@@ -1,0 +1,79 @@
+C:\Users\tan\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\appsettings.Development.json
+C:\Users\tan\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\appsettings.json
+C:\Users\tan\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\LogTool.Api.staticwebassets.endpoints.json
+C:\Users\tan\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\LogTool.Api.exe
+C:\Users\tan\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\LogTool.Api.deps.json
+C:\Users\tan\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\LogTool.Api.runtimeconfig.json
+C:\Users\tan\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\LogTool.Api.dll
+C:\Users\tan\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\LogTool.Api.pdb
+C:\Users\tan\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\Microsoft.AspNetCore.OpenApi.dll
+C:\Users\tan\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\Microsoft.OpenApi.dll
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.csproj.AssemblyReference.cache
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\rpswa.dswa.cache.json
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.AssemblyInfoInputs.cache
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.AssemblyInfo.cs
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.csproj.CoreCompileInputs.cache
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\rjimswa.dswa.cache.json
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\rjsmrazor.dswa.cache.json
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\rjsmcshtml.dswa.cache.json
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\scopedcss\bundle\LogTool.Api.styles.css
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\staticwebassets.build.json
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\staticwebassets.build.json.cache
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\staticwebassets.development.json
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\staticwebassets.build.endpoints.json
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\swae.build.ex.cache
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool..70D5A763.Up2Date
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.dll
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\refint\LogTool.Api.dll
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.pdb
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.genruntimeconfig.cache
+C:\Users\tan\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\ref\LogTool.Api.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\LogTool.Api.staticwebassets.endpoints.json
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\appsettings.Development.json
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\appsettings.json
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\LogTool.Api.exe
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\LogTool.Api.deps.json
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\LogTool.Api.runtimeconfig.json
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\LogTool.Api.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\LogTool.Api.pdb
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\ClosedXML.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\ClosedXML.Parser.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\DocumentFormat.OpenXml.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\DocumentFormat.OpenXml.Framework.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\ExcelNumberFormat.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\Microsoft.AspNetCore.OpenApi.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\Microsoft.OpenApi.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\BouncyCastle.Crypto.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\RBush.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\SixLabors.Fonts.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\System.IO.Packaging.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\WebPush.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.csproj.AssemblyReference.cache
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\rpswa.dswa.cache.json
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.AssemblyInfoInputs.cache
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.AssemblyInfo.cs
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.csproj.CoreCompileInputs.cache
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\rjimswa.dswa.cache.json
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\rjsmrazor.dswa.cache.json
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\rjsmcshtml.dswa.cache.json
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\scopedcss\bundle\LogTool.Api.styles.css
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\staticwebassets.build.json
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\staticwebassets.build.json.cache
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\staticwebassets.development.json
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\staticwebassets.build.endpoints.json
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\swae.build.ex.cache
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool..70D5A763.Up2Date
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\refint\LogTool.Api.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.pdb
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.genruntimeconfig.cache
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\ref\LogTool.Api.dll
