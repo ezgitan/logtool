@@ -3,11 +3,26 @@ import { setupReminderPush } from '../lib/push'
 
 interface ReminderPromptModalProps {
   memberName: string
-  onDone: () => void
+  mode: 'first-run' | 'settings'
+  initialHour: number
+  initialMinute: number
+  onSaved: () => void
+  onCancel: () => void
 }
 
-export function ReminderPromptModal({ memberName, onDone }: ReminderPromptModalProps) {
-  const [time, setTime] = useState('17:00')
+function pad(value: number) {
+  return value.toString().padStart(2, '0')
+}
+
+export function ReminderPromptModal({
+  memberName,
+  mode,
+  initialHour,
+  initialMinute,
+  onSaved,
+  onCancel,
+}: ReminderPromptModalProps) {
+  const [time, setTime] = useState(`${pad(initialHour)}:${pad(initialMinute)}`)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -26,7 +41,7 @@ export function ReminderPromptModal({ memberName, onDone }: ReminderPromptModalP
     setError(null)
     try {
       await setupReminderPush(memberName, hour, minute)
-      onDone()
+      onSaved()
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Bildirim kurulamadı.')
     } finally {
@@ -38,7 +53,7 @@ export function ReminderPromptModal({ memberName, onDone }: ReminderPromptModalP
     <div className="modal-overlay">
       <form className="panel reminder-card" onSubmit={handleSubmit}>
         <p className="eyebrow">HATIRLATMA</p>
-        <h2>Log hatırlatma saati</h2>
+        <h2>{mode === 'first-run' ? 'Log hatırlatma saati' : 'Bildirim saatini güncelle'}</h2>
         <p className="login-hint">
           Gün içinde log girmeyi unutmaman için seçtiğin saatte tarayıcı bildirimi gönderelim.
         </p>
@@ -56,11 +71,11 @@ export function ReminderPromptModal({ memberName, onDone }: ReminderPromptModalP
         </label>
 
         <div className="reminder-actions">
-          <button type="button" className="logout-button" onClick={onDone} disabled={submitting}>
-            Şimdi değil
+          <button type="button" className="logout-button" onClick={onCancel} disabled={submitting}>
+            {mode === 'first-run' ? 'Şimdi değil' : 'Vazgeç'}
           </button>
           <button type="submit" disabled={submitting}>
-            {submitting ? 'Kuruluyor…' : 'Bildirimi kur'}
+            {submitting ? 'Kaydediliyor…' : 'Kaydet'}
           </button>
         </div>
       </form>

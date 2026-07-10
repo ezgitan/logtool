@@ -77,3 +77,6 @@ C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\r
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.pdb
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.genruntimeconfig.cache
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\ref\LogTool.Api.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\Data\push-subscriptions.json
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Debug\net10.0\Data\vapid-keys.json
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Debug\net10.0\LogTool.Api.sourcelink.json

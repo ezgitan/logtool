@@ -11,3 +11,5 @@ public sealed record RegisterPushSubscriptionRequest(
     int ReminderMinute);
 
 public sealed record VapidPublicKeyDto(string PublicKey);
+
+public sealed record PushSettingsDto(int? ReminderHour, int? ReminderMinute);

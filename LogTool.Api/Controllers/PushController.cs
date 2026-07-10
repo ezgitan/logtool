@@ -15,6 +15,21 @@ public sealed class PushController(
     public ActionResult<VapidPublicKeyDto> GetPublicKey() =>
         Ok(new VapidPublicKeyDto(vapidKeyProvider.PublicKey));
 
+    [HttpGet("settings")]
+    [ProducesResponseType<PushSettingsDto>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<PushSettingsDto>> GetSettings(
+        [FromQuery] string memberName,
+        CancellationToken cancellationToken)
+    {
+        var all = await store.GetAllAsync(cancellationToken);
+        if (all.TryGetValue(memberName, out var settings) && settings.Subscriptions.Count > 0)
+        {
+            return Ok(new PushSettingsDto(settings.ReminderHour, settings.ReminderMinute));
+        }
+
+        return Ok(new PushSettingsDto(null, null));
+    }
+
     [HttpPost("subscribe")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Subscribe(

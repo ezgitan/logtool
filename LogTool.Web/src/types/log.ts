@@ -58,6 +58,11 @@ export interface RegisterPushSubscriptionRequest {
   reminderMinute: number
 }
 
+export interface PushSettings {
+  reminderHour: number | null
+  reminderMinute: number | null
+}
+
 export interface ApiError {
   code?: string
   message?: string

@@ -1,7 +1,6 @@
 export interface Session {
   email: string
   memberName: string
-  reminderConfigured?: boolean
 }
 
 const SESSION_KEY = 'logtool.session'
@@ -12,11 +11,7 @@ export function loadSession(): Session | null {
   try {
     const parsed = JSON.parse(raw) as Partial<Session>
     if (typeof parsed.email === 'string' && typeof parsed.memberName === 'string') {
-      return {
-        email: parsed.email,
-        memberName: parsed.memberName,
-        reminderConfigured: parsed.reminderConfigured === true,
-      }
+      return { email: parsed.email, memberName: parsed.memberName }
     }
   } catch {
     // ignore malformed session data
