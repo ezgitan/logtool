@@ -1,0 +1,16 @@
+{
+  "id": "/",
+  "name": "LogTool",
+  "short_name": "LogTool",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0e7490",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

@@ -13,14 +13,10 @@
 .topbar nav .nav-link:hover { color: var(--ink); }
 .topbar nav .active { color: var(--brand-dark); background: var(--brand-soft); }
 .topbar nav span:not(.nav-link) { opacity: .55; cursor: default; }
-.user-badge { width: 36px; height: 36px; display: grid; place-items: center; background: #e2e8f0; border-radius: 50%; color: #334155; font-size: 12px; font-weight: 800; }
+.user-badge { height: 36px; padding: 0 14px; display: grid; place-items: center; background: #e2e8f0; border-radius: 999px; color: #334155; font-size: 13px; font-weight: 800; white-space: nowrap; }
 .session-actions { display: flex; align-items: center; gap: 12px; }
 .logout-button { border: 1px solid var(--border); background: white; color: var(--muted); border-radius: 9px; padding: 8px 14px; font-size: 13px; font-weight: 650; cursor: pointer; }
 .logout-button:hover { color: var(--ink); border-color: #cbd5e1; }
-
-.session-member { margin-top: 15px; padding: 13px 14px; border-radius: 11px; background: #f8fafc; border: 1px solid var(--border); }
-.session-member .eyebrow { margin: 0 0 4px; }
-.session-member strong { color: var(--ink); font-size: 15px; }
 
 .modal-overlay {
   position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 24px;
@@ -29,7 +25,9 @@
 .reminder-card { width: min(100%, 420px); padding: 32px; display: grid; gap: 4px; }
 .reminder-card h2 { margin: 0 0 6px; font-size: 22px; letter-spacing: -.025em; color: var(--ink); }
 .reminder-card label { margin-top: 16px; }
-.reminder-card input[type='time'] { max-width: 160px; }
+.time-select-row { display: flex; align-items: center; gap: 8px; }
+.time-select-row select { width: 84px; }
+.time-select-separator { color: var(--muted); font-weight: 800; }
 .reminder-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
 .reminder-actions .logout-button { padding: 12px 18px; }
 .reminder-actions button[type='submit'] { margin: 0; width: auto; }
@@ -75,6 +73,22 @@ select:disabled, textarea:disabled { background: #f1f5f9; color: var(--muted); c
 .day-chip small { color: var(--muted); font-size: 10px; }
 .empty-state { margin: 22px 0 0; padding: 18px; border-radius: 11px; background: #f8fafc; color: var(--muted); font-size: 13px; line-height: 1.5; }
 .success-empty { color: #047857; background: #ecfdf5; }
+
+.admin-add-form { display: grid; gap: 8px; }
+.admin-add-form button[type='submit'] { margin-top: 14px; width: 100%; }
+.admin-member-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; max-height: 480px; overflow-y: auto; }
+.admin-member-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 14px; border-radius: 11px; background: #f8fafc; border: 1px solid transparent;
+}
+.admin-member-row:hover { border-color: var(--border); }
+.admin-member-row span { font-size: 14px; font-weight: 700; color: var(--ink); }
+.admin-remove-button {
+  border: 1px solid #fecaca; background: #fef2f2; color: #b91c1c; border-radius: 8px;
+  padding: 7px 12px; font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.admin-remove-button:hover:not(:disabled) { background: #fee2e2; }
+.admin-remove-button:disabled { cursor: not-allowed; opacity: .5; }
 
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .log-field { margin-top: 20px; position: relative; }

@@ -19,12 +19,12 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
 
 export async function setupReminderPush(memberName: string, hour: number, minute: number) {
   if (!isPushSupported()) {
-    throw new Error('Bu tarayıcı bildirimleri desteklemiyor.')
+    throw new Error('This browser does not support notifications.')
   }
 
   const permission = await Notification.requestPermission()
   if (permission !== 'granted') {
-    throw new Error('Bildirim izni verilmedi.')
+    throw new Error('Notification permission was not granted.')
   }
 
   const registration = await navigator.serviceWorker.register('/sw.js')
@@ -41,7 +41,7 @@ export async function setupReminderPush(memberName: string, hour: number, minute
 
   const subscriptionJson = subscription.toJSON()
   if (!subscriptionJson.endpoint || !subscriptionJson.keys?.p256dh || !subscriptionJson.keys?.auth) {
-    throw new Error('Bildirim aboneliği oluşturulamadı.')
+    throw new Error('Could not create a notification subscription.')
   }
 
   await registerPushSubscription({

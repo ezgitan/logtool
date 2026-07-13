@@ -102,8 +102,8 @@ public sealed class ReminderNotificationService(
         var pushSubscription = new PushSubscription(subscription.Endpoint, subscription.P256dh, subscription.Auth);
         var payload = JsonSerializer.Serialize(new
         {
-            title = "Log zamanı geldi",
-            body = "Bugünkü çalışma kaydını girmeyi unutma.",
+            title = "Time to log your work",
+            body = "Don't forget to submit today's work log.",
         });
 
         try

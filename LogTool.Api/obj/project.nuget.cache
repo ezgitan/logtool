@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "j2A8Y+wSOSQ=",
+  "dgSpecHash": "01A07kvSaw4=",
   "success": true,
   "projectFilePath": "C:\\Users\\nxg19715\\OneDrive - NXP\\Desktop\\logtool\\LogTool.Api\\LogTool.Api.csproj",
   "expectedPackageFiles": [
@@ -9,8 +9,12 @@
     "C:\\Users\\nxg19715\\.nuget\\packages\\documentformat.openxml\\3.1.1\\documentformat.openxml.3.1.1.nupkg.sha512",
     "C:\\Users\\nxg19715\\.nuget\\packages\\documentformat.openxml.framework\\3.1.1\\documentformat.openxml.framework.3.1.1.nupkg.sha512",
     "C:\\Users\\nxg19715\\.nuget\\packages\\excelnumberformat\\1.1.0\\excelnumberformat.1.1.0.nupkg.sha512",
+    "C:\\Users\\nxg19715\\.nuget\\packages\\microsoft.aspnetcore.authentication.negotiate\\10.0.9\\microsoft.aspnetcore.authentication.negotiate.10.0.9.nupkg.sha512",
     "C:\\Users\\nxg19715\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.9\\microsoft.aspnetcore.openapi.10.0.9.nupkg.sha512",
+    "C:\\Users\\nxg19715\\.nuget\\packages\\microsoft.aspnetcore.server.httpsys\\2.3.11\\microsoft.aspnetcore.server.httpsys.2.3.11.nupkg.sha512",
     "C:\\Users\\nxg19715\\.nuget\\packages\\microsoft.extensions.apidescription.server\\10.0.0\\microsoft.extensions.apidescription.server.10.0.0.nupkg.sha512",
+    "C:\\Users\\nxg19715\\.nuget\\packages\\microsoft.extensions.hosting.windowsservices\\10.0.0\\microsoft.extensions.hosting.windowsservices.10.0.0.nupkg.sha512",
+    "C:\\Users\\nxg19715\\.nuget\\packages\\microsoft.extensions.logging.eventlog\\10.0.0\\microsoft.extensions.logging.eventlog.10.0.0.nupkg.sha512",
     "C:\\Users\\nxg19715\\.nuget\\packages\\microsoft.openapi\\2.7.5\\microsoft.openapi.2.7.5.nupkg.sha512",
     "C:\\Users\\nxg19715\\.nuget\\packages\\portable.bouncycastle\\1.9.0\\portable.bouncycastle.1.9.0.nupkg.sha512",
     "C:\\Users\\nxg19715\\.nuget\\packages\\rbush.signed\\4.0.0\\rbush.signed.4.0.0.nupkg.sha512",
@@ -19,8 +23,39 @@
     "C:\\Users\\nxg19715\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\10.2.3\\swashbuckle.aspnetcore.swagger.10.2.3.nupkg.sha512",
     "C:\\Users\\nxg19715\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\10.2.3\\swashbuckle.aspnetcore.swaggergen.10.2.3.nupkg.sha512",
     "C:\\Users\\nxg19715\\.nuget\\packages\\swashbuckle.aspnetcore.swaggerui\\10.2.3\\swashbuckle.aspnetcore.swaggerui.10.2.3.nupkg.sha512",
+    "C:\\Users\\nxg19715\\.nuget\\packages\\system.configuration.configurationmanager\\10.0.9\\system.configuration.configurationmanager.10.0.9.nupkg.sha512",
+    "C:\\Users\\nxg19715\\.nuget\\packages\\system.directoryservices\\10.0.9\\system.directoryservices.10.0.9.nupkg.sha512",
+    "C:\\Users\\nxg19715\\.nuget\\packages\\system.directoryservices.accountmanagement\\10.0.9\\system.directoryservices.accountmanagement.10.0.9.nupkg.sha512",
+    "C:\\Users\\nxg19715\\.nuget\\packages\\system.directoryservices.protocols\\10.0.9\\system.directoryservices.protocols.10.0.9.nupkg.sha512",
     "C:\\Users\\nxg19715\\.nuget\\packages\\system.io.packaging\\8.0.1\\system.io.packaging.8.0.1.nupkg.sha512",
+    "C:\\Users\\nxg19715\\.nuget\\packages\\system.security.cryptography.protecteddata\\10.0.9\\system.security.cryptography.protecteddata.10.0.9.nupkg.sha512",
+    "C:\\Users\\nxg19715\\.nuget\\packages\\system.serviceprocess.servicecontroller\\10.0.0\\system.serviceprocess.servicecontroller.10.0.0.nupkg.sha512",
     "C:\\Users\\nxg19715\\.nuget\\packages\\webpush\\1.0.13\\webpush.1.0.13.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "NU1510",
+      "level": "Warning",
+      "message": "PackageReference Microsoft.AspNetCore.Server.HttpSys will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary.",
+      "projectPath": "C:\\Users\\nxg19715\\OneDrive - NXP\\Desktop\\logtool\\LogTool.Api\\LogTool.Api.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\nxg19715\\OneDrive - NXP\\Desktop\\logtool\\LogTool.Api\\LogTool.Api.csproj",
+      "libraryId": "Microsoft.AspNetCore.Server.HttpSys",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1510",
+      "level": "Warning",
+      "message": "PackageReference Microsoft.Extensions.Logging.EventLog will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary.",
+      "projectPath": "C:\\Users\\nxg19715\\OneDrive - NXP\\Desktop\\logtool\\LogTool.Api\\LogTool.Api.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\nxg19715\\OneDrive - NXP\\Desktop\\logtool\\LogTool.Api\\LogTool.Api.csproj",
+      "libraryId": "Microsoft.Extensions.Logging.EventLog",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
 }

@@ -21,10 +21,10 @@ public sealed class ApiExceptionMiddleware(
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, "İstek işlenirken beklenmeyen bir hata oluştu.");
+            logger.LogError(exception, "Unexpected error while processing the request.");
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
             await context.Response.WriteAsJsonAsync(
-                new ApiErrorDto("unexpected_error", "İstek işlenirken beklenmeyen bir hata oluştu."));
+                new ApiErrorDto("unexpected_error", "An unexpected error occurred while processing the request."));
         }
     }
 
@@ -32,7 +32,8 @@ public sealed class ApiExceptionMiddleware(
     {
         MemberNotFoundException or DateNotFoundException or WorksheetNotFoundException or ExcelFileNotFoundException
             => StatusCodes.Status404NotFound,
-        InactiveMemberException or LogAlreadySubmittedException => StatusCodes.Status409Conflict,
+        InactiveMemberException or LogAlreadySubmittedException or MemberAlreadyExistsException
+            => StatusCodes.Status409Conflict,
         ExcelFileLockedException => StatusCodes.Status423Locked,
         InvalidAttendanceException => StatusCodes.Status400BadRequest,
         LogSaveException => StatusCodes.Status500InternalServerError,

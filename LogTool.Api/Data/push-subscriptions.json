@@ -1,13 +1,37 @@
 {
   "Ezgi": {
-    "ReminderHour": 17,
-    "ReminderMinute": 9,
-    "LastNotifiedDate": "2026-07-10",
+    "ReminderHour": 9,
+    "ReminderMinute": 1,
+    "LastNotifiedDate": null,
     "Subscriptions": [
       {
         "Endpoint": "https://wns2-par02p.notify.windows.com/w/?token=BQYAAAC8ioZK1swvjEkk2kJEXHQ3tAe0DgUC7njO13oH5ecQGQByosuWIT6Z5kNMKU%2fMhNsgv6IVDHSO%2bIp%2fkoKuDIl%2f1ru9gIuyfr8jmk%2flsoX8cs2oH2q2WMdgcJtUq6wFvMiXL9Plm33K56XtV%2bPbqH7ft%2f792Wcmg1dmwencm7bE%2bl7T4ZAwNLcn68KVr5O%2fOQWECXneBzrXay%2bKIF%2fDtzu8w0zisvj7Bhijso51%2fdKmsWcbi%2fd2IRF6C20NdbQY4I53AAbSBbL3xHtt3pnFTPB7tp7qZBhG2eA2%2b3qD%2fkxns3o2KXCgCQHDW1SwJSL1%2fd4%3d",
         "P256dh": "BMizzxatOuJ8-PZDj65zjMRhoeqQRtDf6ul4NaJbqQZYEE0r3kG9sI40QWfj5QMiFj3e18vI03jux67Q0ceq2c4",
         "Auth": "NNvHlPz1utc6h3jH_tBcIw"
+      }
+    ]
+  },
+  "Huseyin": {
+    "ReminderHour": 17,
+    "ReminderMinute": 0,
+    "LastNotifiedDate": null,
+    "Subscriptions": [
+      {
+        "Endpoint": "https://wns2-par02p.notify.windows.com/w/?token=BQYAAAC8ioZK1swvjEkk2kJEXHQ3tAe0DgUC7njO13oH5ecQGQByosuWIT6Z5kNMKU%2fMhNsgv6IVDHSO%2bIp%2fkoKuDIl%2f1ru9gIuyfr8jmk%2flsoX8cs2oH2q2WMdgcJtUq6wFvMiXL9Plm33K56XtV%2bPbqH7ft%2f792Wcmg1dmwencm7bE%2bl7T4ZAwNLcn68KVr5O%2fOQWECXneBzrXay%2bKIF%2fDtzu8w0zisvj7Bhijso51%2fdKmsWcbi%2fd2IRF6C20NdbQY4I53AAbSBbL3xHtt3pnFTPB7tp7qZBhG2eA2%2b3qD%2fkxns3o2KXCgCQHDW1SwJSL1%2fd4%3d",
+        "P256dh": "BMizzxatOuJ8-PZDj65zjMRhoeqQRtDf6ul4NaJbqQZYEE0r3kG9sI40QWfj5QMiFj3e18vI03jux67Q0ceq2c4",
+        "Auth": "NNvHlPz1utc6h3jH_tBcIw"
+      }
+    ]
+  },
+  "Selda": {
+    "ReminderHour": 10,
+    "ReminderMinute": 34,
+    "LastNotifiedDate": "2026-07-13",
+    "Subscriptions": [
+      {
+        "Endpoint": "https://wns2-par02p.notify.windows.com/w/?token=BQYAAAB9h6ecvbTpXxjoEp9RD1AC6OeZ6YUY7ckYTYLUgsqzge41ftU%2fLw78pTtnxKU3fFuNt1ly7bE7%2fypvHPeO%2bxEP2kyiiFkshBMHhUThOlrm2zdmes9n57hh3JPY9NOCBmptTSoTDYdwzPZt2X61Y4rrjGa21XPOHLUWKsk9Za59EklYLnF9GSn5bElo%2f55BA2zX0JCpxuxbeKlc%2fUYy2VhZfwDzT2BdZPcV5ZfprcjJ4WRR%2bIVz3uNZnnxh5Le413YRXTqgqO8WVTYx6%2fHq8gJyZHjeuyDfVR7TDVYxN4ptoWPTzCIz3ve1VyjimhdTZlY%3d",
+        "P256dh": "BI8-57vWaAes0HETYxh7gbmLHBBMYHdaspTF8un9LpgT3spBxLU0Q4BUkIDez9iXInmLq9fJHT3C0Vv0HKOnQe0",
+        "Auth": "zrEXhne_B_JPz-nuPx-fUw"
       }
     ]
   }

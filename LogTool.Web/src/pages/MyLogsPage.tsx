@@ -16,16 +16,18 @@ const attendanceOptions = [
   'Report',
 ]
 
+const autoLogAttendance = new Set(['Leave', 'School', 'Company Activity', 'Bank Holiday', 'Report'])
+
 const today = new Date().toISOString().slice(0, 10)
 
 function getErrorMessage(error: unknown) {
   if (error instanceof ApiRequestError) {
     if (error.code === 'excel_file_locked') {
-      return 'Excel dosyası açık veya başka bir işlem tarafından kullanılıyor. Dosyayı kapatıp tekrar deneyin.'
+      return 'The Excel file is open or in use by another process. Close it and try again.'
     }
     return error.message
   }
-  return 'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.'
+  return 'Something went wrong. Please try again.'
 }
 
 interface MyLogsPageProps {
@@ -65,13 +67,14 @@ export function MyLogsPage({ memberName }: MyLogsPageProps) {
     setMessage(null)
     getLog(memberName, date)
       .then((entry) => {
-        setAttendance(entry.attendance ?? 'Office')
-        setLog(entry.log ?? '')
+        const loadedAttendance = entry.attendance ?? 'Office'
+        setAttendance(loadedAttendance)
+        setLog(entry.log ?? (autoLogAttendance.has(loadedAttendance) ? loadedAttendance : ''))
         setLocked(Boolean(entry.log))
         if (entry.log) {
-          setMessage({ tone: 'info', text: 'Bu tarih için log zaten girildi, düzenlenemez.' })
+          setMessage({ tone: 'info', text: 'A log has already been submitted for this date and cannot be edited.' })
         } else if (entry.attendance) {
-          setMessage({ tone: 'info', text: 'Bu tarih için attendance mevcut, log bekleniyor.' })
+          setMessage({ tone: 'info', text: 'Attendance is set for this date; the log is still missing.' })
         }
       })
       .catch((error: unknown) => {
@@ -83,6 +86,15 @@ export function MyLogsPage({ memberName }: MyLogsPageProps) {
       .finally(() => setLoadingLog(false))
   }, [date, memberName])
 
+  function handleAttendanceChange(value: string) {
+    setAttendance(value)
+    if (autoLogAttendance.has(value)) {
+      setLog(value)
+    } else if (autoLogAttendance.has(attendance)) {
+      setLog('')
+    }
+  }
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!memberName || !date || !log.trim() || locked) return
@@ -90,7 +102,7 @@ export function MyLogsPage({ memberName }: MyLogsPageProps) {
     setMessage(null)
     try {
       await updateLog(memberName, date, { attendance, log })
-      setMessage({ tone: 'success', text: 'Log ve attendance Excel dosyasına kaydedildi.' })
+      setMessage({ tone: 'success', text: 'Log and attendance saved to the Excel file.' })
       setLocked(true)
       await refreshMissingDays()
     } catch (error) {
@@ -105,12 +117,11 @@ export function MyLogsPage({ memberName }: MyLogsPageProps) {
       <section className="intro">
         <div>
           <p className="eyebrow">DAILY WORK LOG</p>
-          <h1>Günün kaydını tamamla.</h1>
-          <p>Eksik günlerini gör, attendance durumunu seç ve çalışmanı güvenle Excel’e kaydet.</p>
+          <h1>Daily Log</h1>
         </div>
         <div className="today-card">
-          <span>Bugün</span>
-          <strong>{new Intl.DateTimeFormat('tr-TR', { day: '2-digit', month: 'long' }).format(new Date())}</strong>
+          <span>Today</span>
+          <strong>{new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'long' }).format(new Date())}</strong>
         </div>
       </section>
 
@@ -121,14 +132,9 @@ export function MyLogsPage({ memberName }: MyLogsPageProps) {
           <div className="panel-heading">
             <div>
               <p className="eyebrow">PLAN</p>
-              <h2>Eksik günler</h2>
+              <h2>Missing days</h2>
             </div>
             <span className="count-badge">{missingDays.length}</span>
-          </div>
-
-          <div className="session-member">
-            <span className="eyebrow">KULLANICI</span>
-            <strong>{memberName}</strong>
           </div>
 
           <MissingDaysList
@@ -143,22 +149,22 @@ export function MyLogsPage({ memberName }: MyLogsPageProps) {
           <div className="panel-heading">
             <div>
               <p className="eyebrow">LOG ENTRY</p>
-              <h2>Çalışma kaydı</h2>
+              <h2>Work log</h2>
             </div>
-            {loadingLog && <span className="loading-dot">Yükleniyor</span>}
+            {loadingLog && <span className="loading-dot">Loading</span>}
           </div>
 
           <form onSubmit={handleSubmit}>
             <div className="form-row">
               <label>
-                Tarih
+                Date
                 <input type="date" value={date} max={today} onChange={(event) => setDate(event.target.value)} required />
               </label>
               <label>
                 Attendance
                 <select
                   value={attendance}
-                  onChange={(event) => setAttendance(event.target.value)}
+                  onChange={(event) => handleAttendanceChange(event.target.value)}
                   disabled={locked}
                 >
                   {attendanceOptions.map((option) => <option key={option}>{option}</option>)}
@@ -167,22 +173,22 @@ export function MyLogsPage({ memberName }: MyLogsPageProps) {
             </div>
 
             <label className="log-field">
-              Bugün ne yaptın?
+              What did you work on today?
               <textarea
                 value={log}
                 onChange={(event) => setLog(event.target.value)}
                 maxLength={10000}
-                placeholder="Tamamladığın işleri, araştırmaları ve önemli çıktıları yaz…"
-                disabled={locked}
+                placeholder="Describe the tasks, research, and key outcomes for today…"
+                disabled={locked || autoLogAttendance.has(attendance)}
                 required
               />
-              <span className="character-count">{log.length.toLocaleString('tr-TR')} / 10.000</span>
+              <span className="character-count">{log.length.toLocaleString('en-GB')} / 10,000</span>
             </label>
 
             <div className="form-footer">
-              <p>{locked ? 'Bu kayıt girildikten sonra değiştirilemez.' : 'Kaydettikten sonra bu tarih düzenlenemez.'}</p>
+              <p>{locked ? 'This entry cannot be changed once submitted.' : 'This date cannot be edited after saving.'}</p>
               <button type="submit" disabled={saving || loadingLog || locked || !log.trim()}>
-                {locked ? 'Kaydedildi' : saving ? 'Kaydediliyor…' : 'Kaydı tamamla'}
+                {locked ? 'Saved' : saving ? 'Saving…' : 'Save entry'}
               </button>
             </div>
           </form>

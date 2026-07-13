@@ -62,6 +62,65 @@ public sealed class ExcelSchemaService(IOptions<ExcelOptions> options)
         throw new MemberNotFoundException(normalizedMemberName);
     }
 
+    public void EnsureMemberNameAvailable(IXLWorksheet worksheet, string memberName)
+    {
+        var lastColumn = worksheet.Row(_options.HeaderRow).LastCellUsed()?.Address.ColumnNumber
+            ?? _options.FirstMemberColumn - 1;
+
+        for (var column = _options.FirstMemberColumn; column <= lastColumn; column++)
+        {
+            var comparableName = worksheet.Cell(_options.HeaderRow, column).GetString().Trim().TrimStart('*').Trim();
+            if (string.Equals(comparableName, memberName, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new MemberAlreadyExistsException(memberName);
+            }
+        }
+    }
+
+    public int AppendMemberColumn(IXLWorksheet worksheet, string memberName)
+    {
+        var lastColumn = worksheet.Row(_options.HeaderRow).LastCellUsed()?.Address.ColumnNumber
+            ?? _options.FirstMemberColumn - 1;
+        var newColumn = Math.Max(lastColumn + 1, _options.FirstMemberColumn);
+
+        var headerCell = worksheet.Cell(_options.HeaderRow, newColumn);
+        if (lastColumn >= _options.FirstMemberColumn)
+        {
+            headerCell.CopyFrom(worksheet.Cell(_options.HeaderRow, lastColumn));
+        }
+
+        headerCell.SetValue(memberName);
+        return newColumn;
+    }
+
+    public void DeactivateMember(IXLWorksheet worksheet, string memberName)
+    {
+        var normalizedMemberName = memberName.Trim();
+        var lastColumn = worksheet.Row(_options.HeaderRow).LastCellUsed()?.Address.ColumnNumber
+            ?? _options.FirstMemberColumn - 1;
+
+        for (var column = _options.FirstMemberColumn; column <= lastColumn; column++)
+        {
+            var cell = worksheet.Cell(_options.HeaderRow, column);
+            var excelName = cell.GetString().Trim();
+            var comparableName = excelName.TrimStart('*').Trim();
+
+            if (!string.Equals(comparableName, normalizedMemberName, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            if (!excelName.StartsWith('*'))
+            {
+                cell.SetValue("*" + comparableName);
+            }
+
+            return;
+        }
+
+        throw new MemberNotFoundException(normalizedMemberName);
+    }
+
     public int FindDateRow(IXLWorksheet worksheet, DateOnly date)
     {
         var lastRow = worksheet.Column(_options.DateColumn).LastCellUsed()?.Address.RowNumber

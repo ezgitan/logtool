@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react'
 import { getPushSettings } from './api/pushApi'
-import { clearSession, loadSession, saveSession, type Session } from './lib/session'
+import { LogoMark } from './components/LogoMark'
 import { hasDismissedReminderPrompt, markReminderPromptDismissed } from './lib/reminderPrompt'
+import type { Session } from './lib/session'
+import { resolveIdentity } from './lib/windowsAuth'
+import { AdminUsersPage } from './pages/AdminUsersPage'
+import { AuthGate } from './pages/AuthGate'
 import { DailyLogsPage } from './pages/DailyLogsPage'
-import { LoginPage } from './pages/LoginPage'
 import { MonthlyReportPage } from './pages/MonthlyReportPage'
 import { MyLogsPage } from './pages/MyLogsPage'
 import { ReminderPromptModal } from './pages/ReminderPromptModal'
 import './App.css'
 
-type Page = 'my-logs' | 'daily-logs' | 'monthly-report'
+type Page = 'my-logs' | 'daily-logs' | 'monthly-report' | 'admin-users'
 
 interface ReminderModalState {
   mode: 'first-run' | 'settings'
@@ -17,28 +20,57 @@ interface ReminderModalState {
   minute: number
 }
 
+function defaultPageFor(session: Session): Page {
+  return session.role === 'admin' ? 'admin-users' : 'my-logs'
+}
+
 function App() {
-  const [session, setSession] = useState<Session | null>(() => loadSession())
+  const [session, setSession] = useState<Session | null>(null)
+  const [authLoading, setAuthLoading] = useState(true)
+  const [authError, setAuthError] = useState<string | null>(null)
   const [page, setPage] = useState<Page>('my-logs')
   const [reminderModal, setReminderModal] = useState<ReminderModalState | null>(null)
 
   useEffect(() => {
-    if (!session) return
     let cancelled = false
 
-    getPushSettings(session.memberName)
+    resolveIdentity()
+      .then((resolved) => {
+        if (cancelled) return
+        setSession(resolved)
+        setPage(defaultPageFor(resolved))
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return
+        setAuthError(error instanceof Error ? error.message : 'Could not verify your identity.')
+      })
+      .finally(() => {
+        if (!cancelled) setAuthLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!session || session.role !== 'member') return
+    const memberName = session.memberName
+    let cancelled = false
+
+    getPushSettings(memberName)
       .then((settings) => {
         if (cancelled) return
         if (settings.reminderHour !== null && settings.reminderMinute !== null) {
           return
         }
-        if (hasDismissedReminderPrompt(session.memberName)) {
+        if (hasDismissedReminderPrompt(memberName)) {
           return
         }
         setReminderModal({ mode: 'first-run', hour: 17, minute: 0 })
       })
       .catch(() => {
-        // sessiz geç: bildirim ayarları opsiyonel bir özellik
+        // ignore silently: notification settings are optional
       })
 
     return () => {
@@ -46,19 +78,8 @@ function App() {
     }
   }, [session])
 
-  function handleLogin(newSession: Session) {
-    saveSession(newSession)
-    setSession(newSession)
-  }
-
-  function handleLogout() {
-    clearSession()
-    setSession(null)
-    setPage('my-logs')
-  }
-
   async function openReminderSettings() {
-    if (!session) return
+    if (!session || session.role !== 'member') return
     try {
       const current = await getPushSettings(session.memberName)
       setReminderModal({
@@ -76,31 +97,36 @@ function App() {
   }
 
   function handleReminderCancelled() {
-    if (reminderModal?.mode === 'first-run' && session) {
+    if (reminderModal?.mode === 'first-run' && session?.role === 'member') {
       markReminderPromptDismissed(session.memberName)
     }
     setReminderModal(null)
   }
 
-  if (!session) {
-    return <LoginPage onLogin={handleLogin} />
+  if (authLoading || !session) {
+    return <AuthGate loading={authLoading} error={authError} />
   }
+
+  const isAdmin = session.role === 'admin'
+  const badgeLabel = session.role === 'member' ? session.memberName : 'Admin'
 
   return (
     <div className="app-shell">
       <header className="topbar">
-        <a className="brand" href="#main" aria-label="LogTool ana sayfa">
-          <span className="brand-mark">L</span>
+        <a className="brand" href="#main" aria-label="LogTool home">
+          <span className="brand-mark"><LogoMark /></span>
           <span>LogTool</span>
         </a>
-        <nav aria-label="Ana navigasyon">
-          <button
-            type="button"
-            className={page === 'my-logs' ? 'nav-link active' : 'nav-link'}
-            onClick={() => setPage('my-logs')}
-          >
-            My Logs
-          </button>
+        <nav aria-label="Main navigation">
+          {!isAdmin && (
+            <button
+              type="button"
+              className={page === 'my-logs' ? 'nav-link active' : 'nav-link'}
+              onClick={() => setPage('my-logs')}
+            >
+              My Logs
+            </button>
+          )}
           <button
             type="button"
             className={page === 'daily-logs' ? 'nav-link active' : 'nav-link'}
@@ -115,27 +141,36 @@ function App() {
           >
             Monthly Report
           </button>
+          {isAdmin && (
+            <button
+              type="button"
+              className={page === 'admin-users' ? 'nav-link active' : 'nav-link'}
+              onClick={() => setPage('admin-users')}
+            >
+              Users
+            </button>
+          )}
         </nav>
         <div className="session-actions">
           <span className="user-badge" title={session.email}>
-            {session.memberName.slice(0, 2).toUpperCase()}
+            {badgeLabel}
           </span>
-          <button type="button" className="logout-button" onClick={openReminderSettings}>
-            Bildirim saati
-          </button>
-          <button type="button" className="logout-button" onClick={handleLogout}>
-            Çıkış yap
-          </button>
+          {!isAdmin && (
+            <button type="button" className="logout-button" onClick={openReminderSettings}>
+              Reminder time
+            </button>
+          )}
         </div>
       </header>
 
       <main id="main">
-        {page === 'my-logs' && <MyLogsPage memberName={session.memberName} />}
+        {page === 'my-logs' && session.role === 'member' && <MyLogsPage memberName={session.memberName} />}
         {page === 'daily-logs' && <DailyLogsPage />}
         {page === 'monthly-report' && <MonthlyReportPage />}
+        {page === 'admin-users' && isAdmin && <AdminUsersPage />}
       </main>
 
-      {reminderModal && (
+      {reminderModal && session.role === 'member' && (
         <ReminderPromptModal
           memberName={session.memberName}
           mode={reminderModal.mode}

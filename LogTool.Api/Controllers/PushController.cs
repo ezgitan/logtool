@@ -38,7 +38,7 @@ public sealed class PushController(
     {
         if (request.ReminderHour is < 0 or > 23 || request.ReminderMinute is < 0 or > 59)
         {
-            return BadRequest(new ApiErrorDto("invalid_reminder_time", "Geçerli bir saat ve dakika belirtilmelidir."));
+            return BadRequest(new ApiErrorDto("invalid_reminder_time", "A valid hour and minute must be provided."));
         }
 
         await store.SaveSubscriptionAsync(

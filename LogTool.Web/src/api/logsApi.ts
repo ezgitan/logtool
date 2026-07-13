@@ -10,6 +10,17 @@ import type {
 
 export const getMembers = () => apiRequest<Member[]>('/api/members')
 
+export const addMember = (name: string) =>
+  apiRequest<Member>('/api/members', {
+    method: 'POST',
+    body: JSON.stringify({ name }),
+  })
+
+export const deactivateMember = (memberName: string) =>
+  apiRequest<void>(`/api/members/${encodeURIComponent(memberName)}`, {
+    method: 'DELETE',
+  })
+
 export const getDailyLogs = (date: string) =>
   apiRequest<DailyLogEntry[]>(`/api/logs/daily?date=${date}`)
 

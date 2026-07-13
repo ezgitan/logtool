@@ -9,4 +9,8 @@ export default defineConfig({
       '/api': 'http://localhost:5297',
     },
   },
+  build: {
+    outDir: '../LogTool.Api/wwwroot',
+    emptyOutDir: true,
+  },
 })

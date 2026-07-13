@@ -34,7 +34,7 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
     }
 
     throw new ApiRequestError(
-      error.message ?? 'İstek tamamlanamadı. Lütfen tekrar deneyin.',
+      error.message ?? 'The request could not be completed. Please try again.',
       response.status,
       error.code,
     )

@@ -6,16 +6,16 @@ import type { MonthlyReport } from '../types/log'
 
 const now = new Date()
 
-const monthFormatter = new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric' })
+const monthFormatter = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' })
 
 function getErrorMessage(error: unknown) {
   if (error instanceof ApiRequestError) {
     if (error.code === 'excel_file_locked') {
-      return 'Excel dosyası açık veya başka bir işlem tarafından kullanılıyor. Dosyayı kapatıp tekrar deneyin.'
+      return 'The Excel file is open or in use by another process. Close it and try again.'
     }
     return error.message
   }
-  return 'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.'
+  return 'Something went wrong. Please try again.'
 }
 
 export function MonthlyReportPage() {
@@ -63,8 +63,7 @@ export function MonthlyReportPage() {
       <section className="intro">
         <div>
           <p className="eyebrow">MONTHLY REPORT</p>
-          <h1>Aylık çalışma özeti.</h1>
-          <p>Ekibin ay bazında ofis, uzaktan çalışma ve izin dağılımını tek tabloda gör.</p>
+          <h1>Monthly Report</h1>
         </div>
       </section>
 
@@ -72,7 +71,7 @@ export function MonthlyReportPage() {
 
       <section className="panel report-panel">
         <div className="month-nav">
-          <button type="button" className="month-nav-button" onClick={goToPreviousMonth} aria-label="Önceki ay">
+          <button type="button" className="month-nav-button" onClick={goToPreviousMonth} aria-label="Previous month">
             ‹
           </button>
           <h2>{monthFormatter.format(new Date(year, month - 1, 1))}</h2>
@@ -81,13 +80,13 @@ export function MonthlyReportPage() {
             className="month-nav-button"
             onClick={goToNextMonth}
             disabled={isCurrentOrFutureMonth}
-            aria-label="Sonraki ay"
+            aria-label="Next month"
           >
             ›
           </button>
         </div>
 
-        {loading && <p className="empty-state">Rapor yükleniyor…</p>}
+        {loading && <p className="empty-state">Loading report…</p>}
 
         {!loading && !error && report && (
           <>
@@ -95,7 +94,7 @@ export function MonthlyReportPage() {
               <table className="daily-table report-table">
                 <thead>
                   <tr>
-                    <th scope="col">Üye</th>
+                    <th scope="col">Member</th>
                     <th scope="col">Office Day</th>
                     <th scope="col">Office Hour</th>
                     <th scope="col">Remote Day</th>
@@ -124,7 +123,7 @@ export function MonthlyReportPage() {
               </table>
             </div>
             <p className="report-footer">
-              {monthFormatter.format(new Date(year, month - 1, 1))} ayı için çalışma günü sayısı: {report.workingDaysInMonth}
+              Working days in {monthFormatter.format(new Date(year, month - 1, 1))}: {report.workingDaysInMonth}
             </p>
           </>
         )}

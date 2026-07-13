@@ -8,9 +8,21 @@
 
   <ItemGroup>
     <PackageReference Include="ClosedXML" Version="0.105.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Negotiate" Version="10.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Server.HttpSys" Version="2.3.11" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.EventLog" Version="10.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="10.0.9" />
     <PackageReference Include="WebPush" Version="1.0.13" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Data holds runtime state (the Excel file, generated VAPID keys, push
+         subscriptions) — never publish the dev machine's copy automatically. -->
+    <Content Remove="Data/**" />
+    <None Remove="Data/**" />
   </ItemGroup>
 
 </Project>
