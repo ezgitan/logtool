@@ -16,6 +16,12 @@ Pop-Location
 Write-Host "Publishing backend (self-contained, win-x64)..."
 if (Test-Path $publishDir) { Remove-Item $publishDir -Recurse -Force }
 dotnet publish $apiDir -c Release -r win-x64 --self-contained true -o $publishDir
+if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed with exit code $LASTEXITCODE" }
+
+# Belt-and-suspenders: MSBuild's content-file copy has been seen to carry a
+# stale appsettings.Production.json into the output, so force the current
+# source version over whatever publish produced.
+Copy-Item -Path (Join-Path $apiDir "appsettings.Production.json") -Destination $publishDir -Force
 
 Write-Host "Copying Excel data file(s)..."
 $dataSource = Join-Path $apiDir "Data"
