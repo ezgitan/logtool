@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LogTool.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+959197c7e3d8f2f970774d71731908e6857906fd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fad990ad18de357ff489c76127c94700f0485e02")]
 [assembly: System.Reflection.AssemblyProductAttribute("LogTool.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LogTool.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

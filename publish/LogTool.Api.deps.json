@@ -10,9 +10,11 @@
       "LogTool.Api/1.0.0": {
         "dependencies": {
           "ClosedXML": "0.105.0",
+          "Microsoft.AspNetCore.Authentication.Negotiate": "10.0.9",
           "Microsoft.AspNetCore.OpenApi": "10.0.9",
           "Microsoft.Extensions.Hosting.WindowsServices": "10.0.0",
           "Swashbuckle.AspNetCore": "10.2.3",
+          "System.DirectoryServices.AccountManagement": "10.0.9",
           "WebPush": "1.0.13",
           "runtimepack.Microsoft.NETCore.App.Runtime.win-x64": "10.0.9",
           "runtimepack.Microsoft.AspNetCore.App.Runtime.win-x64": "10.0.9"
@@ -1390,6 +1392,17 @@
           }
         }
       },
+      "Microsoft.AspNetCore.Authentication.Negotiate/10.0.9": {
+        "dependencies": {
+          "System.DirectoryServices.Protocols": "10.0.9"
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.AspNetCore.Authentication.Negotiate.dll": {
+            "assemblyVersion": "10.0.9.0",
+            "fileVersion": "10.0.926.27113"
+          }
+        }
+      },
       "Microsoft.AspNetCore.OpenApi/10.0.9": {
         "dependencies": {
           "Microsoft.OpenApi": "2.7.5"
@@ -1481,11 +1494,59 @@
           }
         }
       },
+      "System.Configuration.ConfigurationManager/10.0.9": {
+        "dependencies": {
+          "System.Security.Cryptography.ProtectedData": "10.0.9"
+        },
+        "runtime": {
+          "lib/net10.0/System.Configuration.ConfigurationManager.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.926.27113"
+          }
+        }
+      },
+      "System.DirectoryServices/10.0.9": {
+        "runtime": {
+          "runtimes/win/lib/net10.0/System.DirectoryServices.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.926.27113"
+          }
+        }
+      },
+      "System.DirectoryServices.AccountManagement/10.0.9": {
+        "dependencies": {
+          "System.Configuration.ConfigurationManager": "10.0.9",
+          "System.DirectoryServices": "10.0.9",
+          "System.DirectoryServices.Protocols": "10.0.9"
+        },
+        "runtime": {
+          "runtimes/win/lib/net10.0/System.DirectoryServices.AccountManagement.dll": {
+            "assemblyVersion": "10.0.0.9",
+            "fileVersion": "10.0.926.27113"
+          }
+        }
+      },
+      "System.DirectoryServices.Protocols/10.0.9": {
+        "runtime": {
+          "runtimes/win/lib/net10.0/System.DirectoryServices.Protocols.dll": {
+            "assemblyVersion": "10.0.0.9",
+            "fileVersion": "10.0.926.27113"
+          }
+        }
+      },
       "System.IO.Packaging/8.0.1": {
         "runtime": {
           "lib/net8.0/System.IO.Packaging.dll": {
             "assemblyVersion": "8.0.0.0",
             "fileVersion": "8.0.1024.46610"
+          }
+        }
+      },
+      "System.Security.Cryptography.ProtectedData/10.0.9": {
+        "runtime": {
+          "lib/net10.0/System.Security.Cryptography.ProtectedData.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.926.27113"
           }
         }
       },
@@ -1561,6 +1622,13 @@
       "path": "excelnumberformat/1.1.0",
       "hashPath": "excelnumberformat.1.1.0.nupkg.sha512"
     },
+    "Microsoft.AspNetCore.Authentication.Negotiate/10.0.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-zc90EfNZhwSrmW+Kp0BXkt+9Z6z2xRT3iyA+RpYCt9FE/idPc9WGZ+nsYJ7EcJApM56Q1g/shuS+V8KzT6uVVg==",
+      "path": "microsoft.aspnetcore.authentication.negotiate/10.0.9",
+      "hashPath": "microsoft.aspnetcore.authentication.negotiate.10.0.9.nupkg.sha512"
+    },
     "Microsoft.AspNetCore.OpenApi/10.0.9": {
       "type": "package",
       "serviceable": true,
@@ -1631,12 +1699,47 @@
       "path": "swashbuckle.aspnetcore.swaggerui/10.2.3",
       "hashPath": "swashbuckle.aspnetcore.swaggerui.10.2.3.nupkg.sha512"
     },
+    "System.Configuration.ConfigurationManager/10.0.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-k7kYSTmNjwFYKdUju+rjYyigbcUBj1sElR3ayqszcatPXL9YJoBANJN48xctdXTopYf3ceFX2T4m1xvJRM+CGA==",
+      "path": "system.configuration.configurationmanager/10.0.9",
+      "hashPath": "system.configuration.configurationmanager.10.0.9.nupkg.sha512"
+    },
+    "System.DirectoryServices/10.0.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-AF8OLvTKeJek89WVELaRB722RSnUodblZ6qRrathez99gk4J24h6Z8FlHrbN2xKFVkGC2fWlrvGegm9XHU5Bng==",
+      "path": "system.directoryservices/10.0.9",
+      "hashPath": "system.directoryservices.10.0.9.nupkg.sha512"
+    },
+    "System.DirectoryServices.AccountManagement/10.0.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ZxLhRINsDa0weCvBNA1mWeE8HHfqYx2Ase4r4Bc2oeGb9rgxrDZNGpkNp573P7LvqhRL4CAmabuARPjC3Kxr2A==",
+      "path": "system.directoryservices.accountmanagement/10.0.9",
+      "hashPath": "system.directoryservices.accountmanagement.10.0.9.nupkg.sha512"
+    },
+    "System.DirectoryServices.Protocols/10.0.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-MrXtP8ik1FZxjurEQLBS29oig3W8Am/0OOczx6sJJrrUkiuyAMcHVHZ6y0twc+3BQ31u5Zxa0Zlcac0rtnSOFA==",
+      "path": "system.directoryservices.protocols/10.0.9",
+      "hashPath": "system.directoryservices.protocols.10.0.9.nupkg.sha512"
+    },
     "System.IO.Packaging/8.0.1": {
       "type": "package",
       "serviceable": true,
       "sha512": "sha512-KYkIOAvPexQOLDxPO2g0BVoWInnQhPpkFzRqvNrNrMhVT6kqhVr0zEb6KCHlptLFukxnZrjuMVAnxK7pOGUYrw==",
       "path": "system.io.packaging/8.0.1",
       "hashPath": "system.io.packaging.8.0.1.nupkg.sha512"
+    },
+    "System.Security.Cryptography.ProtectedData/10.0.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-vXp+vBQbTkMrDzUiPCxo1KvzfaAvZWuSRS2P7e5orhtV7ZuePKAB3Cqc9dH2YHUavRJyA2uWd2yrL6hl2VoJ5g==",
+      "path": "system.security.cryptography.protecteddata/10.0.9",
+      "hashPath": "system.security.cryptography.protecteddata.10.0.9.nupkg.sha512"
     },
     "System.ServiceProcess.ServiceController/10.0.0": {
       "type": "package",

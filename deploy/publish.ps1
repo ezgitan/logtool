@@ -13,8 +13,12 @@ npm install
 npm run build
 Pop-Location
 
-Write-Host "Publishing backend (self-contained, win-x64)..."
+Write-Host "Cleaning previous build output (avoids stale MSBuild incremental cache)..."
 if (Test-Path $publishDir) { Remove-Item $publishDir -Recurse -Force }
+Get-ChildItem -Path $apiDir -Include bin, obj -Recurse -Directory -ErrorAction SilentlyContinue |
+    Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+
+Write-Host "Publishing backend (self-contained, win-x64)..."
 dotnet publish $apiDir -c Release -r win-x64 --self-contained true -o $publishDir
 if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed with exit code $LASTEXITCODE" }
 

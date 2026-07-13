@@ -13,6 +13,7 @@ C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\DocumentFormat.OpenXml.dll
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\DocumentFormat.OpenXml.Framework.dll
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\ExcelNumberFormat.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\Microsoft.AspNetCore.Authentication.Negotiate.dll
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\Microsoft.AspNetCore.OpenApi.dll
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\Microsoft.Extensions.Hosting.WindowsServices.dll
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\Microsoft.OpenApi.dll
@@ -22,7 +23,12 @@ C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\Swashbuckle.AspNetCore.Swagger.dll
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\Swashbuckle.AspNetCore.SwaggerGen.dll
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\System.Configuration.ConfigurationManager.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\System.DirectoryServices.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\System.DirectoryServices.AccountManagement.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\System.DirectoryServices.Protocols.dll
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\System.IO.Packaging.dll
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\System.Security.Cryptography.ProtectedData.dll
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\System.ServiceProcess.ServiceController.dll
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\WebPush.dll
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\Microsoft.CSharp.dll
@@ -368,7 +374,10 @@ C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Release\net10.0
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Release\net10.0\win-x64\rjsmrazor.dswa.cache.json
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Release\net10.0\win-x64\rjsmcshtml.dswa.cache.json
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Release\net10.0\win-x64\scopedcss\bundle\LogTool.Api.styles.css
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Release\net10.0\win-x64\compressed\n7yjd33tk4-{0}-2znq5ilcgz-2znq5ilcgz.gz
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Release\net10.0\win-x64\compressed\vxl6bn8q5x-{0}-d25jc7fj8x-d25jc7fj8x.gz
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Release\net10.0\win-x64\compressed\qqzzydj898-{0}-9r5piy37bj-9r5piy37bj.gz
+C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Release\net10.0\win-x64\compressed\lfxkwystam-{0}-wtco95i92c-wtco95i92c.gz
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Release\net10.0\win-x64\compressed\2wfw7aw1lx-{0}-8onq41og99-8onq41og99.gz
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Release\net10.0\win-x64\compressed\mga5rcrb7s-{0}-jodu8wmfs7-jodu8wmfs7.gz
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Release\net10.0\win-x64\staticwebassets.build.json
@@ -382,12 +391,3 @@ C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Release\net10.0
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Release\net10.0\win-x64\LogTool.Api.pdb
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Release\net10.0\win-x64\LogTool.Api.genruntimeconfig.cache
 C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Release\net10.0\win-x64\ref\LogTool.Api.dll
-C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\Microsoft.AspNetCore.Authentication.Negotiate.dll
-C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\System.Configuration.ConfigurationManager.dll
-C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\System.DirectoryServices.dll
-C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\System.DirectoryServices.AccountManagement.dll
-C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\System.DirectoryServices.Protocols.dll
-C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\bin\Release\net10.0\win-x64\System.Security.Cryptography.ProtectedData.dll
-C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Release\net10.0\win-x64\compressed\n7yjd33tk4-{0}-2znq5ilcgz-2znq5ilcgz.gz
-C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Release\net10.0\win-x64\compressed\qqzzydj898-{0}-9r5piy37bj-9r5piy37bj.gz
-C:\Users\nxg19715\OneDrive - NXP\Desktop\logtool\LogTool.Api\obj\Release\net10.0\win-x64\compressed\lfxkwystam-{0}-wtco95i92c-wtco95i92c.gz

@@ -47,7 +47,11 @@ CA-issued certificate.
 
 ## 4. Run it
 
-For a quick test, just run it directly:
+For a quick test, run it **as Administrator** (HTTP.sys requires either
+admin rights or a `netsh http add urlacl` reservation to bind a
+wildcard `https://+:...` address — the Windows Service in step 5 runs
+as LocalSystem, which already has this, so this is only needed for
+manual testing):
 
 ```powershell
 $env:ASPNETCORE_ENVIRONMENT = "Production"
