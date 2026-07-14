@@ -122,7 +122,33 @@ path — `/setup.vbs` supersedes it since it needs no distribution.
   `Data/push-subscriptions.json`) are generated fresh on first run at
   the new location — that's expected, everyone will need to
   (re)enable reminders once on the new site.
-- To update the app later: re-run `publish.ps1`, stop the service
-  (`Stop-Service LogTool`), copy over the new files (keep `Data\`),
-  then `Start-Service LogTool` again. The certificate binding from
-  step 2 persists across updates — no need to re-run it.
+- **If `Data\vapid-keys.json` is ever lost or overwritten** (e.g. a
+  manual copy accidentally replaced it), every existing person's
+  reminder subscription becomes permanently invalid — pushes start
+  failing with `401`/`403` and nothing will fix it except each person
+  re-enabling notifications from scratch. The app logs a warning to
+  Event Viewer (Application, source `LogTool`) whenever it has to
+  generate a fresh VAPID key pair, so this is easy to spot after the
+  fact if reminders mysteriously stop working. To avoid causing it in
+  the first place, always update via `update-server.ps1` (below)
+  rather than a manual folder copy.
+
+## Updating to a new build
+
+Don't manually copy the `publish` folder over the live one — it's one
+missed "except Data\" away from silently invalidating every saved
+reminder subscription. Instead:
+
+1. On the dev machine: `.\deploy\publish.ps1`.
+2. Copy the resulting `publish` folder to the server into a
+   **staging** location, not over the live install - e.g.
+   `C:\LogTool\publish-new`.
+3. On the server, as Administrator:
+   ```powershell
+   .\deploy\update-server.ps1 -NewBuildPath "C:\LogTool\publish-new" -LivePath "C:\LogTool\publish"
+   ```
+   This stops the service, mirrors the new build into place while
+   **excluding `Data\` entirely** (not "copy but remember to skip
+   it" — the tool itself can't touch it), and restarts the service.
+   The certificate binding persists across updates automatically, no
+   need to re-run `generate-cert.ps1`.

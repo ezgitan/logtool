@@ -7,7 +7,7 @@ public sealed class VapidKeyProvider
 {
     private sealed record StoredVapidKeys(string PublicKey, string PrivateKey);
 
-    public VapidKeyProvider(IWebHostEnvironment environment)
+    public VapidKeyProvider(IWebHostEnvironment environment, ILogger<VapidKeyProvider> logger)
     {
         var filePath = Path.Combine(environment.ContentRootPath, "Data", "vapid-keys.json");
 
@@ -19,6 +19,13 @@ public sealed class VapidKeyProvider
         }
         else
         {
+            logger.LogWarning(
+                "No {FilePath} found - generating a new VAPID key pair. If this server has run " +
+                "before, every existing reminder notification subscription is now invalid " +
+                "(pushes will fail with 401/403 until each person re-enables notifications). " +
+                "This usually means Data\\ was overwritten during a deployment.",
+                filePath);
+
             var generated = VapidHelper.GenerateVapidKeys();
             PublicKey = generated.PublicKey;
             PrivateKey = generated.PrivateKey;
