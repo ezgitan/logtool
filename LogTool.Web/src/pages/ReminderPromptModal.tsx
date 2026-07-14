@@ -48,6 +48,11 @@ export function ReminderPromptModal({
     }
   }
 
+  function handleRecheckPermission() {
+    setError(null)
+    setPermission(getNotificationPermission())
+  }
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setSubmitting(true)
@@ -83,26 +88,46 @@ export function ReminderPromptModal({
         {needsPermission ? (
           <>
             {permission === 'denied' ? (
-              <p className="login-hint">
-                Notifications are blocked for this site. Allow them from your browser&rsquo;s site settings
-                (usually via the icon next to the address bar), then reopen this dialog.
-              </p>
+              <>
+                <p className="login-hint">
+                  Notifications are blocked for this site. Click the icon next to the address bar (often a
+                  lock or bell), allow notifications there, then come back and click &ldquo;Check
+                  again&rdquo;.
+                </p>
+                <div className="reminder-actions">
+                  {mode === 'settings' && (
+                    <button type="button" className="logout-button" onClick={onCancel}>
+                      Cancel
+                    </button>
+                  )}
+                  <button type="button" onClick={handleRecheckPermission}>
+                    Check again
+                  </button>
+                </div>
+              </>
             ) : (
-              <p className="login-hint">
-                Click below, then choose &ldquo;Allow&rdquo; when your browser asks for notification
-                permission.
-              </p>
+              <>
+                <p className="login-hint">
+                  Click below, then choose &ldquo;Allow&rdquo; when your browser asks for notification
+                  permission.
+                </p>
+                <div className="reminder-actions">
+                  {mode === 'settings' && (
+                    <button
+                      type="button"
+                      className="logout-button"
+                      onClick={onCancel}
+                      disabled={requestingPermission}
+                    >
+                      Cancel
+                    </button>
+                  )}
+                  <button type="button" onClick={handleEnableNotifications} disabled={requestingPermission}>
+                    {requestingPermission ? 'Waiting for response…' : 'Enable notifications'}
+                  </button>
+                </div>
+              </>
             )}
-            <div className="reminder-actions">
-              {mode === 'settings' && (
-                <button type="button" className="logout-button" onClick={onCancel} disabled={requestingPermission}>
-                  Cancel
-                </button>
-              )}
-              <button type="button" onClick={handleEnableNotifications} disabled={requestingPermission}>
-                {requestingPermission ? 'Waiting for response…' : 'Enable notifications'}
-              </button>
-            </div>
           </>
         ) : (
           <form onSubmit={handleSubmit}>
