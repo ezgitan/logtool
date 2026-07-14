@@ -48,20 +48,29 @@ public sealed class ReminderNotificationService(
                 continue;
             }
 
+            logger.LogInformation(
+                "Reminder due for {MemberName} at {Now:HH:mm} (target {Hour}:{Minute}, last notified {LastNotified}, {SubCount} subscription(s))",
+                memberName, now, settings.ReminderHour, settings.ReminderMinute, settings.LastNotifiedDate, settings.Subscriptions.Count);
+
             if (settings.LastNotifiedDate == today)
             {
+                logger.LogInformation("Skipping {MemberName} - already notified today ({Today})", memberName, today);
                 continue;
             }
 
             var alreadyLogged = await TryHasTodayLogAsync(memberName, today, cancellationToken);
             if (alreadyLogged)
             {
+                logger.LogInformation("Skipping {MemberName} - today's log is already filled in", memberName);
                 await store.MarkNotifiedAsync(memberName, today, cancellationToken);
                 continue;
             }
 
             foreach (var subscription in settings.Subscriptions.ToList())
             {
+                logger.LogInformation(
+                    "Sending reminder push to {MemberName} at endpoint ending '...{EndpointSuffix}'",
+                    memberName, subscription.Endpoint[^Math.Min(24, subscription.Endpoint.Length)..]);
                 await SendNotificationAsync(webPushClient, vapidDetails, memberName, subscription, cancellationToken);
             }
 
@@ -109,16 +118,19 @@ public sealed class ReminderNotificationService(
         try
         {
             await webPushClient.SendNotificationAsync(pushSubscription, payload, vapidDetails, cancellationToken);
+            logger.LogInformation("Push notification sent successfully to {MemberName}", memberName);
         }
         catch (WebPushException exception) when (
             exception.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Gone)
         {
-            logger.LogInformation("Geçersiz push subscription temizleniyor: {MemberName}", memberName);
+            logger.LogInformation(
+                "Push subscription for {MemberName} is invalid ({StatusCode}) - removing it",
+                memberName, exception.StatusCode);
             await store.RemoveSubscriptionAsync(memberName, subscription.Endpoint, cancellationToken);
         }
         catch (Exception exception)
         {
-            logger.LogWarning(exception, "Push bildirimi gönderilemedi: {MemberName}", memberName);
+            logger.LogWarning(exception, "Failed to send push notification to {MemberName}", memberName);
         }
     }
 }
