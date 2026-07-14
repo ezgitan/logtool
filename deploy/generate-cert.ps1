@@ -21,11 +21,20 @@ Get-ChildItem "cert:\LocalMachine\My" |
     Where-Object { $_.FriendlyName -eq $friendlyName } |
     Remove-Item -Force -ErrorAction SilentlyContinue
 
+# -DnsName's automatic IP-vs-hostname detection isn't reliable on every
+# Windows version - it can silently add the IP as a "DNS Name" SAN entry
+# instead of an "IP Address" one. Chromium browsers require the latter to
+# accept a certificate when connecting via IP literal, so build the SAN
+# extension explicitly to guarantee the right type.
+$parsedIp = $null
+$isIpAddress = [System.Net.IPAddress]::TryParse($HostName, [ref]$parsedIp)
+$sanExtension = if ($isIpAddress) { "2.5.29.17={text}IPAddress=$HostName" } else { "2.5.29.17={text}DNS=$HostName" }
+
 $cert = New-SelfSignedCertificate `
-    -DnsName $HostName `
     -CertStoreLocation "cert:\LocalMachine\My" `
     -NotAfter (Get-Date).AddYears(5) `
-    -FriendlyName $friendlyName
+    -FriendlyName $friendlyName `
+    -TextExtension @($sanExtension)
 
 $thumbprint = $cert.Thumbprint
 $appId = "{2f6a6b0e-1c6a-4b1a-9b1a-1234567890ab}"
