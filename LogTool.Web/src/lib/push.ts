@@ -17,18 +17,43 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   return outputArray
 }
 
+function withTimeout<T>(promise: Promise<T>, ms: number, timeoutMessage: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(timeoutMessage)), ms)
+    promise.then(
+      (value) => {
+        clearTimeout(timer)
+        resolve(value)
+      },
+      (error: unknown) => {
+        clearTimeout(timer)
+        reject(error instanceof Error ? error : new Error(String(error)))
+      },
+    )
+  })
+}
+
 export async function setupReminderPush(memberName: string, hour: number, minute: number) {
   if (!isPushSupported()) {
     throw new Error('This browser does not support notifications.')
   }
 
-  const permission = await Notification.requestPermission()
+  const permission = await withTimeout(
+    Notification.requestPermission(),
+    20000,
+    'No response to the notification permission prompt. Check your address bar for a permission ' +
+      'icon (often a bell or lock) and allow it, then try again.',
+  )
   if (permission !== 'granted') {
     throw new Error('Notification permission was not granted.')
   }
 
   const registration = await navigator.serviceWorker.register('/sw.js')
-  await navigator.serviceWorker.ready
+  await withTimeout(
+    navigator.serviceWorker.ready,
+    20000,
+    'Timed out waiting for the notification service to start. Try reloading the page.',
+  )
 
   const { publicKey } = await getPushPublicKey()
   const existing = await registration.pushManager.getSubscription()
