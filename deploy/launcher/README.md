@@ -1,9 +1,11 @@
 # LogTool launcher
 
-`Open LogTool.vbs` is what each person double-clicks instead of typing
-the site address. It runs `whoami /upn` **on their own PC** (not the
-server) and opens the site with that identity pre-filled, so nobody
-has to type anything or remember an address.
+`Open LogTool.vbs` is what each person runs instead of typing the site
+address. It runs `whoami /upn` **on their own PC** (not the server),
+completely hidden — no console window flashes — and opens the site
+with that identity pre-filled, so nobody has to type anything, sign
+in, or even see that a lookup happened. From the user's point of view
+they just open LogTool and they're in.
 
 ## Why this exists
 
@@ -20,7 +22,24 @@ passwords either). Don't rely on this for anything sensitive.
 
 ## Rolling this out
 
-Copy `Open LogTool.vbs` to each person's Desktop or Start Menu (e.g.
-via a shared drive, a login script, or just emailing it). If you
-rename the site later from an IP to a real hostname, update the
-`siteUrl` line inside the file and redistribute it.
+Two ways to distribute this, from least to most polished:
+
+1. **Just the script**: copy `Open LogTool.vbs` to each person's
+   Desktop or Start Menu (shared drive, login script, or email).
+   Double-clicking the `.vbs` file directly works fine.
+2. **A proper desktop icon** (recommended — looks like a normal app,
+   not a stray script file): copy this whole `launcher` folder
+   somewhere on each PC (or a shared network path everyone can read),
+   then run once:
+   ```powershell
+   .\create-shortcut.ps1
+   ```
+   This creates a "LogTool" shortcut on that user's Desktop. No admin
+   rights needed. Double-clicking it runs the same hidden whoami
+   lookup and opens the site — it just looks like clicking an app
+   icon instead of running a script.
+
+If you rename the site later from an IP to a real hostname, update
+the `siteUrl` line inside `Open LogTool.vbs` and redistribute it (the
+shortcut keeps pointing at the same `.vbs` file, so you don't need to
+recreate shortcuts — just update the one script).

@@ -1,11 +1,23 @@
+import { type FormEvent, useState } from 'react'
 import { LogoMark } from '../components/LogoMark'
 
 interface AuthGateProps {
   loading: boolean
   error: string | null
+  submitting: boolean
+  onSubmit: (email: string) => void
 }
 
-export function AuthGate({ loading, error }: AuthGateProps) {
+export function AuthGate({ loading, error, submitting, onSubmit }: AuthGateProps) {
+  const [email, setEmail] = useState('')
+
+  function handleSubmit(event: FormEvent) {
+    event.preventDefault()
+    const trimmed = email.trim()
+    if (!trimmed) return
+    onSubmit(trimmed)
+  }
+
   return (
     <div className="login-shell">
       <div className="panel login-card">
@@ -14,22 +26,39 @@ export function AuthGate({ loading, error }: AuthGateProps) {
           <span>LogTool</span>
         </div>
 
-        {loading && (
+        {loading ? (
           <>
             <p className="eyebrow">SIGNING IN</p>
             <h1>Checking your identity…</h1>
-            <p className="login-hint">Verifying you&rsquo;re on the company network.</p>
           </>
-        )}
-
-        {!loading && error && (
+        ) : (
           <>
-            <p className="eyebrow">ACCESS DENIED</p>
-            <h1>Can&rsquo;t verify your identity</h1>
-            <p className="status-message status-error" role="alert">
-              <span aria-hidden="true">!</span>
-              {error}
-            </p>
+            <p className="eyebrow">SIGN IN</p>
+            <h1>Enter your work email</h1>
+            <p className="login-hint">No password needed — just your company email address.</p>
+            <form onSubmit={handleSubmit}>
+              <label>
+                Email
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="name.surname@nxp.com"
+                  autoFocus
+                  required
+                />
+              </label>
+              <button type="submit" disabled={submitting}>
+                {submitting ? 'Signing in…' : 'Continue'}
+              </button>
+            </form>
+
+            {error && (
+              <p className="status-message status-error" role="alert">
+                <span aria-hidden="true">!</span>
+                {error}
+              </p>
+            )}
           </>
         )}
       </div>
