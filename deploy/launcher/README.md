@@ -43,3 +43,31 @@ If you rename the site later from an IP to a real hostname, update
 the `siteUrl` line inside `Open LogTool.vbs` and redistribute it (the
 shortcut keeps pointing at the same `.vbs` file, so you don't need to
 recreate shortcuts — just update the one script).
+
+## Trusting the certificate (needed for reminder notifications)
+
+The site uses a self-signed certificate. Browsers let you click through
+the "not secure" warning to use the site normally, but they silently
+block Service Worker registration on an untrusted cert — which means
+reminder notifications won't work until each person trusts the
+certificate once.
+
+`generate-cert.ps1` (run on the server) automatically drops the public
+certificate here as `LogTool-cert.cer`. Each person needs to trust it
+**once**, via either method:
+
+- **Easiest (no PowerShell)**: double-click `LogTool-cert.cer` →
+  "Install Certificate" → Store Location: **Current User** → "Place
+  all certificates in the following store" → **Trusted Root
+  Certification Authorities** → Finish.
+- **Scripted** (same effect, useful for bulk rollout / login scripts):
+  ```powershell
+  powershell -ExecutionPolicy Bypass -File .\trust-cert.ps1
+  ```
+
+No admin rights needed either way — both target the current user's
+certificate store. After trusting it, close and reopen the browser.
+
+If the certificate is ever regenerated (e.g. it expires after 5 years,
+or the server is rebuilt), redistribute the new `LogTool-cert.cer` and
+have everyone repeat this step.

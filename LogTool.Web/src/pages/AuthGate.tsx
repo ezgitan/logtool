@@ -59,6 +59,12 @@ export function AuthGate({ loading, error, submitting, onSubmit }: AuthGateProps
                 {error}
               </p>
             )}
+
+            <p className="login-hint">
+              First time here? <a href="/setup.vbs">Download the one-time setup script</a> to
+              sign in automatically and enable reminder notifications, without typing your
+              email every time.
+            </p>
           </>
         )}
       </div>

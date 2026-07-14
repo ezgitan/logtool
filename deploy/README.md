@@ -40,9 +40,11 @@ well-known ports through, even if a raw TCP connection to a custom
 port appears to succeed.)
 
 Browsers will show a "not secure" / self-signed warning the first
-time each person visits — that's expected and just needs a one-time
-"proceed anyway" click. There's no way around that without a real
-CA-issued certificate.
+time each person visits, and reminder notifications won't work until
+they trust the certificate. Nobody needs to be handed a file for
+this — the site itself serves a one-time setup script (see "How
+sign-in works" below) that trusts the certificate and signs them in,
+downloaded directly from the login page.
 
 ## 3. Open the firewall (on the target server, as Administrator)
 
@@ -87,17 +89,29 @@ Directory domain**, so it has no way to validate anyone's Windows
 credentials itself — neither automatically nor by prompting for a
 password. That rules out real Windows Integrated Authentication here.
 
-Instead, each person uses the launcher in `deploy/launcher/` (see its
-own README) — a small script that runs on **their own PC** (which
-usually *is* domain-joined), reads their identity locally, and opens
-the site with it pre-filled via a URL parameter. No password, no
-prompt, no typing.
+Instead, sign-in works one of two ways, and nothing needs to be
+distributed to anyone out-of-band — both are self-serve from the site:
 
-This is **not real authentication** — it trusts whatever identity the
-launcher (or a manually edited URL) provides. That matches the
-trust level this tool already had before (no password was ever
-checked). If the server gets properly domain-joined later, this can
-be swapped back for real Windows sign-in.
+1. **Type your email** — the login page just asks for a company email
+   address (no password). Works from any browser, anywhere, with zero
+   setup. This is the fallback every person can always use.
+2. **One-time setup script** — the login page also links to
+   `/setup.vbs`, generated on the fly by the server (see
+   `LogTool.Api/Controllers/SetupController.cs`). It bundles the
+   site's current certificate and, run once, trusts it and opens the
+   site signed in via `whoami /upn` — after that, reminder
+   notifications work and there's no email to type. It's downloaded
+   from the site itself, not emailed or copied via a network share.
+
+Both are **not real authentication** — they trust whatever identity is
+provided (typed email, or the local Windows account name). That
+matches the trust level this tool already had before (no password was
+ever checked). If the server gets properly domain-joined later, this
+can be swapped back for real Windows sign-in.
+
+The `deploy/launcher/` folder (a separately-distributed `.vbs` +
+cert-trust scripts) still works too, but is no longer the primary
+path — `/setup.vbs` supersedes it since it needs no distribution.
 
 ## Notes
 
