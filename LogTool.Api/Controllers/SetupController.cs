@@ -76,16 +76,21 @@ public sealed class SetupController : ControllerBase
         sb.AppendLine("' opens LogTool signed in as you. Safe to run again any time.");
         sb.AppendLine();
         sb.AppendLine("Set shell = CreateObject(\"WScript.Shell\")");
+        sb.AppendLine("Set fso = CreateObject(\"Scripting.FileSystemObject\")");
         sb.AppendLine();
         sb.AppendLine("' Request admin access via the company's elevation shortcut, if present.");
+        sb.AppendLine("' Runs through PowerShell so it behaves exactly like running");
+        sb.AppendLine("' Start-Process on that shortcut directly in a PowerShell prompt.");
         sb.AppendLine("On Error Resume Next");
-        sb.AppendLine("adminAccessPath = \"\"\"\" & shell.ExpandEnvironmentStrings(\"%APPDATA%\") & \"\\Microsoft\\Windows\\Start Menu\\Programs\\Administrator Access.lnk\" & \"\"\"\"");
-        sb.AppendLine("shell.Run adminAccessPath");
+        sb.AppendLine("psPath = fso.GetSpecialFolder(2) & \"\\\" & fso.GetTempName() & \".ps1\"");
+        sb.AppendLine("Set psFile = fso.CreateTextFile(psPath, True)");
+        sb.AppendLine("psFile.WriteLine \"Start-Process \"\"$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\Administrator Access.lnk\"\"\"");
+        sb.AppendLine("psFile.Close");
+        sb.AppendLine("shell.Run \"powershell -NoProfile -ExecutionPolicy Bypass -File \"\"\" & psPath & \"\"\"\", 0, True");
+        sb.AppendLine("fso.DeleteFile psPath, True");
         sb.AppendLine("On Error Goto 0");
         sb.AppendLine();
         sb.AppendLine($"siteUrl = \"{siteUrl}\"");
-        sb.AppendLine();
-        sb.AppendLine("Set fso = CreateObject(\"Scripting.FileSystemObject\")");
         sb.AppendLine();
 
         if (certBase64 is not null)
