@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { getPushSettings } from './api/pushApi'
 import { LogoMark } from './components/LogoMark'
 import { hasDismissedReminderPrompt, markReminderPromptDismissed } from './lib/reminderPrompt'
-import { getStoredIdentity, resolveSession, storeIdentity } from './lib/identity'
+import { getStoredIdentity, resolveSession } from './lib/identity'
 import type { Session } from './lib/session'
 import { AdminUsersPage } from './pages/AdminUsersPage'
 import { AuthGate } from './pages/AuthGate'
@@ -27,7 +27,6 @@ function defaultPageFor(session: Session): Page {
 function App() {
   const [session, setSession] = useState<Session | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
-  const [authSubmitting, setAuthSubmitting] = useState(false)
   const [authError, setAuthError] = useState<string | null>(null)
   const [page, setPage] = useState<Page>('my-logs')
   const [reminderModal, setReminderModal] = useState<ReminderModalState | null>(null)
@@ -59,21 +58,6 @@ function App() {
       cancelled = true
     }
   }, [])
-
-  async function handleSignIn(email: string) {
-    setAuthSubmitting(true)
-    setAuthError(null)
-    try {
-      const resolved = await resolveSession(email)
-      storeIdentity(email)
-      setSession(resolved)
-      setPage(defaultPageFor(resolved))
-    } catch (error) {
-      setAuthError(error instanceof Error ? error.message : 'Could not verify your identity.')
-    } finally {
-      setAuthSubmitting(false)
-    }
-  }
 
   useEffect(() => {
     if (!session || session.role !== 'member') return
@@ -126,7 +110,7 @@ function App() {
   }
 
   if (authLoading || !session) {
-    return <AuthGate loading={authLoading} error={authError} submitting={authSubmitting} onSubmit={handleSignIn} />
+    return <AuthGate loading={authLoading} error={authError} />
   }
 
   const isAdmin = session.role === 'admin'

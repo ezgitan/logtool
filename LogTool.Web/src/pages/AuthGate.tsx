@@ -1,23 +1,11 @@
-import { type FormEvent, useState } from 'react'
 import { LogoMark } from '../components/LogoMark'
 
 interface AuthGateProps {
   loading: boolean
   error: string | null
-  submitting: boolean
-  onSubmit: (email: string) => void
 }
 
-export function AuthGate({ loading, error, submitting, onSubmit }: AuthGateProps) {
-  const [email, setEmail] = useState('')
-
-  function handleSubmit(event: FormEvent) {
-    event.preventDefault()
-    const trimmed = email.trim()
-    if (!trimmed) return
-    onSubmit(trimmed)
-  }
-
+export function AuthGate({ loading, error }: AuthGateProps) {
   return (
     <div className="login-shell">
       <div className="panel login-card">
@@ -26,32 +14,24 @@ export function AuthGate({ loading, error, submitting, onSubmit }: AuthGateProps
           <span>LogTool</span>
         </div>
 
-        {loading ? (
+        {loading && (
           <>
             <p className="eyebrow">SIGNING IN</p>
             <h1>Checking your identity…</h1>
           </>
-        ) : (
+        )}
+
+        {!loading && (
           <>
-            <p className="eyebrow">SIGN IN</p>
-            <h1>Enter your work email</h1>
-            <p className="login-hint">No password needed — just your company email address.</p>
-            <form onSubmit={handleSubmit}>
-              <label>
-                Email
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  placeholder="name.surname@nxp.com"
-                  autoFocus
-                  required
-                />
-              </label>
-              <button type="submit" disabled={submitting}>
-                {submitting ? 'Signing in…' : 'Continue'}
-              </button>
-            </form>
+            <p className="eyebrow">FIRST TIME HERE</p>
+            <h1>Download the setup script</h1>
+            <p className="login-hint">
+              Run it once to sign in and enable reminder notifications. After that, LogTool
+              opens automatically every time — no sign-in needed.
+            </p>
+            <a className="setup-download" href="/setup.vbs">
+              Download setup script
+            </a>
 
             {error && (
               <p className="status-message status-error" role="alert">
@@ -59,12 +39,6 @@ export function AuthGate({ loading, error, submitting, onSubmit }: AuthGateProps
                 {error}
               </p>
             )}
-
-            <p className="login-hint">
-              First time here? <a href="/setup.vbs">Download the one-time setup script</a> to
-              sign in automatically and enable reminder notifications, without typing your
-              email every time.
-            </p>
           </>
         )}
       </div>

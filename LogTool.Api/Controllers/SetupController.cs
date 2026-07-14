@@ -75,6 +75,13 @@ public sealed class SetupController : ControllerBase
         sb.AppendLine("' LogTool one-time setup. Trusts the site certificate (if needed) and");
         sb.AppendLine("' opens LogTool signed in as you. Safe to run again any time.");
         sb.AppendLine();
+        sb.AppendLine("' Re-launch elevated (UAC prompt) if not already running as admin.");
+        sb.AppendLine("If Not WScript.Arguments.Named.Exists(\"elevated\") Then");
+        sb.AppendLine("    Set uacShell = CreateObject(\"Shell.Application\")");
+        sb.AppendLine("    uacShell.ShellExecute \"wscript.exe\", \"//nologo \"\"\" & WScript.ScriptFullName & \"\"\" /elevated\", \"\", \"runas\", 1");
+        sb.AppendLine("    WScript.Quit");
+        sb.AppendLine("End If");
+        sb.AppendLine();
         sb.AppendLine($"siteUrl = \"{siteUrl}\"");
         sb.AppendLine();
         sb.AppendLine("Set shell = CreateObject(\"WScript.Shell\")");

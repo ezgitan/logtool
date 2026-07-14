@@ -20,18 +20,18 @@ function normalizeEmail(identity: string): string {
   return identity.includes('@') ? identity : `${identity}@${COMPANY_EMAIL_DOMAIN}`
 }
 
-/** Identity supplied automatically (via the LogTool launcher's `?identity=` link, or a prior sign-in this browser). */
+/**
+ * Identity supplied automatically via the setup script's `?identity=` link.
+ * Persisted in localStorage (not sessionStorage) so running the script once
+ * signs a person in permanently on that browser - no repeat visits needed.
+ */
 export function getStoredIdentity(): string | null {
   const fromUrl = readIdentityFromUrl()
   if (fromUrl) {
-    sessionStorage.setItem(IDENTITY_STORAGE_KEY, fromUrl)
+    localStorage.setItem(IDENTITY_STORAGE_KEY, fromUrl)
     return fromUrl
   }
-  return sessionStorage.getItem(IDENTITY_STORAGE_KEY)
-}
-
-export function storeIdentity(identity: string): void {
-  sessionStorage.setItem(IDENTITY_STORAGE_KEY, identity)
+  return localStorage.getItem(IDENTITY_STORAGE_KEY)
 }
 
 export async function resolveSession(identity: string): Promise<Session> {
