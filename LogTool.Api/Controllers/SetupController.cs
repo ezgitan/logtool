@@ -109,7 +109,9 @@ public sealed class SetupController : ControllerBase
         sb.AppendLine("    On Error Resume Next");
         sb.AppendLine("    psPath = fso.GetSpecialFolder(2) & \"\\\" & fso.GetTempName() & \".ps1\"");
         sb.AppendLine("    Set psFile = fso.CreateTextFile(psPath, True)");
-        sb.AppendLine("    psFile.WriteLine \"Start-Process \"\"$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\Administrator Access.lnk\"\"\"");
+        sb.AppendLine("    ' -Wait matters: Start-Process returns immediately otherwise, so the");
+        sb.AppendLine("    ' retry below would fire before the approval screen is even dismissed.");
+        sb.AppendLine("    psFile.WriteLine \"Start-Process \"\"$env:APPDATA\\Microsoft\\Windows\\Start Menu\\Programs\\Administrator Access.lnk\"\" -Wait\"");
         sb.AppendLine("    psFile.Close");
         sb.AppendLine("    shell.Run \"powershell -NoProfile -ExecutionPolicy Bypass -File \"\"\" & psPath & \"\"\"\", 0, True");
         sb.AppendLine("    fso.DeleteFile psPath, True");
