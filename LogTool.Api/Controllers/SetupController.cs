@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LogTool.Api.Controllers;
@@ -18,6 +19,8 @@ public sealed class SetupController : ControllerBase
     [HttpGet]
     public IActionResult Get()
     {
+        Response.Headers.CacheControl = "no-store";
+
         var port = Request.Host.Port ?? (Request.IsHttps ? 443 : 80);
         var certBase64 = FindCertificateBase64(port);
         var siteUrl = $"{Request.Scheme}://{Request.Host}/";
@@ -58,15 +61,12 @@ public sealed class SetupController : ControllerBase
         var output = process.StandardOutput.ReadToEnd();
         process.WaitForExit();
 
-        foreach (var line in output.Split('\n'))
-        {
-            if (!line.Contains("Certificate Hash", StringComparison.OrdinalIgnoreCase)) continue;
-            var separatorIndex = line.IndexOf(':');
-            if (separatorIndex < 0) continue;
-            return line[(separatorIndex + 1)..].Trim().Replace(" ", "");
-        }
-
-        return null;
+        // netsh's field labels are localized (e.g. not "Certificate Hash" on a
+        // non-English Windows install), so look for the value itself instead:
+        // a SHA-1 thumbprint is a contiguous 40-character hex string, which
+        // nothing else in this output (IP:port, GUID app id, store name) matches.
+        var match = Regex.Match(output, "[0-9a-fA-F]{40}");
+        return match.Success ? match.Value : null;
     }
 
     private static string BuildScript(string? certBase64, string siteUrl)
