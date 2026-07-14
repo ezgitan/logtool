@@ -37,6 +37,7 @@
 .login-brand { margin-bottom: 18px; font-weight: 760; letter-spacing: -.02em; }
 .login-card h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: -.03em; color: var(--ink); }
 .login-hint { margin: 0 0 20px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.permission-steps { margin-top: -12px; padding-left: 20px; display: grid; gap: 4px; }
 .login-card label { margin-top: 14px; }
 .login-card button[type='submit'] { margin-top: 22px; width: 100%; }
 .login-card .status-message { margin: 4px 0 0; }

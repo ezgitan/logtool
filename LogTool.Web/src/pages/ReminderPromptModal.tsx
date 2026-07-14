@@ -90,10 +90,15 @@ export function ReminderPromptModal({
             {permission === 'denied' ? (
               <>
                 <p className="login-hint">
-                  Notifications are blocked for this site. Click the icon next to the address bar (often a
-                  lock or bell), allow notifications there, then come back and click &ldquo;Check
-                  again&rdquo;.
+                  Notifications are blocked on this site. To receive reminders, you need to allow them:
                 </p>
+                <ol className="login-hint permission-steps">
+                  <li>Click the lock (or info) icon at the left of the address bar.</li>
+                  <li>
+                    Find <strong>Notifications</strong> and set it to <strong>Allow</strong>.
+                  </li>
+                  <li>Come back here and click &ldquo;Check again&rdquo;.</li>
+                </ol>
                 <div className="reminder-actions">
                   {mode === 'settings' && (
                     <button type="button" className="logout-button" onClick={onCancel}>
