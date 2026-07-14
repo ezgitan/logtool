@@ -78,12 +78,33 @@ public sealed class SetupController : ControllerBase
         sb.AppendLine("Set shell = CreateObject(\"WScript.Shell\")");
         sb.AppendLine("Set fso = CreateObject(\"Scripting.FileSystemObject\")");
         sb.AppendLine();
+        sb.AppendLine("' Diagnostic log - lets us see exactly what happened at each step.");
+        sb.AppendLine("logPath = shell.SpecialFolders(\"Desktop\") & \"\\LogTool-setup-log.txt\"");
+        sb.AppendLine("Sub LogMsg(msg)");
+        sb.AppendLine("    On Error Resume Next");
+        sb.AppendLine("    Dim logFile");
+        sb.AppendLine("    Set logFile = fso.OpenTextFile(logPath, 8, True)");
+        sb.AppendLine("    logFile.WriteLine Now & \" - \" & msg");
+        sb.AppendLine("    logFile.Close");
+        sb.AppendLine("    On Error Goto 0");
+        sb.AppendLine("End Sub");
+        sb.AppendLine();
+        sb.AppendLine("LogMsg \"=== Setup started ===\"");
+        sb.AppendLine();
         sb.AppendLine($"siteUrl = \"{siteUrl}\"");
         sb.AppendLine();
 
         if (certBase64 is not null)
         {
+            sb.AppendLine("LogMsg \"Certificate found on server - trusting it locally...\"");
             AppendCertTrustBlock(sb, certBase64);
+            sb.AppendLine("LogMsg \"Certificate trust step done.\"");
+            sb.AppendLine();
+        }
+        else
+        {
+            sb.AppendLine("LogMsg \"No self-signed certificate reported by server - skipping trust step.\"");
+            sb.AppendLine();
         }
 
         sb.AppendLine("Function GetUpn()");
@@ -96,16 +117,21 @@ public sealed class SetupController : ControllerBase
         sb.AppendLine("        If Not f.AtEndOfStream Then result = Trim(f.ReadLine)");
         sb.AppendLine("        f.Close");
         sb.AppendLine("        fso.DeleteFile whoamiTemp, True");
+        sb.AppendLine("    Else");
+        sb.AppendLine("        LogMsg \"whoami: output file was never created\"");
         sb.AppendLine("    End If");
         sb.AppendLine("    GetUpn = result");
         sb.AppendLine("End Function");
         sb.AppendLine();
+        sb.AppendLine("LogMsg \"Trying whoami without elevation...\"");
         sb.AppendLine("upn = GetUpn()");
+        sb.AppendLine("LogMsg \"First whoami result: '\" & upn & \"'\"");
         sb.AppendLine();
         sb.AppendLine("' whoami works without elevation on most PCs - only fall back to the");
         sb.AppendLine("' company's elevation shortcut (and retry once) on the ones where it doesn't,");
         sb.AppendLine("' instead of always prompting for admin access up front.");
         sb.AppendLine("If upn = \"\" Then");
+        sb.AppendLine("    LogMsg \"whoami failed - requesting admin access...\"");
         sb.AppendLine("    On Error Resume Next");
         sb.AppendLine("    psPath = fso.GetSpecialFolder(2) & \"\\\" & fso.GetTempName() & \".ps1\"");
         sb.AppendLine("    Set psFile = fso.CreateTextFile(psPath, True)");
@@ -115,16 +141,23 @@ public sealed class SetupController : ControllerBase
         sb.AppendLine("    psFile.Close");
         sb.AppendLine("    shell.Run \"powershell -NoProfile -ExecutionPolicy Bypass -File \"\"\" & psPath & \"\"\"\", 0, True");
         sb.AppendLine("    fso.DeleteFile psPath, True");
+        sb.AppendLine("    If Err.Number <> 0 Then LogMsg \"Admin access step raised an error: \" & Err.Number & \" - \" & Err.Description");
         sb.AppendLine("    On Error Goto 0");
+        sb.AppendLine("    LogMsg \"Admin access step finished (approval screen closed). Retrying whoami...\"");
         sb.AppendLine();
         sb.AppendLine("    upn = GetUpn()");
+        sb.AppendLine("    LogMsg \"Second whoami result: '\" & upn & \"'\"");
         sb.AppendLine("End If");
         sb.AppendLine();
         sb.AppendLine("If upn = \"\" Then");
+        sb.AppendLine("    LogMsg \"FAILED - could not determine identity, showing error to user.\"");
         sb.AppendLine("    MsgBox \"Could not determine your Windows account. Make sure this PC is signed in to the company domain.\", vbExclamation, \"LogTool\"");
         sb.AppendLine("Else");
+        sb.AppendLine("    LogMsg \"SUCCESS - opening site with identity '\" & upn & \"'\"");
         sb.AppendLine("    shell.Run siteUrl & \"?identity=\" & upn, 1, False");
         sb.AppendLine("End If");
+        sb.AppendLine();
+        sb.AppendLine("LogMsg \"=== Setup finished ===\"");
 
         return sb.ToString();
     }
