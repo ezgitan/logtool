@@ -21,20 +21,63 @@ Get-ChildItem "cert:\LocalMachine\My" |
     Where-Object { $_.FriendlyName -eq $friendlyName } |
     Remove-Item -Force -ErrorAction SilentlyContinue
 
-# -DnsName's automatic IP-vs-hostname detection isn't reliable on every
-# Windows version - it can silently add the IP as a "DNS Name" SAN entry
-# instead of an "IP Address" one. Chromium browsers require the latter to
-# accept a certificate when connecting via IP literal, so build the SAN
-# extension explicitly to guarantee the right type.
+# Built via certreq + an INF template rather than New-SelfSignedCertificate's
+# -TextExtension, which produced a malformed Subject Alternative Name
+# extension on this server (Chrome rejected it outright with
+# NET::ERR_CERT_INVALID / "scrambled credentials"). This certreq-based
+# recipe is the long-documented, more portable way to get an IP-typed SAN.
 $parsedIp = $null
 $isIpAddress = [System.Net.IPAddress]::TryParse($HostName, [ref]$parsedIp)
-$sanExtension = if ($isIpAddress) { "2.5.29.17={text}IPAddress=$HostName" } else { "2.5.29.17={text}DNS=$HostName" }
+$sanLine = if ($isIpAddress) { "ipaddress=$HostName" } else { "dns=$HostName" }
 
-$cert = New-SelfSignedCertificate `
-    -CertStoreLocation "cert:\LocalMachine\My" `
-    -NotAfter (Get-Date).AddYears(5) `
-    -FriendlyName $friendlyName `
-    -TextExtension @($sanExtension)
+$workDir = Join-Path $env:TEMP "logtool-cert-$([Guid]::NewGuid().ToString('N'))"
+New-Item -ItemType Directory -Path $workDir | Out-Null
+$infPath = Join-Path $workDir "request.inf"
+$cerPath = Join-Path $workDir "cert.cer"
+
+@"
+[Version]
+Signature = "`$Windows NT`$"
+
+[NewRequest]
+Subject = "CN=$HostName"
+KeySpec = 1
+KeyLength = 2048
+Exportable = TRUE
+FriendlyName = "$friendlyName"
+MachineKeySet = TRUE
+SMIME = FALSE
+PrivateKeyArchive = FALSE
+UserProtected = FALSE
+UseExistingKeySet = FALSE
+ProviderName = "Microsoft RSA SChannel Cryptographic Provider"
+ProviderType = 12
+RequestType = Cert
+KeyUsage = 0xa0
+HashAlgorithm = SHA256
+ValidityPeriod = Years
+ValidityPeriodUnits = 5
+
+[EnhancedKeyUsageExtension]
+OID = 1.3.6.1.5.5.7.3.1
+
+[Extensions]
+2.5.29.17 = "{text}"
+_continue_ = "$sanLine&"
+"@ | Set-Content -Path $infPath -Encoding ASCII
+
+certreq -new -q $infPath $cerPath | Out-Null
+
+$cert = Get-ChildItem "cert:\LocalMachine\My" |
+    Where-Object { $_.FriendlyName -eq $friendlyName } |
+    Sort-Object NotBefore -Descending |
+    Select-Object -First 1
+
+Remove-Item $workDir -Recurse -Force -ErrorAction SilentlyContinue
+
+if (-not $cert) {
+    throw "Certificate creation failed - re-run 'certreq -new request.inf cert.cer' manually (without -q) to see the underlying error."
+}
 
 $thumbprint = $cert.Thumbprint
 $appId = "{2f6a6b0e-1c6a-4b1a-9b1a-1234567890ab}"
