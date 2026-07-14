@@ -82,9 +82,11 @@ export function ReminderPromptModal({
         </label>
 
         <div className="reminder-actions">
-          <button type="button" className="logout-button" onClick={onCancel} disabled={submitting}>
-            {mode === 'first-run' ? 'Not now' : 'Cancel'}
-          </button>
+          {mode === 'settings' && (
+            <button type="button" className="logout-button" onClick={onCancel} disabled={submitting}>
+              Cancel
+            </button>
+          )}
           <button type="submit" disabled={submitting}>
             {submitting ? 'Saving…' : 'Save'}
           </button>

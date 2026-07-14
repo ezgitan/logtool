@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { getPushSettings } from './api/pushApi'
 import { LogoMark } from './components/LogoMark'
 import { hasDismissedReminderPrompt, markReminderPromptDismissed } from './lib/reminderPrompt'
-import { getStoredIdentity, resolveSession } from './lib/identity'
+import { getStoredIdentity, IDENTITY_STORAGE_KEY, resolveSession } from './lib/identity'
 import type { Session } from './lib/session'
 import { AdminUsersPage } from './pages/AdminUsersPage'
 import { AuthGate } from './pages/AuthGate'
@@ -32,30 +32,43 @@ function App() {
   const [reminderModal, setReminderModal] = useState<ReminderModalState | null>(null)
 
   useEffect(() => {
-    const stored = getStoredIdentity()
-    if (!stored) {
-      setAuthLoading(false)
-      return
-    }
-
     let cancelled = false
 
-    resolveSession(stored)
-      .then((resolved) => {
-        if (cancelled) return
-        setSession(resolved)
-        setPage(defaultPageFor(resolved))
-      })
-      .catch((error: unknown) => {
-        if (cancelled) return
-        setAuthError(error instanceof Error ? error.message : 'Could not verify your identity.')
-      })
-      .finally(() => {
-        if (!cancelled) setAuthLoading(false)
-      })
+    function trySignIn() {
+      const stored = getStoredIdentity()
+      if (!stored) {
+        setAuthLoading(false)
+        return
+      }
+
+      resolveSession(stored)
+        .then((resolved) => {
+          if (cancelled) return
+          setSession(resolved)
+          setPage(defaultPageFor(resolved))
+        })
+        .catch((error: unknown) => {
+          if (cancelled) return
+          setAuthError(error instanceof Error ? error.message : 'Could not verify your identity.')
+        })
+        .finally(() => {
+          if (!cancelled) setAuthLoading(false)
+        })
+    }
+
+    trySignIn()
+
+    // The setup script opens a separate tab to deliver the identity. Once
+    // that tab stores it, pick it up here via the storage event instead of
+    // making the user open yet another tab for the page they started on.
+    function handleStorageChange(event: StorageEvent) {
+      if (event.key === IDENTITY_STORAGE_KEY) trySignIn()
+    }
+    window.addEventListener('storage', handleStorageChange)
 
     return () => {
       cancelled = true
+      window.removeEventListener('storage', handleStorageChange)
     }
   }, [])
 

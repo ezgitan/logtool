@@ -26,8 +26,8 @@ export function AuthGate({ loading, error }: AuthGateProps) {
             <p className="eyebrow">FIRST TIME HERE</p>
             <h1>Download the setup script</h1>
             <p className="login-hint">
-              Run it once to sign in and enable reminder notifications. After that, LogTool
-              opens automatically every time — no sign-in needed.
+              Run it once to sign in and enable reminder notifications. This page will update
+              on its own once it's done — no need to reopen or refresh anything.
             </p>
             <a className="setup-download" href="/setup.vbs">
               Download setup script

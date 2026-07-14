@@ -3,7 +3,7 @@ import { COMPANY_EMAIL_DOMAIN, isAdminEmail } from './adminConfig'
 import { matchMemberByEmail } from './memberMatch'
 import type { Session } from './session'
 
-const IDENTITY_STORAGE_KEY = 'logtool.identity'
+export const IDENTITY_STORAGE_KEY = 'logtool.identity'
 
 function readIdentityFromUrl(): string | null {
   const params = new URLSearchParams(window.location.search)
