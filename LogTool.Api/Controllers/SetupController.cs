@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
@@ -14,25 +15,58 @@ namespace LogTool.Api.Controllers;
 [Route("setup.vbs")]
 public sealed class SetupController : ControllerBase
 {
-    private const string CertificateFriendlyName = "LogTool self-signed certificate";
-
     [HttpGet]
     public IActionResult Get()
     {
-        var certBase64 = FindCertificateBase64();
+        var port = Request.Host.Port ?? (Request.IsHttps ? 443 : 80);
+        var certBase64 = FindCertificateBase64(port);
         var siteUrl = $"{Request.Scheme}://{Request.Host}/";
         var bytes = Encoding.ASCII.GetBytes(BuildScript(certBase64, siteUrl));
         return File(bytes, "application/octet-stream", "Setup LogTool.vbs");
     }
 
-    private static string? FindCertificateBase64()
+    /// <summary>
+    /// Finds the certificate actually bound to HTTP.sys via netsh (there can be
+    /// several self-signed certs sitting in the store from re-running
+    /// generate-cert.ps1 over time - matching by thumbprint, not friendly name,
+    /// guarantees we embed the one the browser is really seeing).
+    /// </summary>
+    private static string? FindCertificateBase64(int port)
     {
+        var thumbprint = GetBoundThumbprint(port);
+        if (thumbprint is null) return null;
+
         using var store = new X509Store(StoreName.My, StoreLocation.LocalMachine);
         store.Open(OpenFlags.ReadOnly);
-        var cert = store.Certificates
-            .OfType<X509Certificate2>()
-            .FirstOrDefault(c => c.FriendlyName == CertificateFriendlyName);
+        var matches = store.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, validOnly: false);
+        var cert = matches.OfType<X509Certificate2>().FirstOrDefault();
         return cert is null ? null : Convert.ToBase64String(cert.Export(X509ContentType.Cert));
+    }
+
+    private static string? GetBoundThumbprint(int port)
+    {
+        var startInfo = new ProcessStartInfo("netsh", $"http show sslcert ipport=0.0.0.0:{port}")
+        {
+            RedirectStandardOutput = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+        };
+
+        using var process = Process.Start(startInfo);
+        if (process is null) return null;
+
+        var output = process.StandardOutput.ReadToEnd();
+        process.WaitForExit();
+
+        foreach (var line in output.Split('\n'))
+        {
+            if (!line.Contains("Certificate Hash", StringComparison.OrdinalIgnoreCase)) continue;
+            var separatorIndex = line.IndexOf(':');
+            if (separatorIndex < 0) continue;
+            return line[(separatorIndex + 1)..].Trim().Replace(" ", "");
+        }
+
+        return null;
     }
 
     private static string BuildScript(string? certBase64, string siteUrl)

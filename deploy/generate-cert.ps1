@@ -12,11 +12,20 @@ param(
 # a .pfx file read by the app — so this installs the cert into the machine
 # store and registers it with HTTP.sys directly.
 
+$friendlyName = "LogTool self-signed certificate"
+
+# Clean up certs from previous runs of this script so they don't pile up in
+# the store (setup.vbs matches by the thumbprint netsh has bound, not by
+# name, so stale duplicates here are just clutter - but worth avoiding).
+Get-ChildItem "cert:\LocalMachine\My" |
+    Where-Object { $_.FriendlyName -eq $friendlyName } |
+    Remove-Item -Force -ErrorAction SilentlyContinue
+
 $cert = New-SelfSignedCertificate `
     -DnsName $HostName `
     -CertStoreLocation "cert:\LocalMachine\My" `
     -NotAfter (Get-Date).AddYears(5) `
-    -FriendlyName "LogTool self-signed certificate"
+    -FriendlyName $friendlyName
 
 $thumbprint = $cert.Thumbprint
 $appId = "{2f6a6b0e-1c6a-4b1a-9b1a-1234567890ab}"
