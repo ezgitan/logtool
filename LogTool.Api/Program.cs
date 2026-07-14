@@ -1,18 +1,10 @@
-using Microsoft.AspNetCore.Server.HttpSys;
-
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseWindowsService();
-builder.WebHost.UseHttpSys(options =>
-{
-    options.Authentication.Schemes = AuthenticationSchemes.Negotiate | AuthenticationSchemes.NTLM;
-    options.Authentication.AllowAnonymous = true;
-});
+builder.WebHost.UseHttpSys();
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddEventLog(settings => settings.SourceName = "LogTool");
 
-builder.Services.AddAuthentication(HttpSysDefaults.AuthenticationScheme);
-builder.Services.AddAuthorization();
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.Configure<LogTool.Api.Options.ExcelOptions>(
@@ -39,8 +31,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
-app.UseAuthentication();
-app.UseAuthorization();
 app.UseMiddleware<LogTool.Api.Middleware.ApiExceptionMiddleware>();
 app.MapControllers();
 app.MapFallbackToFile("index.html");

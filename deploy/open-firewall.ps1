@@ -1,6 +1,6 @@
 # Run this ON the target server as Administrator.
 param(
-    [int]$Port = 5443
+    [int]$Port = 443
 )
 
 New-NetFirewallRule -DisplayName "LogTool HTTPS" -Direction Inbound -Protocol TCP -LocalPort $Port -Action Allow

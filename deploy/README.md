@@ -1,10 +1,10 @@
 # Deploying LogTool to the company network
 
 LogTool runs as a single ASP.NET Core app that serves both the API and
-the built frontend, hosted on **HTTP.sys** (not Kestrel) so Windows
-Integrated Authentication (SSO) works reliably.
+the built frontend, hosted on **HTTP.sys**.
 
-Target server: **10.96.250.14**
+Target server: **10.96.250.14** (not domain-joined — see "How sign-in
+works" below for what that means for identity).
 
 ## 1. Build and publish (on this dev machine)
 
@@ -31,8 +31,13 @@ cd C:\LogTool
 ```
 
 This installs the certificate into the Windows certificate store and
-binds it to port 5443 via `netsh` — HTTP.sys picks it up automatically,
+binds it to port 443 via `netsh` — HTTP.sys picks it up automatically,
 there's no file path or password to configure anywhere.
+
+(Port 443, the standard HTTPS port, instead of a custom port like
+5443 — some corporate firewalls between network segments only allow
+well-known ports through, even if a raw TCP connection to a custom
+port appears to succeed.)
 
 Browsers will show a "not secure" / self-signed warning the first
 time each person visits — that's expected and just needs a one-time
@@ -42,7 +47,7 @@ CA-issued certificate.
 ## 3. Open the firewall (on the target server, as Administrator)
 
 ```powershell
-.\deploy\open-firewall.ps1 -Port 5443
+.\deploy\open-firewall.ps1 -Port 443
 ```
 
 ## 4. Run it
@@ -58,9 +63,9 @@ $env:ASPNETCORE_ENVIRONMENT = "Production"
 .\LogTool.Api.exe
 ```
 
-Then browse to `https://10.96.250.14:5443` from another machine on
-the network. You should be signed in automatically via your Windows
-account — no login screen.
+Then, from another machine, open the site using the launcher (see
+below) — not by typing the address directly, since the launcher is
+what supplies your identity.
 
 ## 5. Install as a Windows Service (so it survives reboots/logouts)
 
@@ -75,23 +80,24 @@ Start-Service LogTool
 Logs (startup errors, exceptions) go to Windows Event Viewer under
 **Application** log, source **LogTool**.
 
-## Troubleshooting sign-in
+## How sign-in works
 
-- **"Could not verify your identity"** on a client machine usually
-  means the browser isn't sending Windows credentials automatically —
-  check that the server is reachable and that the browser trusts it
-  for Integrated Authentication (see below). This is a browser/network
-  setting, not something the app can fix.
-- For company-wide seamless sign-in (no per-user setup), IT should
-  push a Group Policy setting `AuthServerAllowlist` (Chrome/Edge) that
-  includes `10.96.250.14` (or the real hostname if one gets set up
-  later) so every managed machine trusts it automatically. Without
-  this policy, each machine may need it set individually.
-- The identity resolution also depends on Active Directory being
-  reachable from the server (to resolve a person's UPN, e.g.
-  `ezgi.tan@nxp.com`, from their Windows login). If AD can't be
-  reached, it falls back to the raw Windows account name, which likely
-  won't match anyone in the Excel roster.
+The server (10.96.250.14) is **not joined to the company Active
+Directory domain**, so it has no way to validate anyone's Windows
+credentials itself — neither automatically nor by prompting for a
+password. That rules out real Windows Integrated Authentication here.
+
+Instead, each person uses the launcher in `deploy/launcher/` (see its
+own README) — a small script that runs on **their own PC** (which
+usually *is* domain-joined), reads their identity locally, and opens
+the site with it pre-filled via a URL parameter. No password, no
+prompt, no typing.
+
+This is **not real authentication** — it trusts whatever identity the
+launcher (or a manually edited URL) provides. That matches the
+trust level this tool already had before (no password was ever
+checked). If the server gets properly domain-joined later, this can
+be swapped back for real Windows sign-in.
 
 ## Notes
 

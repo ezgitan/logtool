@@ -4,7 +4,7 @@
 
 param(
     [string]$HostName = "10.96.250.14",
-    [int]$Port = 5443
+    [int]$Port = 443
 )
 
 # HTTP.sys (used instead of Kestrel so Windows Integrated Authentication
