@@ -33,17 +33,29 @@ function withTimeout<T>(promise: Promise<T>, ms: number, timeoutMessage: string)
   })
 }
 
-export async function setupReminderPush(memberName: string, hour: number, minute: number) {
+export function getNotificationPermission(): NotificationPermission | null {
+  if (!isPushSupported()) return null
+  return Notification.permission
+}
+
+export async function requestNotificationPermission(): Promise<NotificationPermission> {
   if (!isPushSupported()) {
     throw new Error('This browser does not support notifications.')
   }
-
-  const permission = await withTimeout(
+  return withTimeout(
     Notification.requestPermission(),
     20000,
     'No response to the notification permission prompt. Check your address bar for a permission ' +
       'icon (often a bell or lock) and allow it, then try again.',
   )
+}
+
+export async function setupReminderPush(memberName: string, hour: number, minute: number) {
+  if (!isPushSupported()) {
+    throw new Error('This browser does not support notifications.')
+  }
+
+  const permission = await requestNotificationPermission()
   if (permission !== 'granted') {
     throw new Error('Notification permission was not granted.')
   }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { setupReminderPush } from '../lib/push'
+import { getNotificationPermission, requestNotificationPermission, setupReminderPush } from '../lib/push'
 
 interface ReminderPromptModalProps {
   memberName: string
@@ -29,6 +29,24 @@ export function ReminderPromptModal({
   const [minute, setMinute] = useState(initialMinute)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [permission, setPermission] = useState(getNotificationPermission())
+  const [requestingPermission, setRequestingPermission] = useState(false)
+
+  async function handleEnableNotifications() {
+    setRequestingPermission(true)
+    setError(null)
+    try {
+      const result = await requestNotificationPermission()
+      setPermission(result)
+      if (result !== 'granted') {
+        setError('Notification permission was not granted.')
+      }
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Could not request notification permission.')
+    } finally {
+      setRequestingPermission(false)
+    }
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -44,9 +62,11 @@ export function ReminderPromptModal({
     }
   }
 
+  const needsPermission = permission !== 'granted'
+
   return (
     <div className="modal-overlay">
-      <form className="panel reminder-card" onSubmit={handleSubmit}>
+      <div className="panel reminder-card">
         <p className="eyebrow">REMINDER</p>
         <h2>{mode === 'first-run' ? 'Reminder time' : 'Update reminder time'}</h2>
         <p className="login-hint">
@@ -60,38 +80,70 @@ export function ReminderPromptModal({
           </p>
         )}
 
-        <label>
-          Time
-          <div className="time-select-row">
-            <select value={hour} onChange={(event) => setHour(Number(event.target.value))} aria-label="Hour">
-              {hours.map((value) => (
-                <option key={value} value={value}>
-                  {pad(value)}
-                </option>
-              ))}
-            </select>
-            <span className="time-select-separator">:</span>
-            <select value={minute} onChange={(event) => setMinute(Number(event.target.value))} aria-label="Minute">
-              {minutes.map((value) => (
-                <option key={value} value={value}>
-                  {pad(value)}
-                </option>
-              ))}
-            </select>
-          </div>
-        </label>
+        {needsPermission ? (
+          <>
+            {permission === 'denied' ? (
+              <p className="login-hint">
+                Notifications are blocked for this site. Allow them from your browser&rsquo;s site settings
+                (usually via the icon next to the address bar), then reopen this dialog.
+              </p>
+            ) : (
+              <p className="login-hint">
+                Click below, then choose &ldquo;Allow&rdquo; when your browser asks for notification
+                permission.
+              </p>
+            )}
+            <div className="reminder-actions">
+              {mode === 'settings' && (
+                <button type="button" className="logout-button" onClick={onCancel} disabled={requestingPermission}>
+                  Cancel
+                </button>
+              )}
+              <button type="button" onClick={handleEnableNotifications} disabled={requestingPermission}>
+                {requestingPermission ? 'Waiting for response…' : 'Enable notifications'}
+              </button>
+            </div>
+          </>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <label>
+              Time
+              <div className="time-select-row">
+                <select value={hour} onChange={(event) => setHour(Number(event.target.value))} aria-label="Hour">
+                  {hours.map((value) => (
+                    <option key={value} value={value}>
+                      {pad(value)}
+                    </option>
+                  ))}
+                </select>
+                <span className="time-select-separator">:</span>
+                <select
+                  value={minute}
+                  onChange={(event) => setMinute(Number(event.target.value))}
+                  aria-label="Minute"
+                >
+                  {minutes.map((value) => (
+                    <option key={value} value={value}>
+                      {pad(value)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </label>
 
-        <div className="reminder-actions">
-          {mode === 'settings' && (
-            <button type="button" className="logout-button" onClick={onCancel} disabled={submitting}>
-              Cancel
-            </button>
-          )}
-          <button type="submit" disabled={submitting}>
-            {submitting ? 'Saving…' : 'Save'}
-          </button>
-        </div>
-      </form>
+            <div className="reminder-actions">
+              {mode === 'settings' && (
+                <button type="button" className="logout-button" onClick={onCancel} disabled={submitting}>
+                  Cancel
+                </button>
+              )}
+              <button type="submit" disabled={submitting}>
+                {submitting ? 'Saving…' : 'Save'}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
     </div>
   )
 }
