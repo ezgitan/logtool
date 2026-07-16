@@ -137,18 +137,28 @@ path — `/setup.vbs` supersedes it since it needs no distribution.
 
 Don't manually copy the `publish` folder over the live one — it's one
 missed "except Data\" away from silently invalidating every saved
-reminder subscription. Instead:
+reminder subscription. Changes are pushed to GitHub
+(`https://github.com/ezgitan/logtool`); `update-server.ps1` handles
+pulling and deploying them in one step.
 
-1. On the dev machine: `.\deploy\publish.ps1`.
-2. Copy the resulting `publish` folder to the server into a
-   **staging** location, not over the live install - e.g.
-   `C:\LogTool\publish-new`.
-3. On the server, as Administrator:
+1. On the dev machine: build (`.\deploy\publish.ps1`), commit the
+   updated `publish\` folder, push to GitHub.
+2. On the server, as Administrator, run the same command every time:
    ```powershell
-   .\deploy\update-server.ps1 -NewBuildPath "C:\LogTool\publish-new" -LivePath "C:\LogTool\publish"
+   .\deploy\update-server.ps1 -LivePath "C:\LogTool\publish"
    ```
-   This stops the service, mirrors the new build into place while
-   **excluding `Data\` entirely** (not "copy but remember to skip
-   it" — the tool itself can't touch it), and restarts the service.
-   The certificate binding persists across updates automatically, no
-   need to re-run `generate-cert.ps1`.
+   No manual `git clone`/`git pull`, no staging folder to create or
+   fill by hand. The script manages its own clone under
+   `C:\LogTool-clone` (override with `-ClonePath` if you want it
+   elsewhere) - clones on the very first run, `git pull`s on every
+   run after. It refuses to touch the live service at all if the pull
+   didn't actually produce a real build (missing `LogTool.Api.exe` or
+   suspiciously few files), so a bad pull is caught before anything
+   live is touched, not after - this exact scenario broke the live
+   service once with a manually-managed staging folder.
+
+Under the hood it then stops the service, mirrors the new build into
+place while **excluding `Data\` entirely** (not "copy but remember to
+skip it" — the tool itself can't touch it), and restarts the service.
+The certificate binding persists across updates automatically, no
+need to re-run `generate-cert.ps1`.
