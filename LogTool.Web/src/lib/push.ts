@@ -68,13 +68,20 @@ export async function setupReminderPush(memberName: string, hour: number, minute
   )
 
   const { publicKey } = await getPushPublicKey()
+
+  // Always drop any existing subscription and create a fresh one, rather
+  // than reusing whatever's cached. Reusing a stale subscription (e.g. one
+  // bound to a VAPID key the server no longer has, after Data\ got
+  // regenerated) silently fails - re-subscribing against the server's
+  // *current* key is the only way to guarantee this actually works.
   const existing = await registration.pushManager.getSubscription()
-  const subscription =
-    existing ??
-    (await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(publicKey),
-    }))
+  if (existing) {
+    await existing.unsubscribe()
+  }
+  const subscription = await registration.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array(publicKey),
+  })
 
   const subscriptionJson = subscription.toJSON()
   if (!subscriptionJson.endpoint || !subscriptionJson.keys?.p256dh || !subscriptionJson.keys?.auth) {
