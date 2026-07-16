@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ApiRequestError } from '../api/client'
 import { getMonthlyReport } from '../api/logsApi'
 import { StatusMessage } from '../components/StatusMessage'
@@ -7,7 +7,12 @@ import type { MonthlyReport } from '../types/log'
 const now = new Date()
 
 const monthFormatter = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' })
-const remoteDateFormatter = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric' })
+const remoteDateFormatter = new Intl.DateTimeFormat('en-GB', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+})
 
 function getErrorMessage(error: unknown) {
   if (error instanceof ApiRequestError) {
@@ -24,20 +29,25 @@ function formatRemoteDate(isoDate: string) {
   return remoteDateFormatter.format(new Date(y, m - 1, d))
 }
 
+interface RemoteDaysSelection {
+  memberName: string
+  dates: string[]
+}
+
 export function MonthlyReportPage() {
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth() + 1)
   const [report, setReport] = useState<MonthlyReport | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [expandedMember, setExpandedMember] = useState<string | null>(null)
+  const [remoteDaysSelection, setRemoteDaysSelection] = useState<RemoteDaysSelection | null>(null)
 
   const isCurrentOrFutureMonth = year > now.getFullYear() || (year === now.getFullYear() && month >= now.getMonth() + 1)
 
   useEffect(() => {
     setLoading(true)
     setError(null)
-    setExpandedMember(null)
+    setRemoteDaysSelection(null)
     getMonthlyReport(year, month)
       .then(setReport)
       .catch((caught: unknown) => {
@@ -64,10 +74,6 @@ export function MonthlyReportPage() {
     } else {
       setMonth((current) => current + 1)
     }
-  }
-
-  function toggleExpanded(memberName: string) {
-    setExpandedMember((current) => (current === memberName ? null : memberName))
   }
 
   return (
@@ -119,40 +125,31 @@ export function MonthlyReportPage() {
                 </thead>
                 <tbody>
                   {report.members.map((entry) => (
-                    <Fragment key={entry.memberName}>
-                      <tr>
-                        <td className="daily-member">{entry.memberName}</td>
-                        <td className="report-cell">{entry.officeDays}</td>
-                        <td className="report-cell">{entry.officeHours}</td>
-                        <td className="report-cell">
-                          {entry.remoteDays > 0 ? (
-                            <button
-                              type="button"
-                              className="remote-day-toggle"
-                              onClick={() => toggleExpanded(entry.memberName)}
-                              aria-expanded={expandedMember === entry.memberName}
-                            >
-                              {entry.remoteDays}
-                            </button>
-                          ) : (
-                            entry.remoteDays
-                          )}
-                        </td>
-                        <td className="report-cell">{entry.remoteHours}</td>
-                        <td className="report-cell">{entry.totalWorkedDays}</td>
-                        <td className="report-cell">{entry.totalWorkedHours}</td>
-                        <td className="report-cell">{entry.totalLeaveDays}</td>
-                        <td className="report-cell">{entry.notWorkingDays}</td>
-                      </tr>
-                      {expandedMember === entry.memberName && (
-                        <tr className="remote-dates-row">
-                          <td colSpan={9}>
-                            <span className="remote-dates-label">Home office days:</span>{' '}
-                            {entry.remoteDates.map(formatRemoteDate).join(', ')}
-                          </td>
-                        </tr>
-                      )}
-                    </Fragment>
+                    <tr key={entry.memberName}>
+                      <td className="daily-member">{entry.memberName}</td>
+                      <td className="report-cell">{entry.officeDays}</td>
+                      <td className="report-cell">{entry.officeHours}</td>
+                      <td className="report-cell">
+                        {entry.remoteDays > 0 ? (
+                          <button
+                            type="button"
+                            className="remote-day-toggle"
+                            onClick={() =>
+                              setRemoteDaysSelection({ memberName: entry.memberName, dates: entry.remoteDates })
+                            }
+                          >
+                            {entry.remoteDays}
+                          </button>
+                        ) : (
+                          entry.remoteDays
+                        )}
+                      </td>
+                      <td className="report-cell">{entry.remoteHours}</td>
+                      <td className="report-cell">{entry.totalWorkedDays}</td>
+                      <td className="report-cell">{entry.totalWorkedHours}</td>
+                      <td className="report-cell">{entry.totalLeaveDays}</td>
+                      <td className="report-cell">{entry.notWorkingDays}</td>
+                    </tr>
                   ))}
                 </tbody>
               </table>
@@ -163,6 +160,26 @@ export function MonthlyReportPage() {
           </>
         )}
       </section>
+
+      {remoteDaysSelection && (
+        <div className="modal-overlay" onClick={() => setRemoteDaysSelection(null)}>
+          <div className="panel remote-dates-card" onClick={(event) => event.stopPropagation()}>
+            <p className="eyebrow">HOME OFFICE DAYS</p>
+            <h2>{remoteDaysSelection.memberName}</h2>
+            <p className="login-hint">{monthFormatter.format(new Date(year, month - 1, 1))}</p>
+            <ul className="remote-dates-list">
+              {remoteDaysSelection.dates.map((date) => (
+                <li key={date}>{formatRemoteDate(date)}</li>
+              ))}
+            </ul>
+            <div className="reminder-actions">
+              <button type="button" onClick={() => setRemoteDaysSelection(null)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

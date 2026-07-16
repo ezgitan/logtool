@@ -200,8 +200,14 @@ button[type='submit']:disabled { cursor: not-allowed; opacity: .5; box-shadow: n
   font-variant-numeric: tabular-nums; text-decoration: underline; text-underline-offset: 2px;
 }
 .remote-day-toggle:hover { color: var(--brand-dark); }
-.remote-dates-row td { text-align: left; background: #f8fafc; font-size: 13px; color: var(--ink); padding-top: 10px; padding-bottom: 10px; }
-.remote-dates-label { font-weight: 700; color: var(--muted); }
+
+.remote-dates-card { width: min(100%, 420px); padding: 32px; display: grid; gap: 4px; }
+.remote-dates-card h2 { margin: 0 0 6px; font-size: 22px; letter-spacing: -.025em; color: var(--ink); }
+.remote-dates-list { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 8px; max-height: 320px; overflow-y: auto; }
+.remote-dates-list li {
+  padding: 10px 14px; border-radius: 10px; background: #f8fafc; border: 1px solid var(--border);
+  font-size: 14px; color: var(--ink); font-weight: 600;
+}
 
 .attendance-badge { display: inline-flex; align-items: center; padding: 5px 11px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #f1f5f9; color: #475569; }
 .attendance-office { background: var(--brand-soft); color: var(--brand-dark); }
