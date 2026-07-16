@@ -41,10 +41,19 @@ public sealed class ExcelService
             using var workbook = new XLWorkbook(_filePath);
             return action(workbook);
         }
+        catch (LogToolException)
+        {
+            throw;
+        }
         catch (IOException exception)
         {
             _logger.LogWarning(exception, "Excel dosyasına erişilemedi: {ExcelFileName}", Path.GetFileName(_filePath));
             throw new ExcelFileLockedException();
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Excel dosyası okunamadı: {ExcelFileName}", Path.GetFileName(_filePath));
+            throw;
         }
         finally
         {

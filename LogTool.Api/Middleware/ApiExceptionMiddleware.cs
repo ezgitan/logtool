@@ -15,13 +15,17 @@ public sealed class ApiExceptionMiddleware(
         }
         catch (LogToolException exception)
         {
-            logger.LogWarning(exception, "İstek işlenirken beklenen uygulama hatası oluştu: {ErrorCode}", exception.Code);
+            logger.LogWarning(
+                exception, "Beklenen uygulama hatası: {ErrorCode} on {Method} {Path}",
+                exception.Code, context.Request.Method, context.Request.Path);
             context.Response.StatusCode = GetStatusCode(exception);
             await context.Response.WriteAsJsonAsync(new ApiErrorDto(exception.Code, exception.Message));
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, "Unexpected error while processing the request.");
+            logger.LogError(
+                exception, "Unexpected error on {Method} {Path}",
+                context.Request.Method, context.Request.Path);
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
             await context.Response.WriteAsJsonAsync(
                 new ApiErrorDto("unexpected_error", "An unexpected error occurred while processing the request."));

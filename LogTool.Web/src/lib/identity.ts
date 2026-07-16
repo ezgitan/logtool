@@ -30,7 +30,8 @@ export async function fetchRequiredSetupVersion(): Promise<string | null> {
     if (!response.ok) return null
     const data = (await response.json()) as { version: string }
     return data.version
-  } catch {
+  } catch (error) {
+    console.error('Could not check the current setup.vbs version', error)
     return null
   }
 }

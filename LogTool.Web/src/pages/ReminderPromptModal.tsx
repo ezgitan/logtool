@@ -42,6 +42,7 @@ export function ReminderPromptModal({
         setError('Notification permission was not granted.')
       }
     } catch (caught) {
+      console.error('Could not request notification permission', caught)
       setError(caught instanceof Error ? caught.message : 'Could not request notification permission.')
     } finally {
       setRequestingPermission(false)
@@ -61,6 +62,7 @@ export function ReminderPromptModal({
       await setupReminderPush(memberName, hour, minute)
       onSaved()
     } catch (caught) {
+      console.error('Could not set up reminder push', caught)
       setError(caught instanceof Error ? caught.message : 'Could not set up notifications.')
     } finally {
       setSubmitting(false)

@@ -65,13 +65,15 @@ function App() {
             })
             .catch((error: unknown) => {
               if (cancelled) return
+              console.error('Could not resolve session for stored identity', error)
               setAuthError(error instanceof Error ? error.message : 'Could not verify your identity.')
             })
             .finally(() => {
               if (!cancelled) setAuthLoading(false)
             })
         })
-        .catch(() => {
+        .catch((error: unknown) => {
+          console.error('Could not determine stored identity', error)
           if (!cancelled) setAuthLoading(false)
         })
     }
@@ -123,8 +125,10 @@ function App() {
         }
         setReminderModal({ mode: 'first-run', hour: 17, minute: 0 })
       })
-      .catch(() => {
-        // ignore silently: notification settings are optional
+      .catch((error: unknown) => {
+        // Not shown to the user: notification settings are optional, but
+        // still worth a trace if this is why a reminder prompt didn't show.
+        console.error('Could not load push settings', error)
       })
 
     return () => {
@@ -180,7 +184,8 @@ function App() {
         hour: current.reminderHour ?? 17,
         minute: current.reminderMinute ?? 0,
       })
-    } catch {
+    } catch (error) {
+      console.error('Could not load current push settings', error)
       setReminderModal({ mode: 'settings', hour: 17, minute: 0 })
     }
   }
