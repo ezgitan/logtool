@@ -7,6 +7,17 @@
   pointer-events: none;
 }
 
+.notice-banner {
+  display: flex; align-items: center; justify-content: center; gap: 16px;
+  padding: 11px clamp(20px, 5vw, 72px); font-size: 13px; font-weight: 650;
+  color: #b91c1c; background: #fef2f2; border-bottom: 1px solid #fecaca;
+}
+.notice-banner button[type='button'] {
+  min-width: 0; padding: 6px 14px; font-size: 12px;
+  background: #b91c1c; box-shadow: none;
+}
+.notice-banner button[type='button']:hover { background: #991b1b; }
+
 .topbar {
   height: 72px; padding: 0 clamp(20px, 5vw, 72px); display: flex; align-items: center;
   border-bottom: 1px solid var(--border); background: rgba(248, 250, 252, .88);

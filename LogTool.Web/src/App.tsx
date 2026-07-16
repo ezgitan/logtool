@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getPushSettings } from './api/pushApi'
 import { LogoMark } from './components/LogoMark'
+import { getNotificationPermission } from './lib/push'
 import { hasDismissedReminderPrompt, markReminderPromptDismissed } from './lib/reminderPrompt'
 import { getStoredIdentity, IDENTITY_STORAGE_KEY, resolveSession } from './lib/identity'
 import type { Session } from './lib/session'
@@ -33,6 +34,8 @@ function App() {
   const [justUpgraded, setJustUpgraded] = useState(false)
   const [page, setPage] = useState<Page>('my-logs')
   const [reminderModal, setReminderModal] = useState<ReminderModalState | null>(null)
+  const [hasConfiguredReminder, setHasConfiguredReminder] = useState(false)
+  const [notificationsBlocked, setNotificationsBlocked] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -97,6 +100,7 @@ function App() {
     getPushSettings(memberName)
       .then((settings) => {
         if (cancelled) return
+        setHasConfiguredReminder(settings.reminderHour !== null && settings.reminderMinute !== null)
 
         // A fresh setup.vbs run may mean the push subscription it depends on
         // went stale across the update - re-prompt even if a time was
@@ -127,6 +131,45 @@ function App() {
       cancelled = true
     }
   }, [session, justUpgraded])
+
+  // Notification permission can be revoked by the browser at any time,
+  // without the person ever opening "Reminder time" to find out - watch it
+  // live so a blocked state shows up on its own instead of only surfacing
+  // the next time someone happens to reopen that screen.
+  useEffect(() => {
+    if (!session || session.role !== 'member' || !hasConfiguredReminder) {
+      setNotificationsBlocked(false)
+      return
+    }
+
+    setNotificationsBlocked(getNotificationPermission() === 'denied')
+
+    if (!('permissions' in navigator)) return
+
+    let status: PermissionStatus | null = null
+    let cancelled = false
+
+    function handleChange() {
+      if (status) setNotificationsBlocked(status.state === 'denied')
+    }
+
+    navigator.permissions
+      .query({ name: 'notifications' as PermissionName })
+      .then((result) => {
+        if (cancelled) return
+        status = result
+        status.addEventListener('change', handleChange)
+        handleChange()
+      })
+      .catch(() => {
+        // Permissions API not supported for 'notifications' in this browser - the one-time check above still applies.
+      })
+
+    return () => {
+      cancelled = true
+      status?.removeEventListener('change', handleChange)
+    }
+  }, [session, hasConfiguredReminder])
 
   async function openReminderSettings() {
     if (!session || session.role !== 'member') return
@@ -212,6 +255,15 @@ function App() {
           )}
         </div>
       </header>
+
+      {notificationsBlocked && session.role === 'member' && (
+        <div className="notice-banner" role="alert">
+          <span>Notifications are blocked for this site — reminders won&rsquo;t be delivered.</span>
+          <button type="button" onClick={openReminderSettings}>
+            Fix now
+          </button>
+        </div>
+      )}
 
       <main id="main">
         {page === 'my-logs' && session.role === 'member' && <MyLogsPage memberName={session.memberName} />}
