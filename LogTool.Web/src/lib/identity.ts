@@ -4,34 +4,81 @@ import { matchMemberByEmail } from './memberMatch'
 import type { Session } from './session'
 
 export const IDENTITY_STORAGE_KEY = 'logtool.identity'
+const SETUP_VERSION_STORAGE_KEY = 'logtool.setupVersion'
 
-function readIdentityFromUrl(): string | null {
+function readParamsFromUrl(): { identity: string | null; setupVersion: string | null } {
   const params = new URLSearchParams(window.location.search)
   const identity = params.get('identity')
-  if (!identity) return null
-  params.delete('identity')
-  const cleanedQuery = params.toString()
-  const newUrl = window.location.pathname + (cleanedQuery ? `?${cleanedQuery}` : '') + window.location.hash
-  window.history.replaceState({}, '', newUrl)
-  return identity
+  const setupVersion = params.get('setupVersion')
+  if (identity) {
+    params.delete('identity')
+    params.delete('setupVersion')
+    const cleanedQuery = params.toString()
+    const newUrl = window.location.pathname + (cleanedQuery ? `?${cleanedQuery}` : '') + window.location.hash
+    window.history.replaceState({}, '', newUrl)
+  }
+  return { identity, setupVersion }
 }
 
 function normalizeEmail(identity: string): string {
   return identity.includes('@') ? identity : `${identity}@${COMPANY_EMAIL_DOMAIN}`
 }
 
+async function fetchRequiredSetupVersion(): Promise<string | null> {
+  try {
+    const response = await fetch('/api/setup/version')
+    if (!response.ok) return null
+    const data = (await response.json()) as { version: string }
+    return data.version
+  } catch {
+    return null
+  }
+}
+
+export interface StoredIdentityResult {
+  identity: string | null
+  /** True when a person previously completed setup, but with an older setup.vbs than the server now serves. */
+  outdated: boolean
+}
+
 /**
  * Identity supplied automatically via the setup script's `?identity=` link.
  * Persisted in localStorage (not sessionStorage) so running the script once
  * signs a person in permanently on that browser - no repeat visits needed.
+ *
+ * Every stored identity is tagged with the setup.vbs version that produced
+ * it. If the server's current version has moved on, the stored identity is
+ * treated as invalid so the person is sent back to "download setup" instead
+ * of silently running on stale certificate-trust/identity logic - without
+ * anyone having to manually clear browser storage.
  */
-export function getStoredIdentity(): string | null {
-  const fromUrl = readIdentityFromUrl()
+export async function getStoredIdentity(): Promise<StoredIdentityResult> {
+  const { identity: fromUrl, setupVersion: fromUrlVersion } = readParamsFromUrl()
+  const requiredVersion = await fetchRequiredSetupVersion()
+
   if (fromUrl) {
     localStorage.setItem(IDENTITY_STORAGE_KEY, fromUrl)
-    return fromUrl
+    localStorage.setItem(SETUP_VERSION_STORAGE_KEY, fromUrlVersion ?? requiredVersion ?? '')
+    return { identity: fromUrl, outdated: false }
   }
-  return localStorage.getItem(IDENTITY_STORAGE_KEY)
+
+  const storedIdentity = localStorage.getItem(IDENTITY_STORAGE_KEY)
+  if (!storedIdentity) {
+    return { identity: null, outdated: false }
+  }
+
+  // If the version check itself failed (offline blip, etc.), don't lock a
+  // returning person out over it - fall through and let them straight in.
+  if (requiredVersion === null) {
+    return { identity: storedIdentity, outdated: false }
+  }
+
+  const storedVersion = localStorage.getItem(SETUP_VERSION_STORAGE_KEY)
+  if (storedVersion !== requiredVersion) {
+    return { identity: null, outdated: true }
+  }
+
+  return { identity: storedIdentity, outdated: false }
 }
 
 export async function resolveSession(identity: string): Promise<Session> {

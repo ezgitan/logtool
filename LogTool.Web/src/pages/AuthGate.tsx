@@ -3,9 +3,10 @@ import { LogoMark } from '../components/LogoMark'
 interface AuthGateProps {
   loading: boolean
   error: string | null
+  outdated?: boolean
 }
 
-export function AuthGate({ loading, error }: AuthGateProps) {
+export function AuthGate({ loading, error, outdated }: AuthGateProps) {
   return (
     <div className="login-shell">
       <div className="panel login-card">
@@ -23,11 +24,14 @@ export function AuthGate({ loading, error }: AuthGateProps) {
 
         {!loading && (
           <>
-            <p className="eyebrow">FIRST TIME HERE</p>
-            <h1>Download the setup script</h1>
+            <p className="eyebrow">{outdated ? 'SETUP REQUIRED' : 'FIRST TIME HERE'}</p>
+            <h1>{outdated ? 'A newer setup is available' : 'Download the setup script'}</h1>
             <p className="login-hint">
-              Run it once to sign in and enable reminder notifications. This page will update
-              on its own once it's done — no need to reopen or refresh anything.
+              {outdated
+                ? "LogTool's setup script was updated since you last ran it. Run the new one to keep " +
+                  'signing in automatically and receiving reminders.'
+                : "Run it once to sign in and enable reminder notifications. This page will update " +
+                  "on its own once it's done — no need to reopen or refresh anything."}
             </p>
             <a className="setup-download" href="/setup.vbs">
               Download setup script

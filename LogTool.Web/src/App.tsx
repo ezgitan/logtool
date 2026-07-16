@@ -28,6 +28,7 @@ function App() {
   const [session, setSession] = useState<Session | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [authError, setAuthError] = useState<string | null>(null)
+  const [setupOutdated, setSetupOutdated] = useState(false)
   const [page, setPage] = useState<Page>('my-logs')
   const [reminderModal, setReminderModal] = useState<ReminderModalState | null>(null)
 
@@ -35,23 +36,35 @@ function App() {
     let cancelled = false
 
     function trySignIn() {
-      const stored = getStoredIdentity()
-      if (!stored) {
-        setAuthLoading(false)
-        return
-      }
+      getStoredIdentity()
+        .then(({ identity: stored, outdated }) => {
+          if (cancelled) return
+          if (outdated) {
+            setSetupOutdated(true)
+            setAuthLoading(false)
+            return
+          }
+          if (!stored) {
+            setAuthLoading(false)
+            return
+          }
 
-      resolveSession(stored)
-        .then((resolved) => {
-          if (cancelled) return
-          setSession(resolved)
-          setPage(defaultPageFor(resolved))
+          resolveSession(stored)
+            .then((resolved) => {
+              if (cancelled) return
+              setSetupOutdated(false)
+              setSession(resolved)
+              setPage(defaultPageFor(resolved))
+            })
+            .catch((error: unknown) => {
+              if (cancelled) return
+              setAuthError(error instanceof Error ? error.message : 'Could not verify your identity.')
+            })
+            .finally(() => {
+              if (!cancelled) setAuthLoading(false)
+            })
         })
-        .catch((error: unknown) => {
-          if (cancelled) return
-          setAuthError(error instanceof Error ? error.message : 'Could not verify your identity.')
-        })
-        .finally(() => {
+        .catch(() => {
           if (!cancelled) setAuthLoading(false)
         })
     }
@@ -123,7 +136,7 @@ function App() {
   }
 
   if (authLoading || !session) {
-    return <AuthGate loading={authLoading} error={authError} />
+    return <AuthGate loading={authLoading} error={authError} outdated={setupOutdated} />
   }
 
   const isAdmin = session.role === 'admin'

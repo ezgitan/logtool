@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
+using LogTool.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LogTool.Api.Controllers;
@@ -16,6 +17,14 @@ namespace LogTool.Api.Controllers;
 [Route("setup.vbs")]
 public sealed class SetupController : ControllerBase
 {
+    /// <summary>
+    /// Bump this whenever BuildScript's logic changes meaningfully. The
+    /// frontend compares this against the version a person last completed
+    /// setup with and forces a re-run of setup.vbs on mismatch - so nobody
+    /// has to be told to manually clear browser storage after an update.
+    /// </summary>
+    public const string ScriptVersion = "1";
+
     [HttpGet]
     public IActionResult Get()
     {
@@ -24,8 +33,16 @@ public sealed class SetupController : ControllerBase
         var port = Request.Host.Port ?? (Request.IsHttps ? 443 : 80);
         var certBase64 = FindCertificateBase64(port);
         var siteUrl = $"{Request.Scheme}://{Request.Host}/";
-        var bytes = Encoding.ASCII.GetBytes(BuildScript(certBase64, siteUrl));
+        var bytes = Encoding.ASCII.GetBytes(BuildScript(certBase64, siteUrl, ScriptVersion));
         return File(bytes, "application/octet-stream", "Setup LogTool.vbs");
+    }
+
+    [HttpGet("/api/setup/version")]
+    [ProducesResponseType<SetupVersionDto>(StatusCodes.Status200OK)]
+    public ActionResult<SetupVersionDto> GetVersion()
+    {
+        Response.Headers.CacheControl = "no-store";
+        return Ok(new SetupVersionDto(ScriptVersion));
     }
 
     /// <summary>
@@ -69,7 +86,7 @@ public sealed class SetupController : ControllerBase
         return match.Success ? match.Value : null;
     }
 
-    private static string BuildScript(string? certBase64, string siteUrl)
+    private static string BuildScript(string? certBase64, string siteUrl, string scriptVersion)
     {
         var sb = new StringBuilder();
         sb.AppendLine("' LogTool one-time setup. Trusts the site certificate (if needed) and");
@@ -189,7 +206,7 @@ public sealed class SetupController : ControllerBase
         sb.AppendLine("    MsgBox \"Could not determine your Windows account. Make sure this PC is signed in to the company domain.\", vbExclamation, \"LogTool\"");
         sb.AppendLine("Else");
         sb.AppendLine("    LogMsg \"SUCCESS - opening site with identity '\" & upn & \"'\"");
-        sb.AppendLine("    shell.Run siteUrl & \"?identity=\" & upn, 1, False");
+        sb.AppendLine($"    shell.Run siteUrl & \"?identity=\" & upn & \"&setupVersion={scriptVersion}\", 1, False");
         sb.AppendLine("End If");
         sb.AppendLine();
         sb.AppendLine("LogMsg \"=== Setup finished ===\"");
