@@ -1,5 +1,12 @@
 .app-shell { min-height: 100vh; }
 
+.version-badge {
+  position: fixed; bottom: 10px; right: 12px; z-index: 5;
+  font-size: 11px; color: var(--muted); opacity: .6;
+  padding: 3px 8px; border-radius: 6px; background: rgba(248, 250, 252, .7);
+  pointer-events: none;
+}
+
 .topbar {
   height: 72px; padding: 0 clamp(20px, 5vw, 72px); display: flex; align-items: center;
   border-bottom: 1px solid var(--border); background: rgba(248, 250, 252, .88);
@@ -49,6 +56,7 @@
   box-shadow: 0 8px 18px rgba(14, 116, 144, .22);
 }
 .setup-download:hover { background: var(--brand-dark); transform: translateY(-1px); }
+.setup-version-hint { margin: 10px 0 0; font-size: 11px; color: var(--muted); opacity: .7; text-align: center; }
 
 main { max-width: 1180px; margin: 0 auto; padding: 52px 28px 72px; }
 .intro { display: flex; justify-content: space-between; gap: 32px; align-items: end; margin-bottom: 30px; }

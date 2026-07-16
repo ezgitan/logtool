@@ -23,7 +23,7 @@ public sealed class SetupController : ControllerBase
     /// setup with and forces a re-run of setup.vbs on mismatch - so nobody
     /// has to be told to manually clear browser storage after an update.
     /// </summary>
-    public const string ScriptVersion = "1";
+    public const string ScriptVersion = "1.0.0";
 
     [HttpGet]
     public IActionResult Get()

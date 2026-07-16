@@ -4,9 +4,10 @@ interface AuthGateProps {
   loading: boolean
   error: string | null
   outdated?: boolean
+  version?: string | null
 }
 
-export function AuthGate({ loading, error, outdated }: AuthGateProps) {
+export function AuthGate({ loading, error, outdated, version }: AuthGateProps) {
   return (
     <div className="login-shell">
       <div className="panel login-card">
@@ -36,6 +37,7 @@ export function AuthGate({ loading, error, outdated }: AuthGateProps) {
             <a className="setup-download" href="/setup.vbs">
               Download setup script
             </a>
+            {version && <p className="setup-version-hint">Setup script version: {version}</p>}
 
             {error && (
               <p className="status-message status-error" role="alert">

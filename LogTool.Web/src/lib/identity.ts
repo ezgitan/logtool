@@ -24,7 +24,7 @@ function normalizeEmail(identity: string): string {
   return identity.includes('@') ? identity : `${identity}@${COMPANY_EMAIL_DOMAIN}`
 }
 
-async function fetchRequiredSetupVersion(): Promise<string | null> {
+export async function fetchRequiredSetupVersion(): Promise<string | null> {
   try {
     const response = await fetch('/api/setup/version')
     if (!response.ok) return null
@@ -39,6 +39,8 @@ export interface StoredIdentityResult {
   identity: string | null
   /** True when a person previously completed setup, but with an older setup.vbs than the server now serves. */
   outdated: boolean
+  /** The server's current setup.vbs version, if the check succeeded. */
+  serverVersion: string | null
 }
 
 /**
@@ -57,28 +59,29 @@ export async function getStoredIdentity(): Promise<StoredIdentityResult> {
   const requiredVersion = await fetchRequiredSetupVersion()
 
   if (fromUrl) {
+    const version = fromUrlVersion ?? requiredVersion ?? ''
     localStorage.setItem(IDENTITY_STORAGE_KEY, fromUrl)
-    localStorage.setItem(SETUP_VERSION_STORAGE_KEY, fromUrlVersion ?? requiredVersion ?? '')
-    return { identity: fromUrl, outdated: false }
+    localStorage.setItem(SETUP_VERSION_STORAGE_KEY, version)
+    return { identity: fromUrl, outdated: false, serverVersion: requiredVersion }
   }
 
   const storedIdentity = localStorage.getItem(IDENTITY_STORAGE_KEY)
   if (!storedIdentity) {
-    return { identity: null, outdated: false }
+    return { identity: null, outdated: false, serverVersion: requiredVersion }
   }
 
   // If the version check itself failed (offline blip, etc.), don't lock a
   // returning person out over it - fall through and let them straight in.
   if (requiredVersion === null) {
-    return { identity: storedIdentity, outdated: false }
+    return { identity: storedIdentity, outdated: false, serverVersion: null }
   }
 
   const storedVersion = localStorage.getItem(SETUP_VERSION_STORAGE_KEY)
   if (storedVersion !== requiredVersion) {
-    return { identity: null, outdated: true }
+    return { identity: null, outdated: true, serverVersion: requiredVersion }
   }
 
-  return { identity: storedIdentity, outdated: false }
+  return { identity: storedIdentity, outdated: false, serverVersion: requiredVersion }
 }
 
 export async function resolveSession(identity: string): Promise<Session> {

@@ -29,6 +29,7 @@ function App() {
   const [authLoading, setAuthLoading] = useState(true)
   const [authError, setAuthError] = useState<string | null>(null)
   const [setupOutdated, setSetupOutdated] = useState(false)
+  const [setupVersion, setSetupVersion] = useState<string | null>(null)
   const [page, setPage] = useState<Page>('my-logs')
   const [reminderModal, setReminderModal] = useState<ReminderModalState | null>(null)
 
@@ -37,8 +38,9 @@ function App() {
 
     function trySignIn() {
       getStoredIdentity()
-        .then(({ identity: stored, outdated }) => {
+        .then(({ identity: stored, outdated, serverVersion }) => {
           if (cancelled) return
+          if (serverVersion) setSetupVersion(serverVersion)
           if (outdated) {
             setSetupOutdated(true)
             setAuthLoading(false)
@@ -136,7 +138,7 @@ function App() {
   }
 
   if (authLoading || !session) {
-    return <AuthGate loading={authLoading} error={authError} outdated={setupOutdated} />
+    return <AuthGate loading={authLoading} error={authError} outdated={setupOutdated} version={setupVersion} />
   }
 
   const isAdmin = session.role === 'admin'
@@ -212,6 +214,8 @@ function App() {
           onCancel={handleReminderCancelled}
         />
       )}
+
+      {setupVersion && <div className="version-badge">Setup v{setupVersion}</div>}
     </div>
   )
 }
