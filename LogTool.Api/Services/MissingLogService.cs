@@ -28,13 +28,13 @@ public sealed class MissingLogService(
                 var attendanceWorksheet = schemaService.GetAttendanceWorksheet(workbook);
                 var logColumn = schemaService.FindActiveMemberColumn(logWorksheet, memberName);
                 var attendanceColumn = schemaService.FindActiveMemberColumn(attendanceWorksheet, memberName);
-                var logRows = schemaService.GetDateRows(logWorksheet);
-                var attendanceRows = schemaService.GetDateRows(attendanceWorksheet);
+                var logRows = schemaService.GetDateRowsInMonth(logWorksheet, today.Year, today.Month);
+                var attendanceRows = schemaService.GetDateRowsInMonth(attendanceWorksheet, today.Year, today.Month);
                 var missingDays = new List<MissingLogDayDto>();
 
                 foreach (var (date, logRow) in logRows.OrderBy(item => item.Key))
                 {
-                    if (date.Year != today.Year || date.Month != today.Month || date > today || IsWeekend(date))
+                    if (date > today || IsWeekend(date))
                     {
                         continue;
                     }

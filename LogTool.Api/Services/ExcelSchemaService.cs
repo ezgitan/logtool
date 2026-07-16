@@ -154,6 +154,41 @@ public sealed class ExcelSchemaService(IOptions<ExcelOptions> options)
         return rows;
     }
 
+    /// <summary>
+    /// Same idea as <see cref="GetDateRows"/> but scoped to one month, and much
+    /// cheaper on long-running sheets: date rows are always appended in
+    /// chronological order (see <see cref="EnsureDateRow"/>), so scanning
+    /// backward from the last row and stopping as soon as we pass the start
+    /// of the target month reads only that month's rows instead of the
+    /// entire history of the workbook.
+    /// </summary>
+    public IReadOnlyDictionary<DateOnly, int> GetDateRowsInMonth(IXLWorksheet worksheet, int year, int month)
+    {
+        var lastRow = worksheet.Column(_options.DateColumn).LastCellUsed()?.Address.RowNumber
+            ?? _options.HeaderRow;
+        var rows = new Dictionary<DateOnly, int>();
+
+        for (var row = lastRow; row > _options.HeaderRow; row--)
+        {
+            if (!TryReadDate(worksheet.Cell(row, _options.DateColumn), out var date))
+            {
+                continue;
+            }
+
+            if (date.Year < year || (date.Year == year && date.Month < month))
+            {
+                break;
+            }
+
+            if (date.Year == year && date.Month == month)
+            {
+                rows[date] = row;
+            }
+        }
+
+        return rows;
+    }
+
     public int EnsureDateRow(IXLWorksheet worksheet, DateOnly date)
     {
         var existingRows = GetDateRows(worksheet);
