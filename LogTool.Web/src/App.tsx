@@ -30,6 +30,7 @@ function App() {
   const [authError, setAuthError] = useState<string | null>(null)
   const [setupOutdated, setSetupOutdated] = useState(false)
   const [setupVersion, setSetupVersion] = useState<string | null>(null)
+  const [justUpgraded, setJustUpgraded] = useState(false)
   const [page, setPage] = useState<Page>('my-logs')
   const [reminderModal, setReminderModal] = useState<ReminderModalState | null>(null)
 
@@ -38,9 +39,10 @@ function App() {
 
     function trySignIn() {
       getStoredIdentity()
-        .then(({ identity: stored, outdated, serverVersion }) => {
+        .then(({ identity: stored, outdated, serverVersion, justCompletedNewVersion }) => {
           if (cancelled) return
           if (serverVersion) setSetupVersion(serverVersion)
+          if (justCompletedNewVersion) setJustUpgraded(true)
           if (outdated) {
             setSetupOutdated(true)
             setAuthLoading(false)
@@ -95,6 +97,20 @@ function App() {
     getPushSettings(memberName)
       .then((settings) => {
         if (cancelled) return
+
+        // A fresh setup.vbs run may mean the push subscription it depends on
+        // went stale across the update - re-prompt even if a time was
+        // already configured, so notifications get re-registered.
+        if (justUpgraded) {
+          setReminderModal({
+            mode: 'first-run',
+            hour: settings.reminderHour ?? 17,
+            minute: settings.reminderMinute ?? 0,
+          })
+          setJustUpgraded(false)
+          return
+        }
+
         if (settings.reminderHour !== null && settings.reminderMinute !== null) {
           return
         }
@@ -110,7 +126,7 @@ function App() {
     return () => {
       cancelled = true
     }
-  }, [session])
+  }, [session, justUpgraded])
 
   async function openReminderSettings() {
     if (!session || session.role !== 'member') return

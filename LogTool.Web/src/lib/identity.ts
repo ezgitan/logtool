@@ -41,6 +41,14 @@ export interface StoredIdentityResult {
   outdated: boolean
   /** The server's current setup.vbs version, if the check succeeded. */
   serverVersion: string | null
+  /**
+   * True exactly once, right after a person finishes running a *different*
+   * setup.vbs version than the one they'd completed before (not the very
+   * first time ever). Used to re-prompt for the reminder time even if one
+   * was already configured, since the push subscription it depends on may
+   * have gone stale across the update.
+   */
+  justCompletedNewVersion: boolean
 }
 
 /**
@@ -59,29 +67,31 @@ export async function getStoredIdentity(): Promise<StoredIdentityResult> {
   const requiredVersion = await fetchRequiredSetupVersion()
 
   if (fromUrl) {
+    const previousVersion = localStorage.getItem(SETUP_VERSION_STORAGE_KEY)
     const version = fromUrlVersion ?? requiredVersion ?? ''
+    const justCompletedNewVersion = previousVersion !== null && previousVersion !== version
     localStorage.setItem(IDENTITY_STORAGE_KEY, fromUrl)
     localStorage.setItem(SETUP_VERSION_STORAGE_KEY, version)
-    return { identity: fromUrl, outdated: false, serverVersion: requiredVersion }
+    return { identity: fromUrl, outdated: false, serverVersion: requiredVersion, justCompletedNewVersion }
   }
 
   const storedIdentity = localStorage.getItem(IDENTITY_STORAGE_KEY)
   if (!storedIdentity) {
-    return { identity: null, outdated: false, serverVersion: requiredVersion }
+    return { identity: null, outdated: false, serverVersion: requiredVersion, justCompletedNewVersion: false }
   }
 
   // If the version check itself failed (offline blip, etc.), don't lock a
   // returning person out over it - fall through and let them straight in.
   if (requiredVersion === null) {
-    return { identity: storedIdentity, outdated: false, serverVersion: null }
+    return { identity: storedIdentity, outdated: false, serverVersion: null, justCompletedNewVersion: false }
   }
 
   const storedVersion = localStorage.getItem(SETUP_VERSION_STORAGE_KEY)
   if (storedVersion !== requiredVersion) {
-    return { identity: null, outdated: true, serverVersion: requiredVersion }
+    return { identity: null, outdated: true, serverVersion: requiredVersion, justCompletedNewVersion: false }
   }
 
-  return { identity: storedIdentity, outdated: false, serverVersion: requiredVersion }
+  return { identity: storedIdentity, outdated: false, serverVersion: requiredVersion, justCompletedNewVersion: false }
 }
 
 export async function resolveSession(identity: string): Promise<Session> {
