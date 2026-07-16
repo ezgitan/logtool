@@ -9,4 +9,5 @@ public sealed record MonthlyReportEntryDto(
     int TotalWorkedDays,
     int TotalWorkedHours,
     int TotalLeaveDays,
-    int NotWorkingDays);
+    int NotWorkingDays,
+    IReadOnlyList<DateOnly> RemoteDates);

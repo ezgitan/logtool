@@ -33,6 +33,7 @@ export interface MonthlyReportEntry {
   totalWorkedHours: number
   totalLeaveDays: number
   notWorkingDays: number
+  remoteDates: string[]
 }
 
 export interface MonthlyReport {

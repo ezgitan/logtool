@@ -195,6 +195,14 @@ button[type='submit']:disabled { cursor: not-allowed; opacity: .5; box-shadow: n
 .report-cell { color: var(--ink); font-variant-numeric: tabular-nums; }
 .report-footer { margin: 16px 4px 0; color: var(--muted); font-size: 13px; }
 
+.remote-day-toggle {
+  all: unset; cursor: pointer; color: var(--brand); font-weight: 800;
+  font-variant-numeric: tabular-nums; text-decoration: underline; text-underline-offset: 2px;
+}
+.remote-day-toggle:hover { color: var(--brand-dark); }
+.remote-dates-row td { text-align: left; background: #f8fafc; font-size: 13px; color: var(--ink); padding-top: 10px; padding-bottom: 10px; }
+.remote-dates-label { font-weight: 700; color: var(--muted); }
+
 .attendance-badge { display: inline-flex; align-items: center; padding: 5px 11px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #f1f5f9; color: #475569; }
 .attendance-office { background: var(--brand-soft); color: var(--brand-dark); }
 .attendance-home-office { background: #eef2ff; color: #4338ca; }

@@ -63,8 +63,8 @@ public sealed class MonthlyReportService(
         int workingDays)
     {
         var officeDays = 0;
-        var remoteDays = 0;
         var leaveDays = 0;
+        var remoteDates = new List<DateOnly>();
 
         foreach (var date in weekdays)
         {
@@ -80,7 +80,7 @@ public sealed class MonthlyReportService(
             }
             else if (string.Equals(value, "Home Office", StringComparison.OrdinalIgnoreCase))
             {
-                remoteDays++;
+                remoteDates.Add(date);
             }
             else if (LeaveAttendance.Contains(value))
             {
@@ -88,6 +88,7 @@ public sealed class MonthlyReportService(
             }
         }
 
+        var remoteDays = remoteDates.Count;
         var totalWorkedDays = officeDays + remoteDays;
 
         return new MonthlyReportEntryDto(
@@ -99,7 +100,8 @@ public sealed class MonthlyReportService(
             totalWorkedDays,
             totalWorkedDays * HoursPerDay,
             leaveDays,
-            workingDays - totalWorkedDays);
+            workingDays - totalWorkedDays,
+            remoteDates);
     }
 
     private static Dictionary<string, string?> ReadDayAttendance(

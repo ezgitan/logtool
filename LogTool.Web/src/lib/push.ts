@@ -33,6 +33,34 @@ function withTimeout<T>(promise: Promise<T>, ms: number, timeoutMessage: string)
   })
 }
 
+/**
+ * PushManager.subscribe() can transiently throw "AbortError: Registration
+ * failed - push service error" when hit with back-to-back subscribe calls
+ * (e.g. unsubscribe immediately followed by a fresh subscribe, or someone
+ * changing their reminder time again right after their first setup) - the
+ * browser's push service (FCM etc.) briefly rate-limits itself. Retrying
+ * after a short pause resolves it without the person having to notice.
+ */
+async function subscribeWithRetry(
+  pushManager: PushManager,
+  options: PushSubscriptionOptionsInit,
+  attempts = 3,
+): Promise<PushSubscription> {
+  let lastError: unknown
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      return await pushManager.subscribe(options)
+    } catch (error) {
+      lastError = error
+      console.error(`Push subscribe attempt ${attempt}/${attempts} failed`, error)
+      if (attempt < attempts) {
+        await new Promise((resolve) => setTimeout(resolve, 700 * attempt))
+      }
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error(String(lastError))
+}
+
 export function getNotificationPermission(): NotificationPermission | null {
   if (!isPushSupported()) return null
   return Notification.permission
@@ -78,7 +106,7 @@ export async function setupReminderPush(memberName: string, hour: number, minute
   if (existing) {
     await existing.unsubscribe()
   }
-  const subscription = await registration.pushManager.subscribe({
+  const subscription = await subscribeWithRetry(registration.pushManager, {
     userVisibleOnly: true,
     applicationServerKey: urlBase64ToUint8Array(publicKey),
   })

@@ -341,7 +341,7 @@ function App() {
         />
       )}
 
-      {setupVersion && <div className="version-badge">Setup v{setupVersion}</div>}
+      {setupVersion && <div className="version-badge">v{setupVersion}</div>}
     </div>
   )
 }
