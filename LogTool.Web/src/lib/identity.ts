@@ -50,6 +50,14 @@ export interface StoredIdentityResult {
    * have gone stale across the update.
    */
   justCompletedNewVersion: boolean
+  /**
+   * True when the identity was just delivered via the `?identity=` link
+   * (i.e. this is the tab the setup script opened), as opposed to a
+   * returning visit reading it back out of storage. Used to close that tab
+   * automatically once signed in, since the original "download setup" tab
+   * updates itself the same moment via the storage event.
+   */
+  deliveredViaUrl: boolean
 }
 
 /**
@@ -73,26 +81,56 @@ export async function getStoredIdentity(): Promise<StoredIdentityResult> {
     const justCompletedNewVersion = previousVersion !== null && previousVersion !== version
     localStorage.setItem(IDENTITY_STORAGE_KEY, fromUrl)
     localStorage.setItem(SETUP_VERSION_STORAGE_KEY, version)
-    return { identity: fromUrl, outdated: false, serverVersion: requiredVersion, justCompletedNewVersion }
+    return {
+      identity: fromUrl,
+      outdated: false,
+      serverVersion: requiredVersion,
+      justCompletedNewVersion,
+      deliveredViaUrl: true,
+    }
   }
 
   const storedIdentity = localStorage.getItem(IDENTITY_STORAGE_KEY)
   if (!storedIdentity) {
-    return { identity: null, outdated: false, serverVersion: requiredVersion, justCompletedNewVersion: false }
+    return {
+      identity: null,
+      outdated: false,
+      serverVersion: requiredVersion,
+      justCompletedNewVersion: false,
+      deliveredViaUrl: false,
+    }
   }
 
   // If the version check itself failed (offline blip, etc.), don't lock a
   // returning person out over it - fall through and let them straight in.
   if (requiredVersion === null) {
-    return { identity: storedIdentity, outdated: false, serverVersion: null, justCompletedNewVersion: false }
+    return {
+      identity: storedIdentity,
+      outdated: false,
+      serverVersion: null,
+      justCompletedNewVersion: false,
+      deliveredViaUrl: false,
+    }
   }
 
   const storedVersion = localStorage.getItem(SETUP_VERSION_STORAGE_KEY)
   if (storedVersion !== requiredVersion) {
-    return { identity: null, outdated: true, serverVersion: requiredVersion, justCompletedNewVersion: false }
+    return {
+      identity: null,
+      outdated: true,
+      serverVersion: requiredVersion,
+      justCompletedNewVersion: false,
+      deliveredViaUrl: false,
+    }
   }
 
-  return { identity: storedIdentity, outdated: false, serverVersion: requiredVersion, justCompletedNewVersion: false }
+  return {
+    identity: storedIdentity,
+    outdated: false,
+    serverVersion: requiredVersion,
+    justCompletedNewVersion: false,
+    deliveredViaUrl: false,
+  }
 }
 
 export async function resolveSession(identity: string): Promise<Session> {
