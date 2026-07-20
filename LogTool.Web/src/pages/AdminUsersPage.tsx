@@ -31,24 +31,12 @@ export function AdminUsersPage() {
   const [notifySending, setNotifySending] = useState(false)
 
   const [excelPath, setExcelPath] = useState<string | null>(null)
-  const [excelPathCopied, setExcelPathCopied] = useState(false)
 
   useEffect(() => {
     getExcelLink()
       .then((result) => setExcelPath(result.path))
       .catch((error: unknown) => console.error('Could not load Excel path', error))
   }, [])
-
-  async function handleCopyExcelPath() {
-    if (!excelPath) return
-    try {
-      await navigator.clipboard.writeText(excelPath)
-      setExcelPathCopied(true)
-      setTimeout(() => setExcelPathCopied(false), 2000)
-    } catch (error) {
-      console.error('Could not copy Excel path', error)
-    }
-  }
 
   const refresh = useCallback(async () => {
     setLoading(true)
@@ -163,19 +151,9 @@ export function AdminUsersPage() {
           <h1>User Management</h1>
         </div>
         {excelPath && (
-          <div className="excel-path-row">
-            <a className="excel-open-button" href="logtoolexcel:open">
-              Open Excel file
-            </a>
-            <button
-              type="button"
-              className="excel-path-copy"
-              onClick={handleCopyExcelPath}
-              title={excelPath}
-            >
-              {excelPathCopied ? 'Copied!' : 'Copy path'}
-            </button>
-          </div>
+          <a className="excel-open-button" href="logtoolexcel:open">
+            Open Excel file
+          </a>
         )}
       </section>
 

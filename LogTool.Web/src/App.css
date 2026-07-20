@@ -103,9 +103,9 @@
 .time-select-row { display: flex; align-items: center; gap: 8px; }
 .time-select-row select { width: 84px; }
 .time-select-separator { color: var(--muted); font-weight: 800; }
-.reminder-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+.reminder-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 24px; }
 .reminder-actions .logout-button { padding: 12px 18px; }
-.reminder-actions button[type='submit'], .reminder-actions button.button-secondary { margin: 0; width: auto; }
+form .reminder-actions button[type='submit'], form .reminder-actions button.button-secondary { margin: 0; width: auto; }
 
 .login-shell { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
 .login-card { width: min(100%, 400px); padding: 32px; display: grid; gap: 4px; }
@@ -133,7 +133,6 @@ main { max-width: 1180px; margin: 0 auto; padding: 52px 28px 72px; }
 .intro > div > p:last-child { max-width: 660px; margin: 14px 0 0; color: var(--muted); }
 .today-card { min-width: 132px; padding: 15px 18px; border: 1px solid var(--border); background: white; border-radius: 14px; box-shadow: var(--shadow-sm); }
 
-.excel-path-row { display: inline-flex; align-items: center; gap: 8px; height: fit-content; }
 .excel-open-button {
   display: inline-flex; align-items: center; height: fit-content;
   padding: 12px 18px; border: 1px solid var(--border); border-radius: 12px;
@@ -141,11 +140,6 @@ main { max-width: 1180px; margin: 0 auto; padding: 52px 28px 72px; }
   text-decoration: none; box-shadow: var(--shadow-sm);
 }
 .excel-open-button:hover { border-color: var(--brand); background: var(--brand-soft); }
-.excel-path-copy {
-  flex-shrink: 0; border: 1px solid var(--border); background: white; color: var(--muted);
-  border-radius: 9px; padding: 8px 12px; font-size: 12px; font-weight: 700; cursor: pointer;
-}
-.excel-path-copy:hover { border-color: var(--brand); background: var(--brand-soft); color: var(--brand-dark); }
 .today-card span { display: block; color: var(--muted); font-size: 12px; }
 .today-card strong { color: var(--ink); font-size: 16px; }
 .today-card-button { font: inherit; text-align: left; cursor: pointer; transition: border-color .15s, transform .15s; }
@@ -216,6 +210,10 @@ button[type='submit']:disabled { cursor: not-allowed; opacity: .5; box-shadow: n
 button.button-secondary { min-width: 154px; border: 0; border-radius: 10px; padding: 12px 18px; background: #64748b; color: white; font-weight: 780; cursor: pointer; }
 button.button-secondary:hover:not(:disabled) { background: #475569; transform: translateY(-1px); }
 button.button-secondary:disabled { cursor: not-allowed; opacity: .5; }
+
+button.button-success { min-width: 154px; border: 1px solid #86efac; border-radius: 10px; padding: 11px 18px; background: #dcfce7; color: #15803d; font-weight: 780; cursor: pointer; }
+button.button-success:hover:not(:disabled) { background: #bbf7d0; border-color: #4ade80; }
+button.button-success:disabled { cursor: not-allowed; opacity: .5; }
 .loading-dot { color: var(--brand); font-size: 12px; font-weight: 700; }
 .loading-dot::before { content: ''; display: inline-block; width: 7px; height: 7px; margin-right: 7px; background: currentColor; border-radius: 50%; animation: pulse 1s infinite alternate; }
 

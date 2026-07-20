@@ -51,13 +51,16 @@ function App() {
   const [reminderModal, setReminderModal] = useState<ReminderModalState | null>(null)
   const [hasConfiguredReminder, setHasConfiguredReminder] = useState(false)
   const [notificationsBlocked, setNotificationsBlocked] = useState(false)
+  const [closingDeliveryTab, setClosingDeliveryTab] = useState(false)
+  const [showContinueFallback, setShowContinueFallback] = useState(false)
+  const [pendingSession, setPendingSession] = useState<Session | null>(null)
 
   useEffect(() => {
     let cancelled = false
 
     function trySignIn() {
       getStoredIdentity()
-        .then(({ identity: stored, outdated, serverVersion, justCompletedNewVersion }) => {
+        .then(({ identity: stored, outdated, serverVersion, justCompletedNewVersion, deliveredViaUrl }) => {
           if (cancelled) return
           if (serverVersion) setSetupVersion(serverVersion)
           if (justCompletedNewVersion) setJustUpgraded(true)
@@ -75,6 +78,25 @@ function App() {
             .then((resolved) => {
               if (cancelled) return
               setSetupOutdated(false)
+
+              // This tab is the one setup.vbs opened just to deliver the
+              // identity - the "download setup" tab picks it up and updates
+              // itself via the storage event below, so this one tries to
+              // close itself instead of showing a redundant second copy of
+              // the app. Browsers only allow closing script-opened tabs, so
+              // this is best-effort: if it's blocked, the fallback screen
+              // below just tells the person they can close it themselves.
+              if (deliveredViaUrl) {
+                setClosingDeliveryTab(true)
+                setPendingSession(resolved)
+                setTimeout(() => window.close(), 400)
+                // If we're still here after a moment, closing was blocked
+                // (e.g. no other tab opened this one) - offer a way forward
+                // instead of leaving the person stuck on a dead-end screen.
+                setTimeout(() => setShowContinueFallback(true), 1500)
+                return
+              }
+
               setSession(resolved)
               setPage(resolveInitialPage(resolved))
             })
@@ -219,6 +241,37 @@ function App() {
       markReminderPromptDismissed(session.memberName)
     }
     setReminderModal(null)
+  }
+
+  function continueInThisTab() {
+    if (!pendingSession) return
+    setSession(pendingSession)
+    setPage(resolveInitialPage(pendingSession))
+    setClosingDeliveryTab(false)
+  }
+
+  if (closingDeliveryTab) {
+    return (
+      <div className="login-shell">
+        <div className="panel login-card">
+          <div className="brand login-brand">
+            <span className="brand-mark"><LogoMark /></span>
+            <span>LogTool</span>
+          </div>
+          <p className="eyebrow">SIGNED IN</p>
+          <h1>All set</h1>
+          <p className="login-hint">
+            You&rsquo;re signed in. This tab should close on its own — if it doesn&rsquo;t, you can close
+            it and continue on the other tab.
+          </p>
+          {showContinueFallback && (
+            <button type="button" onClick={continueInThisTab}>
+              Continue in this tab
+            </button>
+          )}
+        </div>
+      </div>
+    )
   }
 
   if (authLoading || !session) {
