@@ -217,8 +217,11 @@ button[type='submit']:disabled { cursor: not-allowed; opacity: .5; box-shadow: n
 }
 .member-name-toggle:hover { color: var(--brand-dark); }
 
-.member-range-card { width: min(100%, 560px); padding: 32px; display: grid; gap: 4px; max-height: 88vh; overflow-y: auto; }
+.member-range-card { width: min(100%, 920px); padding: 32px; display: grid; gap: 4px; max-height: 88vh; overflow-y: auto; }
 .member-range-card h2 { margin: 0 0 14px; font-size: 22px; letter-spacing: -.025em; color: var(--ink); }
+
+.member-range-layout { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 28px; align-items: start; margin-top: 8px; }
+.member-range-side { display: grid; gap: 4px; }
 
 .range-picker-row { display: flex; gap: 16px; margin-bottom: 8px; }
 .range-picker-row label { flex: 1; }
@@ -230,12 +233,16 @@ button[type='submit']:disabled { cursor: not-allowed; opacity: .5; box-shadow: n
 .range-summary-item strong { display: block; font-size: 24px; color: var(--brand); letter-spacing: -.02em; }
 .range-summary-item span { font-size: 12px; color: var(--muted); font-weight: 650; }
 
-.attendance-breakdown-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 13px; }
+.attendance-breakdown-table { width: 100%; border-collapse: collapse; margin-bottom: 0; font-size: 13px; }
 .attendance-breakdown-table th { text-align: left; color: var(--muted); font-weight: 650; padding: 6px 4px; border-bottom: 1px solid var(--border); }
 .attendance-breakdown-table td { padding: 8px 4px; border-bottom: 1px solid var(--border); color: var(--ink); }
 .attendance-breakdown-table td:last-child { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
 
-.range-log-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; max-height: 320px; overflow-y: auto; }
+.range-log-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; max-height: 480px; overflow-y: auto; }
+
+@media (max-width: 720px) {
+  .member-range-layout { grid-template-columns: 1fr; }
+}
 .range-log-item {
   display: grid; grid-template-columns: 90px auto 1fr; align-items: start; gap: 12px;
   padding: 10px 14px; border-radius: 10px; background: #f8fafc; border: 1px solid var(--border); font-size: 13px;

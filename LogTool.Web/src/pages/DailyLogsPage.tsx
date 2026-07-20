@@ -5,6 +5,12 @@ import { StatusMessage } from '../components/StatusMessage'
 import type { DailyLogEntry } from '../types/log'
 
 const today = new Date().toISOString().slice(0, 10)
+const SELECTED_DATE_STORAGE_KEY = 'logtool.dailyLogsDate'
+
+function getInitialDate() {
+  const stored = localStorage.getItem(SELECTED_DATE_STORAGE_KEY)
+  return stored && stored <= today ? stored : today
+}
 
 const dateFormatter = new Intl.DateTimeFormat('en-GB', {
   weekday: 'long',
@@ -24,13 +30,14 @@ function getErrorMessage(error: unknown) {
 }
 
 export function DailyLogsPage() {
-  const [date, setDate] = useState(today)
+  const [date, setDate] = useState(getInitialDate)
   const [entries, setEntries] = useState<DailyLogEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!date) return
+    localStorage.setItem(SELECTED_DATE_STORAGE_KEY, date)
     setLoading(true)
     setError(null)
     getDailyLogs(date)

@@ -270,62 +270,68 @@ export function MonthlyReportPage() {
             <p className="eyebrow">MEMBER LOGS</p>
             <h2>{selectedMember}</h2>
 
-            <div className="range-picker-row">
-              <label>
-                From
-                <input
-                  type="date"
-                  value={rangeStart}
-                  max={rangeEnd || undefined}
-                  onChange={(event) => setRangeStart(event.target.value)}
-                />
-              </label>
-              <label>
-                To
-                <input
-                  type="date"
-                  value={rangeEnd}
-                  min={rangeStart || undefined}
-                  onChange={(event) => setRangeEnd(event.target.value)}
-                />
-              </label>
-            </div>
-
             {rangeError && <StatusMessage tone="error">{rangeError}</StatusMessage>}
             {rangeLoading && <p className="empty-state">Loading…</p>}
 
-            {!rangeLoading && !rangeError && rangeEntries && (
-              <>
-                <div className="range-summary">
-                  <div className="range-summary-item">
-                    <strong>{totalWorkedDays}</strong>
-                    <span>Total Worked Days</span>
-                  </div>
-                  <div className="range-summary-item">
-                    <strong>{totalLeaveDays}</strong>
-                    <span>Total Leave Days</span>
-                  </div>
+            <div className="member-range-layout">
+              <div className="member-range-side">
+                <div className="range-picker-row">
+                  <label>
+                    From
+                    <input
+                      type="date"
+                      value={rangeStart}
+                      max={rangeEnd || undefined}
+                      onChange={(event) => setRangeStart(event.target.value)}
+                    />
+                  </label>
+                  <label>
+                    To
+                    <input
+                      type="date"
+                      value={rangeEnd}
+                      min={rangeStart || undefined}
+                      onChange={(event) => setRangeEnd(event.target.value)}
+                    />
+                  </label>
                 </div>
 
-                {Object.keys(breakdown).length > 0 && (
-                  <table className="attendance-breakdown-table">
-                    <thead>
-                      <tr>
-                        <th scope="col">Attendance Type</th>
-                        <th scope="col">Days</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {Object.entries(breakdown).map(([type, count]) => (
-                        <tr key={type}>
-                          <td>{type}</td>
-                          <td>{count}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
+                {!rangeLoading && !rangeError && rangeEntries && (
+                  <>
+                    <div className="range-summary">
+                      <div className="range-summary-item">
+                        <strong>{totalWorkedDays}</strong>
+                        <span>Total Worked Days</span>
+                      </div>
+                      <div className="range-summary-item">
+                        <strong>{totalLeaveDays}</strong>
+                        <span>Total Leave Days</span>
+                      </div>
+                    </div>
 
+                    {Object.keys(breakdown).length > 0 && (
+                      <table className="attendance-breakdown-table">
+                        <thead>
+                          <tr>
+                            <th scope="col">Attendance Type</th>
+                            <th scope="col">Days</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {Object.entries(breakdown).map(([type, count]) => (
+                            <tr key={type}>
+                              <td>{type}</td>
+                              <td>{count}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {!rangeLoading && !rangeError && rangeEntries && (
                 <ul className="range-log-list">
                   {rangeEntries.length === 0 && <li className="empty-state">No records in this range.</li>}
                   {rangeEntries.map((entry) => (
@@ -344,8 +350,8 @@ export function MonthlyReportPage() {
                     </li>
                   ))}
                 </ul>
-              </>
-            )}
+              )}
+            </div>
 
             <div className="reminder-actions">
               <button type="button" onClick={closeMemberRange}>
