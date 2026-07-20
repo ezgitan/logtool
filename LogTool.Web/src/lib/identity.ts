@@ -4,7 +4,7 @@ import { matchMemberByEmail } from './memberMatch'
 import type { Session } from './session'
 
 export const IDENTITY_STORAGE_KEY = 'logtool.identity'
-const SETUP_VERSION_STORAGE_KEY = 'logtool.setupVersion'
+export const SETUP_VERSION_STORAGE_KEY = 'logtool.setupVersion'
 
 function readParamsFromUrl(): { identity: string | null; setupVersion: string | null } {
   const params = new URLSearchParams(window.location.search)

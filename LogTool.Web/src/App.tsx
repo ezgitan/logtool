@@ -4,7 +4,7 @@ import { LogoMark } from './components/LogoMark'
 import { NotificationsBell } from './components/NotificationsBell'
 import { getNotificationPermission } from './lib/push'
 import { hasDismissedReminderPrompt, markReminderPromptDismissed } from './lib/reminderPrompt'
-import { getStoredIdentity, IDENTITY_STORAGE_KEY, resolveSession } from './lib/identity'
+import { getStoredIdentity, IDENTITY_STORAGE_KEY, resolveSession, SETUP_VERSION_STORAGE_KEY } from './lib/identity'
 import type { Session } from './lib/session'
 import { AdminUsersPage } from './pages/AdminUsersPage'
 import { AttendancePage } from './pages/AttendancePage'
@@ -138,9 +138,15 @@ function App() {
     // The setup script opens a separate tab to deliver the identity. Once
     // that tab stores it, pick it up here via the storage event instead of
     // making the user open yet another tab for the page they started on.
+    // The delivery tab writes identity and setup-version as two separate
+    // localStorage calls, which fire two separate storage events here - re-
+    // check on either one (not just the identity key) so a version-only
+    // event never gets silently ignored.
     function handleStorageChange(event: StorageEvent) {
-      console.log('[LogTool auth] storage event received:', event.key, '- match:', event.key === IDENTITY_STORAGE_KEY)
-      if (event.key === IDENTITY_STORAGE_KEY) trySignIn('storage event')
+      console.log('[LogTool auth] storage event received:', event.key)
+      if (event.key === IDENTITY_STORAGE_KEY || event.key === SETUP_VERSION_STORAGE_KEY) {
+        trySignIn('storage event')
+      }
     }
     window.addEventListener('storage', handleStorageChange)
     console.log('[LogTool auth] storage event listener attached')
