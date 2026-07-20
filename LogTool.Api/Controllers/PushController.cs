@@ -68,8 +68,8 @@ public sealed class PushController(
             return BadRequest(new ApiErrorDto("invalid_message", "A message is required."));
         }
 
-        var sentCount = await adminNotificationService.SendToAllAsync(request.Message.Trim(), cancellationToken);
-        return Ok(new SendNotificationResultDto(sentCount));
+        var recipientCount = await adminNotificationService.SendToAllAsync(request.Message.Trim(), cancellationToken);
+        return Ok(new SendNotificationResultDto(recipientCount));
     }
 
     [HttpPost("notify/{memberName}")]
@@ -84,7 +84,7 @@ public sealed class PushController(
             return BadRequest(new ApiErrorDto("invalid_message", "A message is required."));
         }
 
-        var sentCount = await adminNotificationService.SendToMemberAsync(memberName, request.Message.Trim(), cancellationToken);
-        return Ok(new SendNotificationResultDto(sentCount));
+        var recipientCount = await adminNotificationService.SendToMemberAsync(memberName, request.Message.Trim(), cancellationToken);
+        return Ok(new SendNotificationResultDto(recipientCount));
     }
 }

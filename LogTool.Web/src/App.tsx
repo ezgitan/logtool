@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getPushSettings } from './api/pushApi'
 import { LogoMark } from './components/LogoMark'
+import { NotificationsBell } from './components/NotificationsBell'
 import { getNotificationPermission } from './lib/push'
 import { hasDismissedReminderPrompt, markReminderPromptDismissed } from './lib/reminderPrompt'
 import { getStoredIdentity, IDENTITY_STORAGE_KEY, resolveSession } from './lib/identity'
@@ -331,6 +332,7 @@ function App() {
           )}
         </nav>
         <div className="session-actions">
+          {session.role === 'member' && <NotificationsBell memberName={session.memberName} />}
           <span className="user-badge" title={session.email}>
             {badgeLabel}
           </span>

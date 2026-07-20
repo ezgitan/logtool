@@ -37,6 +37,7 @@ public sealed class ApiExceptionMiddleware(
         MemberNotFoundException or DateNotFoundException or WorksheetNotFoundException or ExcelFileNotFoundException
             => StatusCodes.Status404NotFound,
         InactiveMemberException or LogAlreadySubmittedException or MemberAlreadyExistsException
+            or BankHolidayLockedException
             => StatusCodes.Status409Conflict,
         ExcelFileLockedException => StatusCodes.Status423Locked,
         InvalidAttendanceException => StatusCodes.Status400BadRequest,

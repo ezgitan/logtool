@@ -6,23 +6,34 @@ namespace LogTool.Api.Services;
 
 public sealed class AdminNotificationService(
     PushSubscriptionStore store,
+    NotificationStore notificationStore,
+    MemberService memberService,
     VapidKeyProvider vapidKeyProvider,
+    TimeProvider timeProvider,
     ILogger<AdminNotificationService> logger)
 {
-    public Task<int> SendToAllAsync(string message, CancellationToken cancellationToken) =>
-        SendAsync(null, message, cancellationToken);
+    public async Task<int> SendToAllAsync(string message, CancellationToken cancellationToken)
+    {
+        var activeMembers = await memberService.GetActiveMembersAsync(cancellationToken);
+        var memberNames = activeMembers.Select(member => member.Name).ToList();
+        await notificationStore.AddAsync(memberNames, message, timeProvider.GetUtcNow(), cancellationToken);
+        return await SendPushAsync(null, message, cancellationToken);
+    }
 
-    public Task<int> SendToMemberAsync(string memberName, string message, CancellationToken cancellationToken) =>
-        SendAsync(memberName, message, cancellationToken);
+    public async Task<int> SendToMemberAsync(string memberName, string message, CancellationToken cancellationToken)
+    {
+        await notificationStore.AddAsync([memberName], message, timeProvider.GetUtcNow(), cancellationToken);
+        return await SendPushAsync(memberName, message, cancellationToken);
+    }
 
-    private async Task<int> SendAsync(string? onlyMemberName, string message, CancellationToken cancellationToken)
+    private async Task<int> SendPushAsync(string? onlyMemberName, string message, CancellationToken cancellationToken)
     {
         var members = await store.GetAllAsync(cancellationToken);
         using var webPushClient = new WebPushClient();
         var vapidDetails = new VapidDetails(vapidKeyProvider.Subject, vapidKeyProvider.PublicKey, vapidKeyProvider.PrivateKey);
         var payload = JsonSerializer.Serialize(new { title = "Message from Admin", body = message });
 
-        var sentCount = 0;
+        var reachedMembers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var (memberName, settings) in members)
         {
             if (onlyMemberName is not null && !string.Equals(memberName, onlyMemberName, StringComparison.OrdinalIgnoreCase))
@@ -36,7 +47,7 @@ public sealed class AdminNotificationService(
                 try
                 {
                     await webPushClient.SendNotificationAsync(pushSubscription, payload, vapidDetails, cancellationToken);
-                    sentCount++;
+                    reachedMembers.Add(memberName);
                     logger.LogInformation("Admin notification sent to {MemberName}", memberName);
                 }
                 catch (WebPushException exception) when (
@@ -54,6 +65,6 @@ public sealed class AdminNotificationService(
             }
         }
 
-        return sentCount;
+        return reachedMembers.Count;
     }
 }

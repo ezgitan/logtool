@@ -19,6 +19,7 @@ builder.Services.AddScoped<LogTool.Api.Services.MonthlyReportService>();
 builder.Services.AddScoped<LogTool.Api.Services.AttendanceGridService>();
 builder.Services.AddSingleton<LogTool.Api.Services.VapidKeyProvider>();
 builder.Services.AddSingleton<LogTool.Api.Services.PushSubscriptionStore>();
+builder.Services.AddSingleton<LogTool.Api.Services.NotificationStore>();
 builder.Services.AddScoped<LogTool.Api.Services.AdminNotificationService>();
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<LogTool.Api.Services.HolidayService>();

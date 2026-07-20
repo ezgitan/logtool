@@ -1,5 +1,10 @@
 import { apiRequest } from './client'
-import type { PushSettings, RegisterPushSubscriptionRequest, SendNotificationResult } from '../types/log'
+import type {
+  AppNotification,
+  PushSettings,
+  RegisterPushSubscriptionRequest,
+  SendNotificationResult,
+} from '../types/log'
 
 export const getPushPublicKey = () => apiRequest<{ publicKey: string }>('/api/push/public-key')
 
@@ -22,4 +27,12 @@ export const notifyMember = (memberName: string, message: string) =>
   apiRequest<SendNotificationResult>(`/api/push/notify/${encodeURIComponent(memberName)}`, {
     method: 'POST',
     body: JSON.stringify({ message }),
+  })
+
+export const getNotifications = (memberName: string) =>
+  apiRequest<AppNotification[]>(`/api/notifications?memberName=${encodeURIComponent(memberName)}`)
+
+export const markNotificationsRead = (memberName: string) =>
+  apiRequest<void>(`/api/notifications/mark-read?memberName=${encodeURIComponent(memberName)}`, {
+    method: 'POST',
   })

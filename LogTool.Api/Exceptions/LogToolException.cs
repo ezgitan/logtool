@@ -32,6 +32,9 @@ public sealed class LogSaveException()
 public sealed class LogAlreadySubmittedException(DateOnly date)
     : LogToolException("log_already_submitted", $"A log has already been submitted for {date:dd.MM.yyyy} and cannot be edited.");
 
+public sealed class BankHolidayLockedException(DateOnly date)
+    : LogToolException("bank_holiday_locked", $"{date:dd.MM.yyyy} is an official public holiday and cannot be changed.");
+
 public sealed class InvalidPeriodException()
     : LogToolException("invalid_period", "A valid year and month must be provided.");
 

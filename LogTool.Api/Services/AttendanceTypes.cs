@@ -4,6 +4,8 @@ namespace LogTool.Api.Services;
 
 public static class AttendanceTypes
 {
+    public const string BankHoliday = "Bank Holiday";
+
     public static readonly IReadOnlyList<string> All =
     [
         "Office",
@@ -12,7 +14,7 @@ public static class AttendanceTypes
         "School",
         "Mission",
         "Company Activity",
-        "Bank Holiday",
+        BankHoliday,
         "Report"
     ];
 
@@ -24,7 +26,7 @@ public static class AttendanceTypes
         new("School", "S", "Okul"),
         new("Mission", "G", "Görevli"),
         new("Company Activity", "Ç", "Şirket Etkinliği"),
-        new("Bank Holiday", "B", "Resmi Tatil"),
+        new(BankHoliday, "B", "Resmi Tatil"),
         new("Report", "R", "Sağlık Raporu"),
     ];
 

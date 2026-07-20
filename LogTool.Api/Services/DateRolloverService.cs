@@ -5,6 +5,7 @@ namespace LogTool.Api.Services;
 public sealed class DateRolloverService(
     ExcelService excelService,
     ExcelSchemaService schemaService,
+    HolidayService holidayService,
     TimeProvider timeProvider,
     ILogger<DateRolloverService> logger) : BackgroundService
 {
@@ -24,6 +25,11 @@ public sealed class DateRolloverService(
     private async Task EnsureTodayRowsAsync(CancellationToken cancellationToken)
     {
         var today = DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime);
+        var currentYearHolidays = await holidayService.GetHolidaysAsync(today.Year, cancellationToken);
+        var previousYearHolidays = await holidayService.GetHolidaysAsync(today.Year - 1, cancellationToken);
+
+        bool IsHoliday(DateOnly date) =>
+            (date.Year == today.Year ? currentYearHolidays : previousYearHolidays).Contains(date);
 
         try
         {
@@ -37,8 +43,13 @@ public sealed class DateRolloverService(
                     foreach (var date in DatesToBackfill(logWorksheet, today))
                     {
                         schemaService.EnsureDateRow(logWorksheet, date);
-                        schemaService.EnsureDateRow(attendanceWorksheet, date);
+                        var attendanceRow = schemaService.EnsureDateRow(attendanceWorksheet, date);
                         addedAny = true;
+
+                        if (IsHoliday(date))
+                        {
+                            MarkBankHolidayForBlankMembers(attendanceWorksheet, attendanceRow);
+                        }
                     }
 
                     return addedAny;
@@ -48,6 +59,20 @@ public sealed class DateRolloverService(
         catch (Exception exception)
         {
             logger.LogWarning(exception, "Tarih sütunu otomatik güncellenirken hata oluştu.");
+        }
+    }
+
+    private void MarkBankHolidayForBlankMembers(IXLWorksheet attendanceWorksheet, int row)
+    {
+        foreach (var member in schemaService.GetActiveMembers(attendanceWorksheet))
+        {
+            var column = schemaService.FindActiveMemberColumn(attendanceWorksheet, member.Name);
+            var cell = attendanceWorksheet.Cell(row, column);
+            if (string.IsNullOrWhiteSpace(cell.GetString()))
+            {
+                cell.FormulaA1 = string.Empty;
+                cell.SetValue(AttendanceTypes.BankHoliday);
+            }
         }
     }
 

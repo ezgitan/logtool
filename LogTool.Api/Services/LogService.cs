@@ -62,6 +62,12 @@ public sealed class LogService(
                     throw new LogAlreadySubmittedException(date);
                 }
 
+                var existingAttendance = attendanceWorksheet.Cell(attendanceRow, attendanceColumn).GetString().Trim();
+                if (string.Equals(existingAttendance, AttendanceTypes.BankHoliday, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new BankHolidayLockedException(date);
+                }
+
                 WritePlainText(logWorksheet.Cell(logRow, logColumn), logText);
                 WritePlainText(attendanceWorksheet.Cell(attendanceRow, attendanceColumn), attendance);
 

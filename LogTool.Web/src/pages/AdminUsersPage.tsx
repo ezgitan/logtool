@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ApiRequestError } from '../api/client'
-import { addMember, deactivateMember, getMembers } from '../api/logsApi'
+import { addMember, deactivateMember, getExcelLink, getMembers } from '../api/logsApi'
 import { notifyAllMembers, notifyMember } from '../api/pushApi'
 import { StatusMessage } from '../components/StatusMessage'
 import type { Member } from '../types/log'
@@ -29,6 +29,14 @@ export function AdminUsersPage() {
   const [notifyTarget, setNotifyTarget] = useState<string | null>(null)
   const [notifyMessageText, setNotifyMessageText] = useState('')
   const [notifySending, setNotifySending] = useState(false)
+
+  const [excelUrl, setExcelUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    getExcelLink()
+      .then((result) => setExcelUrl(result.url))
+      .catch((error: unknown) => console.error('Could not load Excel link', error))
+  }, [])
 
   const refresh = useCallback(async () => {
     setLoading(true)
@@ -93,9 +101,9 @@ export function AdminUsersPage() {
       const result = await notifyAllMembers(trimmed)
       setBroadcastMessage('')
       setMessage(
-        result.sentCount > 0
-          ? { tone: 'success', text: `Notification sent to ${result.sentCount} device(s).` }
-          : { tone: 'error', text: 'No devices have notifications enabled yet.' },
+        result.recipientCount > 0
+          ? { tone: 'success', text: `Notification sent to ${result.recipientCount} user(s).` }
+          : { tone: 'error', text: 'No users have notifications enabled yet.' },
       )
     } catch (error) {
       setMessage({ tone: 'error', text: getErrorMessage(error) })
@@ -124,7 +132,7 @@ export function AdminUsersPage() {
     try {
       const result = await notifyMember(notifyTarget, trimmed)
       setMessage(
-        result.sentCount > 0
+        result.recipientCount > 0
           ? { tone: 'success', text: `Notification sent to ${notifyTarget}.` }
           : { tone: 'error', text: `${notifyTarget} has no notifications enabled.` },
       )
@@ -142,6 +150,11 @@ export function AdminUsersPage() {
         <div>
           <h1>User Management</h1>
         </div>
+        {excelUrl && (
+          <a className="excel-link" href={excelUrl}>
+            Open Excel file
+          </a>
+        )}
       </section>
 
       {message && <StatusMessage tone={message.tone}>{message.text}</StatusMessage>}
@@ -251,7 +264,7 @@ export function AdminUsersPage() {
                 />
               </label>
               <div className="reminder-actions">
-                <button type="button" onClick={closeNotifyModal}>
+                <button type="button" className="button-brand" onClick={closeNotifyModal}>
                   Cancel
                 </button>
                 <button type="submit" disabled={notifySending || !notifyMessageText.trim()}>

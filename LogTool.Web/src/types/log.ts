@@ -81,7 +81,18 @@ export interface PushSettings {
 }
 
 export interface SendNotificationResult {
-  sentCount: number
+  recipientCount: number
+}
+
+export interface ExcelLink {
+  url: string | null
+}
+
+export interface AppNotification {
+  id: string
+  message: string
+  sentAt: string
+  read: boolean
 }
 
 export interface ApiError {
