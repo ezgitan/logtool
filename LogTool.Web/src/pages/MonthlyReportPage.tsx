@@ -80,9 +80,13 @@ export function MonthlyReportPage() {
     <>
       <section className="intro">
         <div>
-          <p className="eyebrow">MONTHLY REPORT</p>
           <h1>Monthly Report</h1>
         </div>
+        {!loading && !error && report && (
+          <p className="working-days-badge">
+            Working days in {monthFormatter.format(new Date(year, month - 1, 1))}: {report.workingDaysInMonth}
+          </p>
+        )}
       </section>
 
       {error && <StatusMessage tone="error">{error}</StatusMessage>}
@@ -107,57 +111,44 @@ export function MonthlyReportPage() {
         {loading && <p className="empty-state">Loading report…</p>}
 
         {!loading && !error && report && (
-          <>
-            <div className="daily-table-wrap">
-              <table className="daily-table report-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Member</th>
-                    <th scope="col">Office Day</th>
-                    <th scope="col">Office Hour</th>
-                    <th scope="col">Remote Day</th>
-                    <th scope="col">Remote Hour</th>
-                    <th scope="col">Total Worked Day</th>
-                    <th scope="col">Total Worked Hour</th>
-                    <th scope="col">Total Leave Day</th>
-                    <th scope="col">Not Working Days</th>
+          <div className="daily-table-wrap">
+            <table className="daily-table report-table">
+              <thead>
+                <tr>
+                  <th scope="col">Member</th>
+                  <th scope="col">Office Day</th>
+                  <th scope="col">Remote Day</th>
+                  <th scope="col">Total Worked Day</th>
+                  <th scope="col">Total Leave Day</th>
+                </tr>
+              </thead>
+              <tbody>
+                {report.members.map((entry) => (
+                  <tr key={entry.memberName}>
+                    <td className="daily-member">{entry.memberName}</td>
+                    <td className="report-cell">{entry.officeDays}</td>
+                    <td className="report-cell">
+                      {entry.remoteDays > 0 ? (
+                        <button
+                          type="button"
+                          className="remote-day-toggle"
+                          onClick={() =>
+                            setRemoteDaysSelection({ memberName: entry.memberName, dates: entry.remoteDates })
+                          }
+                        >
+                          {entry.remoteDays}
+                        </button>
+                      ) : (
+                        entry.remoteDays
+                      )}
+                    </td>
+                    <td className="report-cell">{entry.totalWorkedDays}</td>
+                    <td className="report-cell">{entry.totalLeaveDays}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {report.members.map((entry) => (
-                    <tr key={entry.memberName}>
-                      <td className="daily-member">{entry.memberName}</td>
-                      <td className="report-cell">{entry.officeDays}</td>
-                      <td className="report-cell">{entry.officeHours}</td>
-                      <td className="report-cell">
-                        {entry.remoteDays > 0 ? (
-                          <button
-                            type="button"
-                            className="remote-day-toggle"
-                            onClick={() =>
-                              setRemoteDaysSelection({ memberName: entry.memberName, dates: entry.remoteDates })
-                            }
-                          >
-                            {entry.remoteDays}
-                          </button>
-                        ) : (
-                          entry.remoteDays
-                        )}
-                      </td>
-                      <td className="report-cell">{entry.remoteHours}</td>
-                      <td className="report-cell">{entry.totalWorkedDays}</td>
-                      <td className="report-cell">{entry.totalWorkedHours}</td>
-                      <td className="report-cell">{entry.totalLeaveDays}</td>
-                      <td className="report-cell">{entry.notWorkingDays}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <p className="report-footer">
-              Working days in {monthFormatter.format(new Date(year, month - 1, 1))}: {report.workingDaysInMonth}
-            </p>
-          </>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
 

@@ -78,7 +78,6 @@ export function AdminUsersPage() {
     <>
       <section className="intro">
         <div>
-          <p className="eyebrow">ADMIN</p>
           <h1>User Management</h1>
         </div>
       </section>
@@ -89,7 +88,6 @@ export function AdminUsersPage() {
         <section className="panel form-panel">
           <div className="panel-heading">
             <div>
-              <p className="eyebrow">NEW USER</p>
               <h2>Add user</h2>
             </div>
           </div>
@@ -114,7 +112,6 @@ export function AdminUsersPage() {
         <section className="panel side-panel">
           <div className="panel-heading">
             <div>
-              <p className="eyebrow">TEAM</p>
               <h2>Active users</h2>
             </div>
             <span className="count-badge">{members.length}</span>

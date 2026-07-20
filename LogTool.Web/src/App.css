@@ -97,6 +97,8 @@ main { max-width: 1180px; margin: 0 auto; padding: 52px 28px 72px; }
 .today-card { min-width: 132px; padding: 15px 18px; border: 1px solid var(--border); background: white; border-radius: 14px; box-shadow: var(--shadow-sm); }
 .today-card span { display: block; color: var(--muted); font-size: 12px; }
 .today-card strong { color: var(--ink); font-size: 16px; }
+.today-card-button { font: inherit; text-align: left; cursor: pointer; transition: border-color .15s, transform .15s; }
+.today-card-button:hover { border-color: var(--brand); transform: translateY(-1px); }
 
 .workspace-grid { display: grid; grid-template-columns: minmax(260px, 340px) 1fr; gap: 22px; align-items: start; }
 .panel { background: white; border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); }
@@ -193,7 +195,7 @@ button[type='submit']:disabled { cursor: not-allowed; opacity: .5; box-shadow: n
 .report-table th:first-child, .report-table td:first-child { text-align: left; }
 .report-table td:nth-child(2) { width: auto; }
 .report-cell { color: var(--ink); font-variant-numeric: tabular-nums; }
-.report-footer { margin: 16px 4px 0; color: var(--muted); font-size: 13px; }
+.working-days-badge { margin: 0 0 6px; color: var(--muted); font-size: 13px; font-weight: 650; white-space: nowrap; }
 
 .remote-day-toggle {
   all: unset; cursor: pointer; color: var(--brand); font-weight: 800;

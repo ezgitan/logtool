@@ -116,7 +116,6 @@ export function MyLogsPage({ memberName }: MyLogsPageProps) {
     <>
       <section className="intro">
         <div>
-          <p className="eyebrow">DAILY WORK LOG</p>
           <h1>Daily Log</h1>
         </div>
         <div className="today-card">
@@ -131,7 +130,6 @@ export function MyLogsPage({ memberName }: MyLogsPageProps) {
         <aside className="panel side-panel">
           <div className="panel-heading">
             <div>
-              <p className="eyebrow">PLAN</p>
               <h2>Missing days</h2>
             </div>
             <span className="count-badge">{missingDays.length}</span>
@@ -148,7 +146,6 @@ export function MyLogsPage({ memberName }: MyLogsPageProps) {
         <section className="panel form-panel">
           <div className="panel-heading">
             <div>
-              <p className="eyebrow">LOG ENTRY</p>
               <h2>Work log</h2>
             </div>
             {loadingLog && <span className="loading-dot">Loading</span>}

@@ -46,13 +46,12 @@ export function DailyLogsPage() {
     <>
       <section className="intro">
         <div>
-          <p className="eyebrow">TEAM OVERVIEW</p>
           <h1>Daily Logs</h1>
         </div>
-        <div className="today-card">
+        <button type="button" className="today-card today-card-button" onClick={() => setDate(today)}>
           <span>Today</span>
           <strong>{new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'long' }).format(new Date())}</strong>
-        </div>
+        </button>
       </section>
 
       {error && <StatusMessage tone="error">{error}</StatusMessage>}
@@ -60,8 +59,7 @@ export function DailyLogsPage() {
       <section className="panel daily-panel">
         <div className="panel-heading daily-heading">
           <div>
-            <p className="eyebrow">{dateFormatter.format(new Date(`${date}T12:00:00`))}</p>
-            <h2>Member records</h2>
+            <h2>{dateFormatter.format(new Date(`${date}T12:00:00`))}</h2>
           </div>
           <div className="daily-heading-actions">
             <label className="daily-date-picker">

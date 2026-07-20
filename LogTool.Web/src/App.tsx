@@ -298,7 +298,7 @@ function App() {
               className={page === 'admin-users' ? 'nav-link active' : 'nav-link'}
               onClick={() => setPage('admin-users')}
             >
-              Users
+              Settings
             </button>
           )}
         </nav>
