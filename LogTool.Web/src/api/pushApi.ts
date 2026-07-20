@@ -36,3 +36,13 @@ export const markNotificationsRead = (memberName: string) =>
   apiRequest<void>(`/api/notifications/mark-read?memberName=${encodeURIComponent(memberName)}`, {
     method: 'POST',
   })
+
+export const deleteNotification = (memberName: string, id: string) =>
+  apiRequest<void>(`/api/notifications/${encodeURIComponent(id)}?memberName=${encodeURIComponent(memberName)}`, {
+    method: 'DELETE',
+  })
+
+export const clearAllNotifications = (memberName: string) =>
+  apiRequest<void>(`/api/notifications?memberName=${encodeURIComponent(memberName)}`, {
+    method: 'DELETE',
+  })

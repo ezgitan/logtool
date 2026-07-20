@@ -264,7 +264,7 @@ export function AdminUsersPage() {
                 />
               </label>
               <div className="reminder-actions">
-                <button type="button" className="button-brand" onClick={closeNotifyModal}>
+                <button type="button" className="button-secondary" onClick={closeNotifyModal}>
                   Cancel
                 </button>
                 <button type="submit" disabled={notifySending || !notifyMessageText.trim()}>

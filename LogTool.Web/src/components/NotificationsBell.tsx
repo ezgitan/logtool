@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { getNotifications, markNotificationsRead } from '../api/pushApi'
+import { clearAllNotifications, deleteNotification, getNotifications, markNotificationsRead } from '../api/pushApi'
 import type { AppNotification } from '../types/log'
 
 const POLL_INTERVAL_MS = 60_000
@@ -65,6 +65,20 @@ export function NotificationsBell({ memberName }: NotificationsBellProps) {
     }
   }
 
+  function handleDelete(id: string) {
+    setNotifications((current) => current.filter((notification) => notification.id !== id))
+    deleteNotification(memberName, id).catch((error: unknown) =>
+      console.error('Could not delete notification', error),
+    )
+  }
+
+  function handleClearAll() {
+    setNotifications([])
+    clearAllNotifications(memberName).catch((error: unknown) =>
+      console.error('Could not clear notifications', error),
+    )
+  }
+
   return (
     <div className="notifications-bell" ref={containerRef}>
       <button type="button" className="bell-button" onClick={toggleOpen} aria-label="Notifications">
@@ -74,7 +88,14 @@ export function NotificationsBell({ memberName }: NotificationsBellProps) {
 
       {open && (
         <div className="notifications-panel">
-          <p className="notifications-panel-title">Notifications</p>
+          <div className="notifications-panel-header">
+            <p className="notifications-panel-title">Notifications</p>
+            {notifications.length > 0 && (
+              <button type="button" className="notifications-clear-all" onClick={handleClearAll}>
+                Clear all
+              </button>
+            )}
+          </div>
 
           {notifications.length === 0 && <p className="empty-state">No notifications yet.</p>}
 
@@ -85,8 +106,18 @@ export function NotificationsBell({ memberName }: NotificationsBellProps) {
                   key={notification.id}
                   className={notification.read ? 'notification-item' : 'notification-item notification-unread'}
                 >
-                  <p>{notification.message}</p>
-                  <span className="notification-time">{timeFormatter.format(new Date(notification.sentAt))}</span>
+                  <div className="notification-item-body">
+                    <p>{notification.message}</p>
+                    <span className="notification-time">{timeFormatter.format(new Date(notification.sentAt))}</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="notification-delete-button"
+                    onClick={() => handleDelete(notification.id)}
+                    aria-label="Delete notification"
+                  >
+                    <TrashIcon />
+                  </button>
                 </li>
               ))}
             </ul>
@@ -94,6 +125,27 @@ export function NotificationsBell({ memberName }: NotificationsBellProps) {
         </div>
       )}
     </div>
+  )
+}
+
+function TrashIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 6h18" />
+      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+    </svg>
   )
 }
 

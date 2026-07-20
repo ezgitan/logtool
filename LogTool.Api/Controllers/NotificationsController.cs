@@ -25,4 +25,20 @@ public sealed class NotificationsController(NotificationStore store) : Controlle
         await store.MarkAllReadAsync(memberName, cancellationToken);
         return NoContent();
     }
+
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> Delete(string id, [FromQuery] string memberName, CancellationToken cancellationToken)
+    {
+        await store.DeleteAsync(memberName, id, cancellationToken);
+        return NoContent();
+    }
+
+    [HttpDelete]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> ClearAll([FromQuery] string memberName, CancellationToken cancellationToken)
+    {
+        await store.ClearAllAsync(memberName, cancellationToken);
+        return NoContent();
+    }
 }

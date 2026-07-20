@@ -69,6 +69,46 @@ public sealed class NotificationStore
         }
     }
 
+    public async Task DeleteAsync(string memberName, string id, CancellationToken cancellationToken)
+    {
+        await FileLock.WaitAsync(cancellationToken);
+        try
+        {
+            var data = await ReadAsync(cancellationToken);
+            if (!data.TryGetValue(memberName, out var list))
+            {
+                return;
+            }
+
+            list.RemoveAll(record => record.Id == id);
+            await WriteAsync(data, cancellationToken);
+        }
+        finally
+        {
+            FileLock.Release();
+        }
+    }
+
+    public async Task ClearAllAsync(string memberName, CancellationToken cancellationToken)
+    {
+        await FileLock.WaitAsync(cancellationToken);
+        try
+        {
+            var data = await ReadAsync(cancellationToken);
+            if (!data.TryGetValue(memberName, out var list) || list.Count == 0)
+            {
+                return;
+            }
+
+            list.Clear();
+            await WriteAsync(data, cancellationToken);
+        }
+        finally
+        {
+            FileLock.Release();
+        }
+    }
+
     public async Task MarkAllReadAsync(string memberName, CancellationToken cancellationToken)
     {
         await FileLock.WaitAsync(cancellationToken);
