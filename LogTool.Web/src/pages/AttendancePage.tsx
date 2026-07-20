@@ -77,8 +77,7 @@ export function AttendancePage() {
     const dayNameRow = ['', ...grid.dates.map((date) => weekdayFormatter.format(parseIsoDate(date)))]
     const dateRow = ['', ...grid.dates.map((date) => formatHeaderDate(date))]
     const memberRows = grid.members.map((member) => [member.memberName, ...member.codes.map((code) => code ?? '')])
-    const legendRows = [[''], ['İzin Kodları'], ...grid.legend.map((entry) => [`${entry.code}: ${entry.label}`])]
-    const tsv = [dayNameRow, dateRow, ...memberRows, ...legendRows].map((row) => row.join('\t')).join('\r\n')
+    const tsv = [dayNameRow, dateRow, ...memberRows].map((row) => row.join('\t')).join('\r\n')
 
     try {
       await navigator.clipboard.writeText(tsv)
