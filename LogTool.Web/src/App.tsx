@@ -51,22 +51,34 @@ function App() {
   const [reminderModal, setReminderModal] = useState<ReminderModalState | null>(null)
   const [hasConfiguredReminder, setHasConfiguredReminder] = useState(false)
   const [notificationsBlocked, setNotificationsBlocked] = useState(false)
+  const [closingDeliveryTab, setClosingDeliveryTab] = useState(false)
+  const [showContinueFallback, setShowContinueFallback] = useState(false)
+  const [pendingSession, setPendingSession] = useState<Session | null>(null)
 
   useEffect(() => {
     let cancelled = false
 
-    function trySignIn() {
+    function trySignIn(trigger: string) {
+      console.log(`[LogTool auth] trySignIn() called (trigger: ${trigger})`)
       getStoredIdentity()
-        .then(({ identity: stored, outdated, serverVersion, justCompletedNewVersion }) => {
+        .then(({ identity: stored, outdated, serverVersion, justCompletedNewVersion, deliveredViaUrl }) => {
           if (cancelled) return
+          console.log('[LogTool auth] getStoredIdentity resolved:', {
+            hasIdentity: !!stored,
+            outdated,
+            serverVersion,
+            deliveredViaUrl,
+          })
           if (serverVersion) setSetupVersion(serverVersion)
           if (justCompletedNewVersion) setJustUpgraded(true)
           if (outdated) {
+            console.log('[LogTool auth] Stored setup is outdated - showing "setup required" screen')
             setSetupOutdated(true)
             setAuthLoading(false)
             return
           }
           if (!stored) {
+            console.log('[LogTool auth] No identity found yet - showing "setup required" screen')
             setAuthLoading(false)
             return
           }
@@ -74,13 +86,41 @@ function App() {
           resolveSession(stored)
             .then((resolved) => {
               if (cancelled) return
+              console.log('[LogTool auth] resolveSession succeeded:', resolved)
               setSetupOutdated(false)
+
+              // This tab is the one setup.vbs opened just to deliver the
+              // identity - the "download setup" tab picks it up and updates
+              // itself via the storage event below, so this one tries to
+              // close itself instead of showing a redundant second copy of
+              // the app. Browsers only allow closing script-opened tabs, so
+              // this is best-effort: if it's blocked, the fallback screen
+              // below just tells the person they can close it themselves.
+              if (deliveredViaUrl) {
+                console.log('[LogTool auth] Identity came from the URL - this is the delivery tab, attempting to close it')
+                setClosingDeliveryTab(true)
+                setPendingSession(resolved)
+                setTimeout(() => {
+                  console.log('[LogTool auth] Calling window.close() now')
+                  window.close()
+                }, 400)
+                // If we're still here after a moment, closing was blocked
+                // (e.g. no other tab opened this one) - offer a way forward
+                // instead of leaving the person stuck on a dead-end screen.
+                setTimeout(() => {
+                  console.log('[LogTool auth] Still open 1.5s after close attempt - close was blocked, showing fallback button')
+                  setShowContinueFallback(true)
+                }, 1500)
+                return
+              }
+
+              console.log('[LogTool auth] Showing the app directly in this tab')
               setSession(resolved)
               setPage(resolveInitialPage(resolved))
             })
             .catch((error: unknown) => {
               if (cancelled) return
-              console.error('Could not resolve session for stored identity', error)
+              console.error('[LogTool auth] Could not resolve session for stored identity', error)
               setAuthError(error instanceof Error ? error.message : 'Could not verify your identity.')
             })
             .finally(() => {
@@ -88,20 +128,22 @@ function App() {
             })
         })
         .catch((error: unknown) => {
-          console.error('Could not determine stored identity', error)
+          console.error('[LogTool auth] Could not determine stored identity', error)
           if (!cancelled) setAuthLoading(false)
         })
     }
 
-    trySignIn()
+    trySignIn('initial mount')
 
     // The setup script opens a separate tab to deliver the identity. Once
     // that tab stores it, pick it up here via the storage event instead of
     // making the user open yet another tab for the page they started on.
     function handleStorageChange(event: StorageEvent) {
-      if (event.key === IDENTITY_STORAGE_KEY) trySignIn()
+      console.log('[LogTool auth] storage event received:', event.key, '- match:', event.key === IDENTITY_STORAGE_KEY)
+      if (event.key === IDENTITY_STORAGE_KEY) trySignIn('storage event')
     }
     window.addEventListener('storage', handleStorageChange)
+    console.log('[LogTool auth] storage event listener attached')
 
     return () => {
       cancelled = true
@@ -219,6 +261,38 @@ function App() {
       markReminderPromptDismissed(session.memberName)
     }
     setReminderModal(null)
+  }
+
+  function continueInThisTab() {
+    if (!pendingSession) return
+    console.log('[LogTool auth] "Continue in this tab" clicked')
+    setSession(pendingSession)
+    setPage(resolveInitialPage(pendingSession))
+    setClosingDeliveryTab(false)
+  }
+
+  if (closingDeliveryTab) {
+    return (
+      <div className="login-shell">
+        <div className="panel login-card">
+          <div className="brand login-brand">
+            <span className="brand-mark"><LogoMark /></span>
+            <span>LogTool</span>
+          </div>
+          <p className="eyebrow">SIGNED IN</p>
+          <h1>All set</h1>
+          <p className="login-hint">
+            You&rsquo;re signed in. This tab should close on its own — if it doesn&rsquo;t, you can close
+            it and continue on the other tab.
+          </p>
+          {showContinueFallback && (
+            <button type="button" onClick={continueInThisTab}>
+              Continue in this tab
+            </button>
+          )}
+        </div>
+      </div>
+    )
   }
 
   if (authLoading || !session) {

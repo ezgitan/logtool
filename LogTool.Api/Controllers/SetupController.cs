@@ -25,7 +25,7 @@ public sealed class SetupController(IOptions<ExcelOptions> excelOptions) : Contr
     /// setup with and forces a re-run of setup.vbs on mismatch - so nobody
     /// has to be told to manually clear browser storage after an update.
     /// </summary>
-    public const string ScriptVersion = "3.1.0";
+    public const string ScriptVersion = "3.1.1";
 
     [HttpGet]
     public IActionResult Get()
@@ -220,23 +220,15 @@ public sealed class SetupController(IOptions<ExcelOptions> excelOptions) : Contr
         sb.AppendLine("    MsgBox \"Could not determine your Windows account. Make sure this PC is signed in to the company domain.\", vbExclamation, \"LogTool\"");
         sb.AppendLine("Else");
         sb.AppendLine("    LogMsg \"SUCCESS - opening site with identity '\" & upn & \"'\"");
-        sb.AppendLine($"    shell.Run siteUrl & \"?identity=\" & upn & \"&setupVersion={scriptVersion}\", 1, False");
         sb.AppendLine();
-        sb.AppendLine("    ' Best-effort: close the tab we just opened with a real Ctrl+W");
-        sb.AppendLine("    ' keystroke instead of the page's own window.close() (which browsers");
-        sb.AppendLine("    ' block for tabs not opened by page script - a real keystroke isn't");
-        sb.AppendLine("    ' subject to that restriction). This only helps if another LogTool");
-        sb.AppendLine("    ' tab is already open behind this one; if this was the only tab open,");
-        sb.AppendLine("    ' closing it can leave nothing visible, so this is a gamble - keep an");
-        sb.AppendLine("    ' eye on LogTool-setup-log.txt if it seems to misbehave.");
-        sb.AppendLine("    WScript.Sleep 3000");
-        sb.AppendLine("    On Error Resume Next");
-        sb.AppendLine("    shell.AppActivate \"LogTool\"");
-        sb.AppendLine("    If Err.Number <> 0 Then LogMsg \"AppActivate before close raised an error: \" & Err.Number & \" - \" & Err.Description");
-        sb.AppendLine("    On Error Goto 0");
-        sb.AppendLine("    WScript.Sleep 300");
-        sb.AppendLine("    LogMsg \"Sending Ctrl+W to close the delivery tab...\"");
-        sb.AppendLine("    shell.SendKeys \"^w\"");
+        sb.AppendLine("    ' This always opens in a new browser tab - there is no reliable way to");
+        sb.AppendLine("    ' close it or reuse an existing tab from here (browsers block script-");
+        sb.AppendLine("    ' driven tab closing/opening for tabs not opened by page script, and a");
+        sb.AppendLine("    ' simulated Ctrl+W keystroke isn't reliable either, since there's no way");
+        sb.AppendLine("    ' to confirm it focused the right window first). The opened tab shows");
+        sb.AppendLine("    ' the signed-in home page directly, so this is a one-time minor tab to");
+        sb.AppendLine("    ' close by hand if an old \"Setup Required\" tab is still open elsewhere.");
+        sb.AppendLine($"    shell.Run siteUrl & \"?identity=\" & upn & \"&setupVersion={scriptVersion}\", 1, False");
         sb.AppendLine("End If");
         sb.AppendLine();
         sb.AppendLine("LogMsg \"=== Setup finished ===\"");
