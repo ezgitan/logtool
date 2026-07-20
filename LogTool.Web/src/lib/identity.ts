@@ -50,14 +50,6 @@ export interface StoredIdentityResult {
    * have gone stale across the update.
    */
   justCompletedNewVersion: boolean
-  /**
-   * True when the identity was just delivered via the `?identity=` link
-   * (i.e. this is the tab the setup script opened), as opposed to a
-   * returning visit reading it back out of storage. Used to close that tab
-   * automatically once signed in, since the original "download setup" tab
-   * updates itself the same moment via the storage event.
-   */
-  deliveredViaUrl: boolean
 }
 
 /**
@@ -86,7 +78,6 @@ export async function getStoredIdentity(): Promise<StoredIdentityResult> {
       outdated: false,
       serverVersion: requiredVersion,
       justCompletedNewVersion,
-      deliveredViaUrl: true,
     }
   }
 
@@ -97,7 +88,6 @@ export async function getStoredIdentity(): Promise<StoredIdentityResult> {
       outdated: false,
       serverVersion: requiredVersion,
       justCompletedNewVersion: false,
-      deliveredViaUrl: false,
     }
   }
 
@@ -109,7 +99,6 @@ export async function getStoredIdentity(): Promise<StoredIdentityResult> {
       outdated: false,
       serverVersion: null,
       justCompletedNewVersion: false,
-      deliveredViaUrl: false,
     }
   }
 
@@ -120,7 +109,6 @@ export async function getStoredIdentity(): Promise<StoredIdentityResult> {
       outdated: true,
       serverVersion: requiredVersion,
       justCompletedNewVersion: false,
-      deliveredViaUrl: false,
     }
   }
 
@@ -129,7 +117,6 @@ export async function getStoredIdentity(): Promise<StoredIdentityResult> {
     outdated: false,
     serverVersion: requiredVersion,
     justCompletedNewVersion: false,
-    deliveredViaUrl: false,
   }
 }
 
