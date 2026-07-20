@@ -33,6 +33,9 @@ export const getLog = (memberName: string, date: string) =>
 export const getMissingDays = (memberName: string) =>
   apiRequest<MissingLogDay[]>(`/api/logs/${encodeURIComponent(memberName)}/missing`)
 
+export const getLogRange = (memberName: string, start: string, end: string) =>
+  apiRequest<LogEntry[]>(`/api/logs/${encodeURIComponent(memberName)}/range?start=${start}&end=${end}`)
+
 export const updateLog = (memberName: string, date: string, payload: UpdateLogEntry) =>
   apiRequest<LogEntry>(`/api/logs/${encodeURIComponent(memberName)}/${date}`, {
     method: 'PUT',

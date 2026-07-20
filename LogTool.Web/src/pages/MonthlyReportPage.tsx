@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { ApiRequestError } from '../api/client'
-import { getMonthlyReport } from '../api/logsApi'
+import { getLogRange, getMonthlyReport } from '../api/logsApi'
 import { StatusMessage } from '../components/StatusMessage'
-import type { MonthlyReport } from '../types/log'
+import type { LogEntry, MonthlyReport } from '../types/log'
 
 const now = new Date()
 
@@ -13,6 +13,10 @@ const remoteDateFormatter = new Intl.DateTimeFormat('en-GB', {
   month: 'long',
   year: 'numeric',
 })
+const shortDateFormatter = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
+
+const WORKED_ATTENDANCE = new Set(['Office', 'Home Office'])
+const LEAVE_ATTENDANCE = new Set(['Leave', 'Bank Holiday'])
 
 function getErrorMessage(error: unknown) {
   if (error instanceof ApiRequestError) {
@@ -24,9 +28,33 @@ function getErrorMessage(error: unknown) {
   return 'Something went wrong. Please try again.'
 }
 
-function formatRemoteDate(isoDate: string) {
+function parseIsoDate(isoDate: string) {
   const [y, m, d] = isoDate.split('-').map(Number)
-  return remoteDateFormatter.format(new Date(y, m - 1, d))
+  return new Date(y, m - 1, d)
+}
+
+function formatRemoteDate(isoDate: string) {
+  return remoteDateFormatter.format(parseIsoDate(isoDate))
+}
+
+function formatShortDate(isoDate: string) {
+  return shortDateFormatter.format(parseIsoDate(isoDate))
+}
+
+function pad(value: number) {
+  return value.toString().padStart(2, '0')
+}
+
+function isoDateOf(year: number, month: number, day: number) {
+  return `${year}-${pad(month)}-${pad(day)}`
+}
+
+function lastDayOfMonth(year: number, month: number) {
+  return new Date(year, month, 0).getDate()
+}
+
+function slugify(value: string) {
+  return value.toLowerCase().replace(/\s+/g, '-')
 }
 
 interface RemoteDaysSelection {
@@ -42,12 +70,20 @@ export function MonthlyReportPage() {
   const [error, setError] = useState<string | null>(null)
   const [remoteDaysSelection, setRemoteDaysSelection] = useState<RemoteDaysSelection | null>(null)
 
+  const [selectedMember, setSelectedMember] = useState<string | null>(null)
+  const [rangeStart, setRangeStart] = useState('')
+  const [rangeEnd, setRangeEnd] = useState('')
+  const [rangeEntries, setRangeEntries] = useState<LogEntry[] | null>(null)
+  const [rangeLoading, setRangeLoading] = useState(false)
+  const [rangeError, setRangeError] = useState<string | null>(null)
+
   const isCurrentOrFutureMonth = year > now.getFullYear() || (year === now.getFullYear() && month >= now.getMonth() + 1)
 
   useEffect(() => {
     setLoading(true)
     setError(null)
     setRemoteDaysSelection(null)
+    setSelectedMember(null)
     getMonthlyReport(year, month)
       .then(setReport)
       .catch((caught: unknown) => {
@@ -56,6 +92,28 @@ export function MonthlyReportPage() {
       })
       .finally(() => setLoading(false))
   }, [year, month])
+
+  useEffect(() => {
+    if (!selectedMember || !rangeStart || !rangeEnd) return
+    let cancelled = false
+    setRangeLoading(true)
+    setRangeError(null)
+    getLogRange(selectedMember, rangeStart, rangeEnd)
+      .then((entries) => {
+        if (!cancelled) setRangeEntries(entries)
+      })
+      .catch((caught: unknown) => {
+        if (cancelled) return
+        setRangeEntries(null)
+        setRangeError(getErrorMessage(caught))
+      })
+      .finally(() => {
+        if (!cancelled) setRangeLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [selectedMember, rangeStart, rangeEnd])
 
   function goToPreviousMonth() {
     if (month === 1) {
@@ -73,6 +131,32 @@ export function MonthlyReportPage() {
       setMonth(1)
     } else {
       setMonth((current) => current + 1)
+    }
+  }
+
+  function openMemberRange(memberName: string) {
+    setSelectedMember(memberName)
+    setRangeStart(isoDateOf(year, month, 1))
+    setRangeEnd(isoDateOf(year, month, lastDayOfMonth(year, month)))
+    setRangeEntries(null)
+    setRangeError(null)
+  }
+
+  function closeMemberRange() {
+    setSelectedMember(null)
+    setRangeEntries(null)
+    setRangeError(null)
+  }
+
+  const breakdown: Record<string, number> = {}
+  let totalWorkedDays = 0
+  let totalLeaveDays = 0
+  if (rangeEntries) {
+    for (const entry of rangeEntries) {
+      if (!entry.attendance) continue
+      breakdown[entry.attendance] = (breakdown[entry.attendance] ?? 0) + 1
+      if (WORKED_ATTENDANCE.has(entry.attendance)) totalWorkedDays++
+      if (LEAVE_ATTENDANCE.has(entry.attendance)) totalLeaveDays++
     }
   }
 
@@ -125,7 +209,15 @@ export function MonthlyReportPage() {
               <tbody>
                 {report.members.map((entry) => (
                   <tr key={entry.memberName}>
-                    <td className="daily-member">{entry.memberName}</td>
+                    <td className="daily-member">
+                      <button
+                        type="button"
+                        className="member-name-toggle"
+                        onClick={() => openMemberRange(entry.memberName)}
+                      >
+                        {entry.memberName}
+                      </button>
+                    </td>
                     <td className="report-cell">{entry.officeDays}</td>
                     <td className="report-cell">
                       {entry.remoteDays > 0 ? (
@@ -165,6 +257,98 @@ export function MonthlyReportPage() {
             </ul>
             <div className="reminder-actions">
               <button type="button" onClick={() => setRemoteDaysSelection(null)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {selectedMember && (
+        <div className="modal-overlay" onClick={closeMemberRange}>
+          <div className="panel member-range-card" onClick={(event) => event.stopPropagation()}>
+            <p className="eyebrow">MEMBER LOGS</p>
+            <h2>{selectedMember}</h2>
+
+            <div className="range-picker-row">
+              <label>
+                From
+                <input
+                  type="date"
+                  value={rangeStart}
+                  max={rangeEnd || undefined}
+                  onChange={(event) => setRangeStart(event.target.value)}
+                />
+              </label>
+              <label>
+                To
+                <input
+                  type="date"
+                  value={rangeEnd}
+                  min={rangeStart || undefined}
+                  onChange={(event) => setRangeEnd(event.target.value)}
+                />
+              </label>
+            </div>
+
+            {rangeError && <StatusMessage tone="error">{rangeError}</StatusMessage>}
+            {rangeLoading && <p className="empty-state">Loading…</p>}
+
+            {!rangeLoading && !rangeError && rangeEntries && (
+              <>
+                <div className="range-summary">
+                  <div className="range-summary-item">
+                    <strong>{totalWorkedDays}</strong>
+                    <span>Total Worked Days</span>
+                  </div>
+                  <div className="range-summary-item">
+                    <strong>{totalLeaveDays}</strong>
+                    <span>Total Leave Days</span>
+                  </div>
+                </div>
+
+                {Object.keys(breakdown).length > 0 && (
+                  <table className="attendance-breakdown-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Attendance Type</th>
+                        <th scope="col">Days</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Object.entries(breakdown).map(([type, count]) => (
+                        <tr key={type}>
+                          <td>{type}</td>
+                          <td>{count}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+
+                <ul className="range-log-list">
+                  {rangeEntries.length === 0 && <li className="empty-state">No records in this range.</li>}
+                  {rangeEntries.map((entry) => (
+                    <li key={entry.date} className="range-log-item">
+                      <div className="range-log-date">{formatShortDate(entry.date)}</div>
+                      {entry.attendance ? (
+                        <span className={`attendance-badge attendance-${slugify(entry.attendance)}`}>
+                          {entry.attendance}
+                        </span>
+                      ) : (
+                        <span className="attendance-badge attendance-missing">Not set</span>
+                      )}
+                      <div className={entry.log ? 'daily-log' : 'daily-log daily-log-empty'}>
+                        {entry.log || 'No log entered'}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+
+            <div className="reminder-actions">
+              <button type="button" onClick={closeMemberRange}>
                 Close
               </button>
             </div>

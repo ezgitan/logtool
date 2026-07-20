@@ -189,6 +189,34 @@ public sealed class ExcelSchemaService(IOptions<ExcelOptions> options)
         return rows;
     }
 
+    /// <summary>Same backward-scan approach as <see cref="GetDateRowsInMonth"/>, scoped to an arbitrary [startDate, endDate] range.</summary>
+    public IReadOnlyDictionary<DateOnly, int> GetDateRowsInRange(IXLWorksheet worksheet, DateOnly startDate, DateOnly endDate)
+    {
+        var lastRow = worksheet.Column(_options.DateColumn).LastCellUsed()?.Address.RowNumber
+            ?? _options.HeaderRow;
+        var rows = new Dictionary<DateOnly, int>();
+
+        for (var row = lastRow; row > _options.HeaderRow; row--)
+        {
+            if (!TryReadDate(worksheet.Cell(row, _options.DateColumn), out var date))
+            {
+                continue;
+            }
+
+            if (date < startDate)
+            {
+                break;
+            }
+
+            if (date <= endDate)
+            {
+                rows[date] = row;
+            }
+        }
+
+        return rows;
+    }
+
     public int EnsureDateRow(IXLWorksheet worksheet, DateOnly date)
     {
         var existingRows = GetDateRows(worksheet);

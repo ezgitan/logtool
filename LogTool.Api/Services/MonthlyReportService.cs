@@ -5,7 +5,8 @@ namespace LogTool.Api.Services;
 
 public sealed class MonthlyReportService(
     ExcelService excelService,
-    ExcelSchemaService schemaService)
+    ExcelSchemaService schemaService,
+    HolidayService holidayService)
 {
     private const int HoursPerDay = 8;
 
@@ -15,7 +16,7 @@ public sealed class MonthlyReportService(
         "Bank Holiday"
     };
 
-    public Task<MonthlyReportDto> GetAsync(
+    public async Task<MonthlyReportDto> GetAsync(
         int year,
         int month,
         CancellationToken cancellationToken)
@@ -25,7 +26,9 @@ public sealed class MonthlyReportService(
             throw new InvalidPeriodException();
         }
 
-        return excelService.ExecuteReadAsync(
+        var holidays = await holidayService.GetHolidaysAsync(year, cancellationToken);
+
+        return await excelService.ExecuteReadAsync(
             workbook =>
             {
                 var logWorksheet = schemaService.GetLogWorksheet(workbook);
@@ -42,10 +45,15 @@ public sealed class MonthlyReportService(
                     date => date,
                     date => ReadDayAttendance(attendanceWorksheet, attendanceRows, memberColumns, date));
 
-                var bankHolidayCount = weekdays.Count(date =>
+                // A day counts as a holiday if it's in the cached public
+                // holiday calendar, OR if someone logged "Bank Holiday" that
+                // day (covers the case where the cache for this year hasn't
+                // been fetched yet, or an ad hoc/regional holiday).
+                var holidayCount = weekdays.Count(date =>
+                    holidays.Contains(date) ||
                     attendanceByDate[date].Values.Any(value =>
                         string.Equals(value, "Bank Holiday", StringComparison.OrdinalIgnoreCase)));
-                var workingDays = weekdays.Count - bankHolidayCount;
+                var workingDays = weekdays.Count - holidayCount;
 
                 var entries = members
                     .Select(member => BuildEntry(member.Name, weekdays, attendanceByDate, workingDays))

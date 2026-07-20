@@ -18,8 +18,11 @@ builder.Services.AddScoped<LogTool.Api.Services.MissingLogService>();
 builder.Services.AddScoped<LogTool.Api.Services.MonthlyReportService>();
 builder.Services.AddSingleton<LogTool.Api.Services.VapidKeyProvider>();
 builder.Services.AddSingleton<LogTool.Api.Services.PushSubscriptionStore>();
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton<LogTool.Api.Services.HolidayService>();
 builder.Services.AddHostedService<LogTool.Api.Services.DateRolloverService>();
 builder.Services.AddHostedService<LogTool.Api.Services.ReminderNotificationService>();
+builder.Services.AddHostedService<LogTool.Api.Services.HolidayCacheRefreshService>();
 
 var app = builder.Build();
 

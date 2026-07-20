@@ -27,6 +27,15 @@ public sealed class LogsController(
         CancellationToken cancellationToken) =>
         Ok(await logService.UpdateAsync(memberName, date, request, cancellationToken));
 
+    [HttpGet("{memberName}/range")]
+    [ProducesResponseType<IReadOnlyList<LogEntryDto>>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<LogEntryDto>>> GetRange(
+        string memberName,
+        [FromQuery] DateOnly start,
+        [FromQuery] DateOnly end,
+        CancellationToken cancellationToken) =>
+        Ok(await logService.GetRangeAsync(memberName, start, end, cancellationToken));
+
     [HttpGet("{memberName}/missing")]
     [ProducesResponseType<IReadOnlyList<MissingLogDayDto>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IReadOnlyList<MissingLogDayDto>>> GetMissing(

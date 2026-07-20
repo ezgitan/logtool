@@ -75,6 +75,42 @@ public sealed class LogService(
             cancellationToken);
     }
 
+    public Task<IReadOnlyList<LogEntryDto>> GetRangeAsync(
+        string memberName,
+        DateOnly startDate,
+        DateOnly endDate,
+        CancellationToken cancellationToken) =>
+        excelService.ExecuteReadAsync<IReadOnlyList<LogEntryDto>>(
+            workbook =>
+            {
+                var logWorksheet = schemaService.GetLogWorksheet(workbook);
+                var attendanceWorksheet = schemaService.GetAttendanceWorksheet(workbook);
+
+                var logColumn = schemaService.FindActiveMemberColumn(logWorksheet, memberName);
+                var attendanceColumn = schemaService.FindActiveMemberColumn(attendanceWorksheet, memberName);
+                var canonicalMemberName = logWorksheet.Cell(1, logColumn).GetString().Trim();
+
+                var logRows = schemaService.GetDateRowsInRange(logWorksheet, startDate, endDate);
+                var attendanceRows = schemaService.GetDateRowsInRange(attendanceWorksheet, startDate, endDate);
+
+                var entries = new List<LogEntryDto>();
+                foreach (var (date, logRow) in logRows.OrderBy(item => item.Key))
+                {
+                    var attendance = attendanceRows.TryGetValue(date, out var attendanceRow)
+                        ? NullIfWhiteSpace(attendanceWorksheet.Cell(attendanceRow, attendanceColumn).GetString())
+                        : null;
+
+                    entries.Add(new LogEntryDto(
+                        canonicalMemberName,
+                        date,
+                        attendance,
+                        NullIfWhiteSpace(logWorksheet.Cell(logRow, logColumn).GetString())));
+                }
+
+                return entries;
+            },
+            cancellationToken);
+
     public Task<IReadOnlyList<DailyLogEntryDto>> GetDailyAsync(
         DateOnly date,
         CancellationToken cancellationToken) =>
