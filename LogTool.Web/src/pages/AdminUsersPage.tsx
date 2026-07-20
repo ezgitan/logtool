@@ -146,7 +146,7 @@ export function AdminUsersPage() {
 
       {message && <StatusMessage tone={message.tone}>{message.text}</StatusMessage>}
 
-      <div className="workspace-grid">
+      <div className="workspace-grid admin-workspace-grid">
         <section className="panel form-panel">
           <div className="panel-heading">
             <div>
@@ -171,7 +171,7 @@ export function AdminUsersPage() {
           </form>
         </section>
 
-        <section className="panel form-panel">
+        <section className="panel form-panel broadcast-panel">
           <div className="panel-heading">
             <div>
               <h2>Send notification</h2>
