@@ -5,11 +5,6 @@ import { notifyAllMembers, notifyMember } from '../api/pushApi'
 import { StatusMessage } from '../components/StatusMessage'
 import type { Member } from '../types/log'
 
-function toExcelProtocolLink(uncPath: string) {
-  const fileUrl = 'file://' + uncPath.replace(/^\\\\/, '').replace(/\\/g, '/')
-  return `ms-excel:ofe|u|${fileUrl}`
-}
-
 function getErrorMessage(error: unknown) {
   if (error instanceof ApiRequestError) {
     if (error.code === 'excel_file_locked') {
@@ -169,7 +164,7 @@ export function AdminUsersPage() {
         </div>
         {excelPath && (
           <div className="excel-path-row">
-            <a className="excel-open-button" href={toExcelProtocolLink(excelPath)}>
+            <a className="excel-open-button" href="logtoolexcel:open">
               Open Excel file
             </a>
             <button

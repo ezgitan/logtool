@@ -3,7 +3,9 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using LogTool.Api.Models;
+using LogTool.Api.Options;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace LogTool.Api.Controllers;
 
@@ -15,7 +17,7 @@ namespace LogTool.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("setup.vbs")]
-public sealed class SetupController : ControllerBase
+public sealed class SetupController(IOptions<ExcelOptions> excelOptions) : ControllerBase
 {
     /// <summary>
     /// Bump this whenever BuildScript's logic changes meaningfully. The
@@ -23,7 +25,7 @@ public sealed class SetupController : ControllerBase
     /// setup with and forces a re-run of setup.vbs on mismatch - so nobody
     /// has to be told to manually clear browser storage after an update.
     /// </summary>
-    public const string ScriptVersion = "1.0.0";
+    public const string ScriptVersion = "2.0.0";
 
     [HttpGet]
     public IActionResult Get()
@@ -33,7 +35,7 @@ public sealed class SetupController : ControllerBase
         var port = Request.Host.Port ?? (Request.IsHttps ? 443 : 80);
         var certBase64 = FindCertificateBase64(port);
         var siteUrl = $"{Request.Scheme}://{Request.Host}/";
-        var bytes = Encoding.ASCII.GetBytes(BuildScript(certBase64, siteUrl, ScriptVersion));
+        var bytes = Encoding.ASCII.GetBytes(BuildScript(certBase64, siteUrl, ScriptVersion, excelOptions.Value.NetworkPath));
         return File(bytes, "application/octet-stream", "Setup LogTool.vbs");
     }
 
@@ -86,7 +88,7 @@ public sealed class SetupController : ControllerBase
         return match.Success ? match.Value : null;
     }
 
-    private static string BuildScript(string? certBase64, string siteUrl, string scriptVersion)
+    private static string BuildScript(string? certBase64, string siteUrl, string scriptVersion, string? excelNetworkPath)
     {
         var sb = new StringBuilder();
         sb.AppendLine("' LogTool one-time setup. Trusts the site certificate (if needed) and");
@@ -111,6 +113,8 @@ public sealed class SetupController : ControllerBase
         sb.AppendLine($"siteUrl = \"{siteUrl}\"");
         sb.AppendLine();
 
+        AppendBase64DecodeFunction(sb);
+
         if (certBase64 is not null)
         {
             sb.AppendLine("LogMsg \"Certificate found on server - trusting it locally...\"");
@@ -121,6 +125,16 @@ public sealed class SetupController : ControllerBase
         else
         {
             sb.AppendLine("LogMsg \"No self-signed certificate reported by server - skipping trust step.\"");
+            sb.AppendLine();
+        }
+
+        if (excelNetworkPath is not null)
+        {
+            AppendExcelProtocolHandlerBlock(sb, excelNetworkPath);
+        }
+        else
+        {
+            sb.AppendLine("LogMsg \"No Excel network path configured on server - skipping logtoolexcel: link handler.\"");
             sb.AppendLine();
         }
 
@@ -214,14 +228,8 @@ public sealed class SetupController : ControllerBase
         return sb.ToString();
     }
 
-    private static void AppendCertTrustBlock(StringBuilder sb, string certBase64)
+    private static void AppendBase64DecodeFunction(StringBuilder sb)
     {
-        sb.AppendLine("certB64 = \"\"");
-        foreach (var chunk in Chunk(certBase64, 100))
-        {
-            sb.AppendLine($"certB64 = certB64 & \"{chunk}\"");
-        }
-        sb.AppendLine();
         sb.AppendLine("Function Base64Decode(b64)");
         sb.AppendLine("    Dim xml, node");
         sb.AppendLine("    Set xml = CreateObject(\"Msxml2.DOMDocument.6.0\")");
@@ -230,6 +238,61 @@ public sealed class SetupController : ControllerBase
         sb.AppendLine("    node.Text = b64");
         sb.AppendLine("    Base64Decode = node.NodeTypedValue");
         sb.AppendLine("End Function");
+        sb.AppendLine();
+    }
+
+    /// <summary>
+    /// Registers a per-user "logtoolexcel:" link handler (HKCU, no admin rights
+    /// needed) so a plain &lt;a href="logtoolexcel:open"&gt; on the site can open
+    /// the shared Excel file directly in Excel - browsers block navigation to
+    /// file:// and UNC links from an https page, so this hands off to a small
+    /// local script instead, which isn't subject to that restriction.
+    /// </summary>
+    private static void AppendExcelProtocolHandlerBlock(StringBuilder sb, string excelNetworkPath)
+    {
+        sb.AppendLine("LogMsg \"Registering the logtoolexcel: link handler...\"");
+        sb.AppendLine("On Error Resume Next");
+        sb.AppendLine();
+
+        var openerScriptBuilder = new StringBuilder();
+        openerScriptBuilder.AppendLine("Set shellObj = CreateObject(\"WScript.Shell\")");
+        openerScriptBuilder.AppendLine($"shellObj.Run \"\"\"{excelNetworkPath}\"\"\", 1, False");
+        var openerBase64 = Convert.ToBase64String(Encoding.ASCII.GetBytes(openerScriptBuilder.ToString()));
+
+        sb.AppendLine("openerB64 = \"\"");
+        foreach (var chunk in Chunk(openerBase64, 100))
+        {
+            sb.AppendLine($"openerB64 = openerB64 & \"{chunk}\"");
+        }
+        sb.AppendLine();
+        sb.AppendLine("openerDir = shell.SpecialFolders(\"AppData\") & \"\\LogTool\"");
+        sb.AppendLine("If Not fso.FolderExists(openerDir) Then fso.CreateFolder openerDir");
+        sb.AppendLine("openerPath = openerDir & \"\\open-excel.vbs\"");
+        sb.AppendLine();
+        sb.AppendLine("Set openerStream = CreateObject(\"ADODB.Stream\")");
+        sb.AppendLine("openerStream.Type = 1");
+        sb.AppendLine("openerStream.Open");
+        sb.AppendLine("openerStream.Write Base64Decode(openerB64)");
+        sb.AppendLine("openerStream.SaveToFile openerPath, 2");
+        sb.AppendLine("openerStream.Close");
+        sb.AppendLine();
+        sb.AppendLine("shell.RegWrite \"HKCU\\Software\\Classes\\logtoolexcel\\\", \"URL:LogTool Excel Opener\", \"REG_SZ\"");
+        sb.AppendLine("shell.RegWrite \"HKCU\\Software\\Classes\\logtoolexcel\\URL Protocol\", \"\", \"REG_SZ\"");
+        sb.AppendLine("shell.RegWrite \"HKCU\\Software\\Classes\\logtoolexcel\\shell\\open\\command\\\", \"wscript.exe //nologo \"\"\" & openerPath & \"\"\"\", \"REG_SZ\"");
+        sb.AppendLine();
+        sb.AppendLine("If Err.Number <> 0 Then LogMsg \"Excel link handler registration raised an error: \" & Err.Number & \" - \" & Err.Description");
+        sb.AppendLine("On Error Goto 0");
+        sb.AppendLine("LogMsg \"Excel link handler registration done.\"");
+        sb.AppendLine();
+    }
+
+    private static void AppendCertTrustBlock(StringBuilder sb, string certBase64)
+    {
+        sb.AppendLine("certB64 = \"\"");
+        foreach (var chunk in Chunk(certBase64, 100))
+        {
+            sb.AppendLine($"certB64 = certB64 & \"{chunk}\"");
+        }
         sb.AppendLine();
         sb.AppendLine("certPath = fso.GetSpecialFolder(2) & \"\\\" & fso.GetTempName() & \".cer\"");
         sb.AppendLine("Set stream = CreateObject(\"ADODB.Stream\")");

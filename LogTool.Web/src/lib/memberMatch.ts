@@ -2,27 +2,30 @@ import type { Member } from '../types/log'
 
 export type MemberMatchResult =
   | { status: 'found'; member: Member }
-  | { status: 'not_found'; firstName: string }
-  | { status: 'ambiguous'; firstName: string }
+  | { status: 'not_found'; attemptedName: string }
+  | { status: 'ambiguous'; attemptedName: string }
 
-export function firstNameFromEmail(email: string): string {
+function capitalizeToken(token: string): string {
+  if (!token) return token
+  return token.charAt(0).toLocaleUpperCase('tr-TR') + token.slice(1).toLocaleLowerCase('tr-TR')
+}
+
+/** "ezgi.tan@nxp.com" -> "Ezgi Tan" - matches how names are entered as Excel column headers. */
+export function fullNameFromEmail(email: string): string {
   const localPart = email.split('@')[0] ?? ''
-  const firstToken = localPart.split(/[._-]+/)[0] ?? ''
-  return firstToken
+  const tokens = localPart.split(/[._-]+/).filter(Boolean)
+  return tokens.map(capitalizeToken).join(' ')
 }
 
 export function matchMemberByEmail(email: string, members: Member[]): MemberMatchResult {
-  const firstName = firstNameFromEmail(email)
-  const normalized = firstName.toLocaleLowerCase('tr-TR')
+  const attemptedName = fullNameFromEmail(email)
+  const normalized = attemptedName.toLocaleLowerCase('tr-TR')
 
-  const matches = members.filter((member) => {
-    const memberFirstName = member.name.trim().split(/\s+/)[0] ?? ''
-    return memberFirstName.toLocaleLowerCase('tr-TR') === normalized
-  })
+  const matches = members.filter((member) => member.name.trim().toLocaleLowerCase('tr-TR') === normalized)
 
   if (matches.length === 1) {
     return { status: 'found', member: matches[0] }
   }
 
-  return { status: matches.length === 0 ? 'not_found' : 'ambiguous', firstName }
+  return { status: matches.length === 0 ? 'not_found' : 'ambiguous', attemptedName }
 }

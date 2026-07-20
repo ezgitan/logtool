@@ -144,7 +144,7 @@ export async function resolveSession(identity: string): Promise<Session> {
     return { role: 'member', email, memberName: result.member.name }
   }
   if (result.status === 'ambiguous') {
-    throw new Error(`Multiple users found matching "${result.firstName}". Contact your admin.`)
+    throw new Error(`Multiple users found matching "${result.attemptedName}". Contact your admin.`)
   }
-  throw new Error(`No user found matching "${result.firstName}". Contact your admin.`)
+  throw new Error(`No user found matching "${result.attemptedName}". Contact your admin.`)
 }
