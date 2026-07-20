@@ -51,8 +51,15 @@ public sealed class AdminNotificationService(
                     logger.LogInformation("Admin notification sent to {MemberName}", memberName);
                 }
                 catch (WebPushException exception) when (
-                    exception.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Gone)
+                    exception.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Gone
+                        or HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
                 {
+                    // NotFound/Gone means the subscription itself expired. Unauthorized/
+                    // Forbidden means the subscription was created against VAPID keys
+                    // that no longer match the server's current ones (e.g. Data\vapid-
+                    // keys.json got regenerated) - either way, this subscription will
+                    // never succeed again until the person re-subscribes, so remove it
+                    // now instead of failing silently on every future attempt too.
                     logger.LogInformation(
                         "Push subscription for {MemberName} is invalid ({StatusCode}) - removing it",
                         memberName, exception.StatusCode);

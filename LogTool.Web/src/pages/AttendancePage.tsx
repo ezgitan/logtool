@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ApiRequestError } from '../api/client'
-import { getAttendanceGrid } from '../api/logsApi'
+import { adminUpdateLog, getAttendanceGrid, getLogRange } from '../api/logsApi'
 import { StatusMessage } from '../components/StatusMessage'
 import type { AttendanceGrid } from '../types/log'
 
@@ -8,6 +8,17 @@ const now = new Date()
 
 const monthFormatter = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' })
 const weekdayFormatter = new Intl.DateTimeFormat('en-GB', { weekday: 'long' })
+
+const attendanceOptions = [
+  'Office',
+  'Home Office',
+  'Leave',
+  'School',
+  'Mission',
+  'Company Activity',
+  'Bank Holiday',
+  'Report',
+]
 
 function getErrorMessage(error: unknown) {
   if (error instanceof ApiRequestError) {
@@ -29,6 +40,11 @@ function formatHeaderDate(isoDate: string) {
   return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`
 }
 
+interface EditingCell {
+  memberName: string
+  date: string
+}
+
 export function AttendancePage() {
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth() + 1)
@@ -37,19 +53,29 @@ export function AttendancePage() {
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
+  const [editingCell, setEditingCell] = useState<EditingCell | null>(null)
+  const [editAttendance, setEditAttendance] = useState('Office')
+  const [editLogText, setEditLogText] = useState('')
+  const [editLoading, setEditLoading] = useState(false)
+  const [editSaving, setEditSaving] = useState(false)
+  const [editError, setEditError] = useState<string | null>(null)
+
   const isCurrentOrFutureMonth = year > now.getFullYear() || (year === now.getFullYear() && month >= now.getMonth() + 1)
 
-  useEffect(() => {
-    setLoading(true)
-    setError(null)
-    setCopied(false)
+  const refreshGrid = () =>
     getAttendanceGrid(year, month)
       .then(setGrid)
       .catch((caught: unknown) => {
         setGrid(null)
         setError(getErrorMessage(caught))
       })
-      .finally(() => setLoading(false))
+
+  useEffect(() => {
+    setLoading(true)
+    setError(null)
+    setCopied(false)
+    refreshGrid().finally(() => setLoading(false))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year, month])
 
   function goToPreviousMonth() {
@@ -86,6 +112,47 @@ export function AttendancePage() {
     } catch (caught) {
       console.error('Could not copy attendance table', caught)
       setError('Could not copy to clipboard.')
+    }
+  }
+
+  function openEditCell(memberName: string, date: string) {
+    setEditingCell({ memberName, date })
+    setEditAttendance('Office')
+    setEditLogText('')
+    setEditError(null)
+    setEditLoading(true)
+    getLogRange(memberName, date, date)
+      .then((entries) => {
+        const entry = entries[0]
+        setEditAttendance(entry?.attendance ?? 'Office')
+        setEditLogText(entry?.log ?? '')
+      })
+      .catch((caught: unknown) => setEditError(getErrorMessage(caught)))
+      .finally(() => setEditLoading(false))
+  }
+
+  function closeEditCell() {
+    setEditingCell(null)
+    setEditError(null)
+  }
+
+  async function handleSaveEdit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!editingCell) return
+
+    setEditSaving(true)
+    setEditError(null)
+    try {
+      await adminUpdateLog(editingCell.memberName, editingCell.date, {
+        attendance: editAttendance,
+        log: editLogText,
+      })
+      await refreshGrid()
+      closeEditCell()
+    } catch (caught) {
+      setEditError(getErrorMessage(caught))
+    } finally {
+      setEditSaving(false)
     }
   }
 
@@ -145,7 +212,13 @@ export function AttendancePage() {
                       <td className="daily-member">{member.memberName}</td>
                       {member.codes.map((code, index) => (
                         <td className="attendance-cell" key={grid.dates[index]}>
-                          {code ?? ''}
+                          <button
+                            type="button"
+                            className="attendance-cell-button"
+                            onClick={() => openEditCell(member.memberName, grid.dates[index])}
+                          >
+                            {code ?? ''}
+                          </button>
                         </td>
                       ))}
                     </tr>
@@ -167,6 +240,49 @@ export function AttendancePage() {
           </>
         )}
       </section>
+
+      {editingCell && (
+        <div className="modal-overlay" onClick={closeEditCell}>
+          <div className="panel notify-member-card" onClick={(event) => event.stopPropagation()}>
+            <p className="eyebrow">EDIT LOG</p>
+            <h2>{editingCell.memberName}</h2>
+            <p className="login-hint">{formatHeaderDate(editingCell.date)}</p>
+
+            {editLoading && <p className="empty-state">Loading…</p>}
+            {editError && <StatusMessage tone="error">{editError}</StatusMessage>}
+
+            {!editLoading && (
+              <form onSubmit={handleSaveEdit} className="admin-add-form">
+                <label>
+                  Attendance
+                  <select value={editAttendance} onChange={(event) => setEditAttendance(event.target.value)}>
+                    {attendanceOptions.map((option) => (
+                      <option key={option}>{option}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Log
+                  <textarea
+                    value={editLogText}
+                    onChange={(event) => setEditLogText(event.target.value)}
+                    rows={4}
+                    maxLength={10000}
+                  />
+                </label>
+                <div className="reminder-actions">
+                  <button type="button" className="button-secondary" onClick={closeEditCell}>
+                    Cancel
+                  </button>
+                  <button type="submit" disabled={editSaving}>
+                    {editSaving ? 'Saving…' : 'Save'}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </>
   )
 }

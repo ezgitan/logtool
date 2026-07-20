@@ -144,6 +144,21 @@ main { max-width: 1180px; margin: 0 auto; padding: 52px 28px 72px; }
 .today-card strong { color: var(--ink); font-size: 16px; }
 .today-card-button { font: inherit; text-align: left; cursor: pointer; transition: border-color .15s, transform .15s; }
 .today-card-button:hover { border-color: var(--brand); transform: translateY(-1px); }
+.today-card-button.selected { border-color: var(--brand); background: var(--brand-soft); }
+.today-card-button.selected span, .today-card-button.selected strong { color: var(--brand-dark); }
+
+.quick-date-row { display: flex; align-items: stretch; gap: 8px; }
+.quick-date-chip {
+  all: unset; box-sizing: border-box; cursor: pointer; min-width: 48px; padding: 10px 8px;
+  border: 1px solid var(--border); border-radius: 12px; background: white; box-shadow: var(--shadow-sm);
+  text-align: center; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  transition: border-color .15s, transform .15s;
+}
+.quick-date-chip span { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.quick-date-chip strong { color: var(--ink); font-size: 15px; font-weight: 800; }
+.quick-date-chip:hover { border-color: var(--brand); transform: translateY(-1px); }
+.quick-date-chip.selected { border-color: var(--brand); background: var(--brand-soft); }
+.quick-date-chip.selected span, .quick-date-chip.selected strong { color: var(--brand-dark); }
 
 .workspace-grid { display: grid; grid-template-columns: minmax(260px, 340px) 1fr; grid-auto-rows: auto; gap: 22px; align-items: start; }
 .admin-workspace-grid .form-panel { grid-column: 1; grid-row: 1; }
@@ -331,6 +346,12 @@ button.button-success:disabled { cursor: not-allowed; opacity: .5; }
 .attendance-day-name { font-size: 11px; }
 .attendance-day-date { font-size: 11px; font-weight: 650; text-transform: none; letter-spacing: 0; color: var(--muted); margin-top: 2px; }
 .attendance-cell { font-weight: 750; color: var(--ink); font-variant-numeric: tabular-nums; background: #f8fbff; }
+.attendance-table td.attendance-cell { padding: 0; }
+.attendance-cell-button {
+  all: unset; box-sizing: border-box; cursor: pointer; display: block; width: 100%; height: 100%;
+  padding: 13px 16px; text-align: center; font: inherit; font-weight: 750; color: var(--ink); font-variant-numeric: tabular-nums;
+}
+.attendance-cell-button:hover { background: var(--brand-soft); color: var(--brand-dark); }
 
 .attendance-legend { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border); }
 .attendance-legend ul { list-style: none; margin: 10px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px 20px; }
@@ -342,7 +363,7 @@ button.button-success:disabled { cursor: not-allowed; opacity: .5; }
 @media (max-width: 800px) {
   .topbar { padding: 0 18px; }.topbar nav { display: none; }
   .session-actions { margin-left: auto; } main { padding: 36px 16px 52px; }
-  .intro { align-items: start; }.today-card { display: none; }
+  .intro { align-items: start; }.today-card, .quick-date-row { display: none; }
   .workspace-grid { grid-template-columns: 1fr; }.form-panel { grid-row: 1; }
   .admin-workspace-grid .form-panel, .admin-workspace-grid .broadcast-panel, .admin-workspace-grid .side-panel {
     grid-column: 1; grid-row: auto;

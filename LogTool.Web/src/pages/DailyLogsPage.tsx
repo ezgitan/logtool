@@ -19,6 +19,28 @@ const dateFormatter = new Intl.DateTimeFormat('en-GB', {
   year: 'numeric',
 })
 
+const weekdayShortFormatter = new Intl.DateTimeFormat('en-GB', { weekday: 'short' })
+const dayNumberFormatter = new Intl.DateTimeFormat('en-GB', { day: '2-digit' })
+
+function parseIsoDate(isoDate: string) {
+  const [y, m, d] = isoDate.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
+
+/** Last 6 days before today, oldest first, so they sit to the left of the "Today" box. */
+function getPastWeekDates() {
+  const base = parseIsoDate(today)
+  const dates: string[] = []
+  for (let i = 6; i >= 1; i--) {
+    const day = new Date(base)
+    day.setDate(day.getDate() - i)
+    dates.push(day.toISOString().slice(0, 10))
+  }
+  return dates
+}
+
+const pastWeekDates = getPastWeekDates()
+
 function getErrorMessage(error: unknown) {
   if (error instanceof ApiRequestError) {
     if (error.code === 'excel_file_locked') {
@@ -55,10 +77,27 @@ export function DailyLogsPage() {
         <div>
           <h1>Daily Logs</h1>
         </div>
-        <button type="button" className="today-card today-card-button" onClick={() => setDate(today)}>
-          <span>Today</span>
-          <strong>{new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'long' }).format(new Date())}</strong>
-        </button>
+        <div className="quick-date-row">
+          {pastWeekDates.map((iso) => (
+            <button
+              key={iso}
+              type="button"
+              className={date === iso ? 'quick-date-chip selected' : 'quick-date-chip'}
+              onClick={() => setDate(iso)}
+            >
+              <span>{weekdayShortFormatter.format(parseIsoDate(iso))}</span>
+              <strong>{dayNumberFormatter.format(parseIsoDate(iso))}</strong>
+            </button>
+          ))}
+          <button
+            type="button"
+            className={date === today ? 'today-card today-card-button selected' : 'today-card today-card-button'}
+            onClick={() => setDate(today)}
+          >
+            <span>Today</span>
+            <strong>{new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'long' }).format(new Date())}</strong>
+          </button>
+        </div>
       </section>
 
       {error && <StatusMessage tone="error">{error}</StatusMessage>}

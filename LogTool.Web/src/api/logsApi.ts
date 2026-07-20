@@ -48,3 +48,9 @@ export const updateLog = (memberName: string, date: string, payload: UpdateLogEn
     method: 'PUT',
     body: JSON.stringify(payload),
   })
+
+export const adminUpdateLog = (memberName: string, date: string, payload: UpdateLogEntry) =>
+  apiRequest<LogEntry>(`/api/logs/${encodeURIComponent(memberName)}/${date}/admin-override`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  })

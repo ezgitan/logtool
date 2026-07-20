@@ -42,6 +42,18 @@ export function NotificationsBell({ memberName }: NotificationsBellProps) {
   }, [memberName])
 
   useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.visibilityState !== 'visible') return
+      getNotifications(memberName)
+        .then(setNotifications)
+        .catch((error: unknown) => console.error('Could not load notifications', error))
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [memberName])
+
+  useEffect(() => {
     if (!open) return
 
     function handleClickOutside(event: MouseEvent) {
@@ -57,12 +69,22 @@ export function NotificationsBell({ memberName }: NotificationsBellProps) {
   function toggleOpen() {
     const next = !open
     setOpen(next)
-    if (next && unreadCount > 0) {
-      setNotifications((current) => current.map((notification) => ({ ...notification, read: true })))
-      markNotificationsRead(memberName).catch((error: unknown) =>
-        console.error('Could not mark notifications as read', error),
-      )
-    }
+    if (!next) return
+
+    // Always fetch fresh on open instead of trusting whatever the last poll
+    // happened to have - the poll interval is long enough that a message
+    // sent right before opening the panel could otherwise look missing.
+    getNotifications(memberName)
+      .then((result) => {
+        setNotifications(result)
+        if (result.some((notification) => !notification.read)) {
+          setNotifications((current) => current.map((notification) => ({ ...notification, read: true })))
+          markNotificationsRead(memberName).catch((error: unknown) =>
+            console.error('Could not mark notifications as read', error),
+          )
+        }
+      })
+      .catch((error: unknown) => console.error('Could not load notifications', error))
   }
 
   function handleDelete(id: string) {

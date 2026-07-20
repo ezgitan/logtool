@@ -27,6 +27,15 @@ public sealed class LogsController(
         CancellationToken cancellationToken) =>
         Ok(await logService.UpdateAsync(memberName, date, request, cancellationToken));
 
+    [HttpPut("{memberName}/{date}/admin-override")]
+    [ProducesResponseType<LogEntryDto>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<LogEntryDto>> AdminUpdate(
+        string memberName,
+        DateOnly date,
+        [FromBody] UpdateLogEntryDto request,
+        CancellationToken cancellationToken) =>
+        Ok(await logService.AdminUpdateAsync(memberName, date, request, cancellationToken));
+
     [HttpGet("{memberName}/range")]
     [ProducesResponseType<IReadOnlyList<LogEntryDto>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IReadOnlyList<LogEntryDto>>> GetRange(
