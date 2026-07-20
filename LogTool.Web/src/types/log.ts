@@ -85,7 +85,7 @@ export interface SendNotificationResult {
 }
 
 export interface ExcelLink {
-  url: string | null
+  path: string | null
 }
 
 export interface AppNotification {

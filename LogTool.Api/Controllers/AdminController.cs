@@ -12,5 +12,5 @@ public sealed class AdminController(IOptions<ExcelOptions> excelOptions) : Contr
     [HttpGet("excel-link")]
     [ProducesResponseType<ExcelLinkDto>(StatusCodes.Status200OK)]
     public ActionResult<ExcelLinkDto> GetExcelLink() =>
-        Ok(new ExcelLinkDto(excelOptions.Value.NetworkOpenUrl));
+        Ok(new ExcelLinkDto(excelOptions.Value.NetworkPath));
 }

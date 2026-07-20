@@ -5,6 +5,11 @@ import { notifyAllMembers, notifyMember } from '../api/pushApi'
 import { StatusMessage } from '../components/StatusMessage'
 import type { Member } from '../types/log'
 
+function toExcelProtocolLink(uncPath: string) {
+  const fileUrl = 'file://' + uncPath.replace(/^\\\\/, '').replace(/\\/g, '/')
+  return `ms-excel:ofe|u|${fileUrl}`
+}
+
 function getErrorMessage(error: unknown) {
   if (error instanceof ApiRequestError) {
     if (error.code === 'excel_file_locked') {
@@ -30,13 +35,25 @@ export function AdminUsersPage() {
   const [notifyMessageText, setNotifyMessageText] = useState('')
   const [notifySending, setNotifySending] = useState(false)
 
-  const [excelUrl, setExcelUrl] = useState<string | null>(null)
+  const [excelPath, setExcelPath] = useState<string | null>(null)
+  const [excelPathCopied, setExcelPathCopied] = useState(false)
 
   useEffect(() => {
     getExcelLink()
-      .then((result) => setExcelUrl(result.url))
-      .catch((error: unknown) => console.error('Could not load Excel link', error))
+      .then((result) => setExcelPath(result.path))
+      .catch((error: unknown) => console.error('Could not load Excel path', error))
   }, [])
+
+  async function handleCopyExcelPath() {
+    if (!excelPath) return
+    try {
+      await navigator.clipboard.writeText(excelPath)
+      setExcelPathCopied(true)
+      setTimeout(() => setExcelPathCopied(false), 2000)
+    } catch (error) {
+      console.error('Could not copy Excel path', error)
+    }
+  }
 
   const refresh = useCallback(async () => {
     setLoading(true)
@@ -150,10 +167,20 @@ export function AdminUsersPage() {
         <div>
           <h1>User Management</h1>
         </div>
-        {excelUrl && (
-          <a className="excel-link" href={excelUrl}>
-            Open Excel file
-          </a>
+        {excelPath && (
+          <div className="excel-path-row">
+            <a className="excel-open-button" href={toExcelProtocolLink(excelPath)}>
+              Open Excel file
+            </a>
+            <button
+              type="button"
+              className="excel-path-copy"
+              onClick={handleCopyExcelPath}
+              title={excelPath}
+            >
+              {excelPathCopied ? 'Copied!' : 'Copy path'}
+            </button>
+          </div>
         )}
       </section>
 
