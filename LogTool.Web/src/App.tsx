@@ -6,6 +6,7 @@ import { hasDismissedReminderPrompt, markReminderPromptDismissed } from './lib/r
 import { getStoredIdentity, IDENTITY_STORAGE_KEY, resolveSession } from './lib/identity'
 import type { Session } from './lib/session'
 import { AdminUsersPage } from './pages/AdminUsersPage'
+import { AttendancePage } from './pages/AttendancePage'
 import { AuthGate } from './pages/AuthGate'
 import { DailyLogsPage } from './pages/DailyLogsPage'
 import { MonthlyReportPage } from './pages/MonthlyReportPage'
@@ -13,7 +14,7 @@ import { MyLogsPage } from './pages/MyLogsPage'
 import { ReminderPromptModal } from './pages/ReminderPromptModal'
 import './App.css'
 
-type Page = 'my-logs' | 'daily-logs' | 'monthly-report' | 'admin-users'
+type Page = 'my-logs' | 'daily-logs' | 'monthly-report' | 'admin-users' | 'attendance'
 
 interface ReminderModalState {
   mode: 'first-run' | 'settings'
@@ -23,6 +24,19 @@ interface ReminderModalState {
 
 function defaultPageFor(session: Session): Page {
   return session.role === 'admin' ? 'admin-users' : 'my-logs'
+}
+
+const PAGE_STORAGE_KEY = 'logtool.page'
+
+function isValidPageForSession(value: string | null, session: Session): value is Page {
+  if (value === 'my-logs') return session.role === 'member'
+  if (value === 'admin-users' || value === 'attendance') return session.role === 'admin'
+  return value === 'daily-logs' || value === 'monthly-report'
+}
+
+function resolveInitialPage(session: Session): Page {
+  const stored = localStorage.getItem(PAGE_STORAGE_KEY)
+  return isValidPageForSession(stored, session) ? stored : defaultPageFor(session)
 }
 
 function App() {
@@ -83,7 +97,7 @@ function App() {
               }
 
               setSession(resolved)
-              setPage(defaultPageFor(resolved))
+              setPage(resolveInitialPage(resolved))
             })
             .catch((error: unknown) => {
               if (cancelled) return
@@ -212,6 +226,11 @@ function App() {
     }
   }
 
+  useEffect(() => {
+    if (!session) return
+    localStorage.setItem(PAGE_STORAGE_KEY, page)
+  }, [session, page])
+
   function handleReminderSaved() {
     setReminderModal(null)
   }
@@ -226,7 +245,7 @@ function App() {
   function continueInThisTab() {
     if (!pendingSession) return
     setSession(pendingSession)
-    setPage(defaultPageFor(pendingSession))
+    setPage(resolveInitialPage(pendingSession))
     setClosingDeliveryTab(false)
   }
 
@@ -295,6 +314,15 @@ function App() {
           {isAdmin && (
             <button
               type="button"
+              className={page === 'attendance' ? 'nav-link active' : 'nav-link'}
+              onClick={() => setPage('attendance')}
+            >
+              Attendance
+            </button>
+          )}
+          {isAdmin && (
+            <button
+              type="button"
               className={page === 'admin-users' ? 'nav-link active' : 'nav-link'}
               onClick={() => setPage('admin-users')}
             >
@@ -328,6 +356,7 @@ function App() {
         {page === 'daily-logs' && <DailyLogsPage />}
         {page === 'monthly-report' && <MonthlyReportPage />}
         {page === 'admin-users' && isAdmin && <AdminUsersPage />}
+        {page === 'attendance' && isAdmin && <AttendancePage />}
       </main>
 
       {reminderModal && session.role === 'member' && (

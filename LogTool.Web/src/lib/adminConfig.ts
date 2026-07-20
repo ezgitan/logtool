@@ -1,6 +1,6 @@
 export const COMPANY_EMAIL_DOMAIN = 'nxp.com'
-export const ADMIN_EMAIL = `huseyin.karacali@${COMPANY_EMAIL_DOMAIN}`
+export const ADMIN_EMAILS = [`huseyin.karacali@${COMPANY_EMAIL_DOMAIN}`, `ezgi.tan@${COMPANY_EMAIL_DOMAIN}`]
 
 export function isAdminEmail(email: string): boolean {
-  return email.trim().toLowerCase() === ADMIN_EMAIL
+  return ADMIN_EMAILS.includes(email.trim().toLowerCase())
 }

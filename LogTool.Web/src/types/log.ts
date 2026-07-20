@@ -41,6 +41,22 @@ export interface MonthlyReport {
   members: MonthlyReportEntry[]
 }
 
+export interface AttendanceGridRow {
+  memberName: string
+  codes: (string | null)[]
+}
+
+export interface AttendanceLegendEntry {
+  code: string
+  label: string
+}
+
+export interface AttendanceGrid {
+  dates: string[]
+  members: AttendanceGridRow[]
+  legend: AttendanceLegendEntry[]
+}
+
 export interface UpdateLogEntry {
   attendance: string
   log: string

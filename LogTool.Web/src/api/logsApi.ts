@@ -1,5 +1,6 @@
 import { apiRequest } from './client'
 import type {
+  AttendanceGrid,
   DailyLogEntry,
   LogEntry,
   Member,
@@ -35,6 +36,9 @@ export const getMissingDays = (memberName: string) =>
 
 export const getLogRange = (memberName: string, start: string, end: string) =>
   apiRequest<LogEntry[]>(`/api/logs/${encodeURIComponent(memberName)}/range?start=${start}&end=${end}`)
+
+export const getAttendanceGrid = (year: number, month: number) =>
+  apiRequest<AttendanceGrid>(`/api/attendance-grid?year=${year}&month=${month}`)
 
 export const updateLog = (memberName: string, date: string, payload: UpdateLogEntry) =>
   apiRequest<LogEntry>(`/api/logs/${encodeURIComponent(memberName)}/${date}`, {
