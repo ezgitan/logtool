@@ -80,6 +80,10 @@ export interface PushSettings {
   reminderMinute: number | null
 }
 
+export interface SendNotificationResult {
+  sentCount: number
+}
+
 export interface ApiError {
   code?: string
   message?: string

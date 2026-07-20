@@ -8,7 +8,8 @@ namespace LogTool.Api.Controllers;
 [Route("api/push")]
 public sealed class PushController(
     PushSubscriptionStore store,
-    VapidKeyProvider vapidKeyProvider) : ControllerBase
+    VapidKeyProvider vapidKeyProvider,
+    AdminNotificationService adminNotificationService) : ControllerBase
 {
     [HttpGet("public-key")]
     [ProducesResponseType<VapidPublicKeyDto>(StatusCodes.Status200OK)]
@@ -54,5 +55,36 @@ public sealed class PushController(
             cancellationToken);
 
         return NoContent();
+    }
+
+    [HttpPost("notify-all")]
+    [ProducesResponseType<SendNotificationResultDto>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<SendNotificationResultDto>> NotifyAll(
+        [FromBody] SendAdminNotificationRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.Message))
+        {
+            return BadRequest(new ApiErrorDto("invalid_message", "A message is required."));
+        }
+
+        var sentCount = await adminNotificationService.SendToAllAsync(request.Message.Trim(), cancellationToken);
+        return Ok(new SendNotificationResultDto(sentCount));
+    }
+
+    [HttpPost("notify/{memberName}")]
+    [ProducesResponseType<SendNotificationResultDto>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<SendNotificationResultDto>> NotifyMember(
+        string memberName,
+        [FromBody] SendAdminNotificationRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.Message))
+        {
+            return BadRequest(new ApiErrorDto("invalid_message", "A message is required."));
+        }
+
+        var sentCount = await adminNotificationService.SendToMemberAsync(memberName, request.Message.Trim(), cancellationToken);
+        return Ok(new SendNotificationResultDto(sentCount));
     }
 }

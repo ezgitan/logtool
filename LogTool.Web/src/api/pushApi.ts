@@ -1,5 +1,5 @@
 import { apiRequest } from './client'
-import type { PushSettings, RegisterPushSubscriptionRequest } from '../types/log'
+import type { PushSettings, RegisterPushSubscriptionRequest, SendNotificationResult } from '../types/log'
 
 export const getPushPublicKey = () => apiRequest<{ publicKey: string }>('/api/push/public-key')
 
@@ -10,4 +10,16 @@ export const registerPushSubscription = (payload: RegisterPushSubscriptionReques
   apiRequest<void>('/api/push/subscribe', {
     method: 'POST',
     body: JSON.stringify(payload),
+  })
+
+export const notifyAllMembers = (message: string) =>
+  apiRequest<SendNotificationResult>('/api/push/notify-all', {
+    method: 'POST',
+    body: JSON.stringify({ message }),
+  })
+
+export const notifyMember = (memberName: string, message: string) =>
+  apiRequest<SendNotificationResult>(`/api/push/notify/${encodeURIComponent(memberName)}`, {
+    method: 'POST',
+    body: JSON.stringify({ message }),
   })

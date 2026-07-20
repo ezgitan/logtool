@@ -126,6 +126,7 @@ select:disabled, textarea:disabled { background: #f1f5f9; color: var(--muted); c
 
 .admin-add-form { display: grid; gap: 8px; }
 .admin-add-form button[type='submit'] { margin-top: 14px; width: 100%; }
+.admin-add-form textarea { min-height: 90px; }
 .admin-member-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; max-height: 480px; overflow-y: auto; }
 .admin-member-row {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -133,12 +134,21 @@ select:disabled, textarea:disabled { background: #f1f5f9; color: var(--muted); c
 }
 .admin-member-row:hover { border-color: var(--border); }
 .admin-member-row span { font-size: 14px; font-weight: 700; color: var(--ink); }
+.admin-member-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.admin-notify-button {
+  border: 1px solid var(--border); background: #fff; color: var(--brand-dark); border-radius: 8px;
+  padding: 7px 12px; font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.admin-notify-button:hover { background: var(--brand-soft); }
 .admin-remove-button {
   border: 1px solid #fecaca; background: #fef2f2; color: #b91c1c; border-radius: 8px;
   padding: 7px 12px; font-size: 12px; font-weight: 700; cursor: pointer;
 }
 .admin-remove-button:hover:not(:disabled) { background: #fee2e2; }
 .admin-remove-button:disabled { cursor: not-allowed; opacity: .5; }
+
+.notify-member-card { width: min(100%, 460px); padding: 32px; display: grid; gap: 4px; }
+.notify-member-card h2 { margin: 0 0 14px; font-size: 22px; letter-spacing: -.025em; color: var(--ink); }
 
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .log-field { margin-top: 20px; position: relative; }

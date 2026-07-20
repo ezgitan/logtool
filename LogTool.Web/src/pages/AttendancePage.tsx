@@ -29,6 +29,10 @@ function formatHeaderDate(isoDate: string) {
   return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`
 }
 
+function tsvCell(value: string) {
+  return /[\t\n"]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value
+}
+
 export function AttendancePage() {
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth() + 1)
@@ -76,11 +80,16 @@ export function AttendancePage() {
 
     const headerRow = [
       '',
-      ...grid.dates.map((date) => `${weekdayFormatter.format(parseIsoDate(date))} ${formatHeaderDate(date)}`),
+      ...grid.dates.map((date) =>
+        tsvCell(`${weekdayFormatter.format(parseIsoDate(date))}\n${formatHeaderDate(date)}`),
+      ),
     ]
-    const memberRows = grid.members.map((member) => [member.memberName, ...member.codes.map((code) => code ?? '')])
+    const memberRows = grid.members.map((member) => [
+      tsvCell(member.memberName),
+      ...member.codes.map((code) => code ?? ''),
+    ])
     const legendRows = [[''], ['İzin Kodları'], ...grid.legend.map((entry) => [`${entry.code}: ${entry.label}`])]
-    const tsv = [headerRow, ...memberRows, ...legendRows].map((row) => row.join('\t')).join('\n')
+    const tsv = [headerRow, ...memberRows, ...legendRows].map((row) => row.join('\t')).join('\r\n')
 
     try {
       await navigator.clipboard.writeText(tsv)

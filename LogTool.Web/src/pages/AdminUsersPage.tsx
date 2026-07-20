@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ApiRequestError } from '../api/client'
 import { addMember, deactivateMember, getMembers } from '../api/logsApi'
+import { notifyAllMembers, notifyMember } from '../api/pushApi'
 import { StatusMessage } from '../components/StatusMessage'
 import type { Member } from '../types/log'
 
@@ -21,6 +22,13 @@ export function AdminUsersPage() {
   const [adding, setAdding] = useState(false)
   const [removingName, setRemovingName] = useState<string | null>(null)
   const [message, setMessage] = useState<{ tone: 'error' | 'success' | 'info'; text: string } | null>(null)
+
+  const [broadcastMessage, setBroadcastMessage] = useState('')
+  const [broadcastSending, setBroadcastSending] = useState(false)
+
+  const [notifyTarget, setNotifyTarget] = useState<string | null>(null)
+  const [notifyMessageText, setNotifyMessageText] = useState('')
+  const [notifySending, setNotifySending] = useState(false)
 
   const refresh = useCallback(async () => {
     setLoading(true)
@@ -74,6 +82,60 @@ export function AdminUsersPage() {
     }
   }
 
+  async function handleBroadcast(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const trimmed = broadcastMessage.trim()
+    if (!trimmed) return
+
+    setBroadcastSending(true)
+    setMessage(null)
+    try {
+      const result = await notifyAllMembers(trimmed)
+      setBroadcastMessage('')
+      setMessage(
+        result.sentCount > 0
+          ? { tone: 'success', text: `Notification sent to ${result.sentCount} device(s).` }
+          : { tone: 'error', text: 'No devices have notifications enabled yet.' },
+      )
+    } catch (error) {
+      setMessage({ tone: 'error', text: getErrorMessage(error) })
+    } finally {
+      setBroadcastSending(false)
+    }
+  }
+
+  function openNotifyModal(memberName: string) {
+    setNotifyTarget(memberName)
+    setNotifyMessageText('')
+  }
+
+  function closeNotifyModal() {
+    setNotifyTarget(null)
+    setNotifyMessageText('')
+  }
+
+  async function handleNotifyMember(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!notifyTarget) return
+    const trimmed = notifyMessageText.trim()
+    if (!trimmed) return
+
+    setNotifySending(true)
+    try {
+      const result = await notifyMember(notifyTarget, trimmed)
+      setMessage(
+        result.sentCount > 0
+          ? { tone: 'success', text: `Notification sent to ${notifyTarget}.` }
+          : { tone: 'error', text: `${notifyTarget} has no notifications enabled.` },
+      )
+      closeNotifyModal()
+    } catch (error) {
+      setMessage({ tone: 'error', text: getErrorMessage(error) })
+    } finally {
+      setNotifySending(false)
+    }
+  }
+
   return (
     <>
       <section className="intro">
@@ -109,6 +171,30 @@ export function AdminUsersPage() {
           </form>
         </section>
 
+        <section className="panel form-panel">
+          <div className="panel-heading">
+            <div>
+              <h2>Send notification</h2>
+            </div>
+          </div>
+
+          <form onSubmit={handleBroadcast} className="admin-add-form">
+            <label>
+              Message
+              <textarea
+                value={broadcastMessage}
+                onChange={(event) => setBroadcastMessage(event.target.value)}
+                placeholder="Message to send to all users"
+                rows={3}
+                required
+              />
+            </label>
+            <button type="submit" disabled={broadcastSending || !broadcastMessage.trim()}>
+              {broadcastSending ? 'Sending…' : 'Send to all users'}
+            </button>
+          </form>
+        </section>
+
         <section className="panel side-panel">
           <div className="panel-heading">
             <div>
@@ -126,20 +212,56 @@ export function AdminUsersPage() {
               {members.map((member) => (
                 <li key={member.name} className="admin-member-row">
                   <span>{member.name}</span>
-                  <button
-                    type="button"
-                    className="admin-remove-button"
-                    onClick={() => handleRemove(member.name)}
-                    disabled={removingName === member.name}
-                  >
-                    {removingName === member.name ? 'Removing…' : 'Remove'}
-                  </button>
+                  <div className="admin-member-actions">
+                    <button type="button" className="admin-notify-button" onClick={() => openNotifyModal(member.name)}>
+                      Notify
+                    </button>
+                    <button
+                      type="button"
+                      className="admin-remove-button"
+                      onClick={() => handleRemove(member.name)}
+                      disabled={removingName === member.name}
+                    >
+                      {removingName === member.name ? 'Removing…' : 'Remove'}
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
           )}
         </section>
       </div>
+
+      {notifyTarget && (
+        <div className="modal-overlay" onClick={closeNotifyModal}>
+          <div className="panel notify-member-card" onClick={(event) => event.stopPropagation()}>
+            <p className="eyebrow">SEND NOTIFICATION</p>
+            <h2>{notifyTarget}</h2>
+
+            <form onSubmit={handleNotifyMember} className="admin-add-form">
+              <label>
+                Message
+                <textarea
+                  value={notifyMessageText}
+                  onChange={(event) => setNotifyMessageText(event.target.value)}
+                  placeholder={`Message to send to ${notifyTarget}`}
+                  rows={3}
+                  autoFocus
+                  required
+                />
+              </label>
+              <div className="reminder-actions">
+                <button type="button" onClick={closeNotifyModal}>
+                  Cancel
+                </button>
+                <button type="submit" disabled={notifySending || !notifyMessageText.trim()}>
+                  {notifySending ? 'Sending…' : 'Send'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   )
 }

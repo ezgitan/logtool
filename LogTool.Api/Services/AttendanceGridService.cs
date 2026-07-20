@@ -10,15 +10,18 @@ public sealed class AttendanceGridService(
         excelService.ExecuteReadAsync(
             workbook =>
             {
+                var logWorksheet = schemaService.GetLogWorksheet(workbook);
                 var attendanceWorksheet = schemaService.GetAttendanceWorksheet(workbook);
-                var members = schemaService.GetActiveMembers(attendanceWorksheet);
+                var members = schemaService.GetActiveMembers(logWorksheet);
                 var dateRows = schemaService.GetDateRowsInMonth(attendanceWorksheet, year, month);
                 var dates = BuildWeekdays(year, month);
 
                 var rows = new List<AttendanceGridRowDto>(members.Count);
                 foreach (var member in members)
                 {
-                    var column = schemaService.FindActiveMemberColumn(attendanceWorksheet, member.Name);
+                    var logColumn = schemaService.FindActiveMemberColumn(logWorksheet, member.Name);
+                    var canonicalMemberName = logWorksheet.Cell(1, logColumn).GetString().Trim();
+                    var attendanceColumn = schemaService.FindActiveMemberColumn(attendanceWorksheet, member.Name);
                     var codes = new List<string?>(dates.Count);
 
                     foreach (var date in dates)
@@ -29,11 +32,11 @@ public sealed class AttendanceGridService(
                             continue;
                         }
 
-                        var raw = attendanceWorksheet.Cell(row, column).GetString().Trim();
+                        var raw = attendanceWorksheet.Cell(row, attendanceColumn).GetString().Trim();
                         codes.Add(raw.Length == 0 ? null : AttendanceTypes.CodeFor(raw));
                     }
 
-                    rows.Add(new AttendanceGridRowDto(member.Name, codes));
+                    rows.Add(new AttendanceGridRowDto(canonicalMemberName, codes));
                 }
 
                 var legend = AttendanceTypes.Legend
