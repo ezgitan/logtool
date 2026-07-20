@@ -89,6 +89,11 @@ function App() {
               if (deliveredViaUrl) {
                 setClosingDeliveryTab(true)
                 setPendingSession(resolved)
+                // Don't just hope some other already-open tab is still alive
+                // to pick this up via the storage event below - open a fresh
+                // home tab explicitly, so signing in always lands somewhere
+                // visible even if no other LogTool tab was open.
+                window.open(`${window.location.origin}/`, '_blank')
                 setTimeout(() => window.close(), 400)
                 // If we're still here after a moment, closing was blocked
                 // (e.g. no other tab opened this one) - offer a way forward
