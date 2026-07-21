@@ -382,8 +382,12 @@ function App() {
 
       <main id="main">
         {page === 'my-logs' && session.role === 'member' && <MyLogsPage memberName={session.memberName} />}
-        {page === 'daily-logs' && <DailyLogsPage />}
-        {page === 'monthly-report' && <MonthlyReportPage />}
+        {page === 'daily-logs' && (
+          <DailyLogsPage currentMemberName={session.role === 'member' ? session.memberName : null} />
+        )}
+        {page === 'monthly-report' && (
+          <MonthlyReportPage currentMemberName={session.role === 'member' ? session.memberName : null} />
+        )}
         {page === 'admin-users' && isAdmin && <AdminUsersPage />}
         {page === 'attendance' && isAdmin && <AttendancePage />}
       </main>

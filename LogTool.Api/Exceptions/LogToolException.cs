@@ -29,9 +29,6 @@ public sealed class InvalidAttendanceException(string attendance)
 public sealed class LogSaveException()
     : LogToolException("log_save_failed", "Failed to save the log.");
 
-public sealed class LogAlreadySubmittedException(DateOnly date)
-    : LogToolException("log_already_submitted", $"A log has already been submitted for {date:dd.MM.yyyy} and cannot be edited.");
-
 public sealed class BankHolidayLockedException(DateOnly date)
     : LogToolException("bank_holiday_locked", $"{date:dd.MM.yyyy} is an official public holiday and cannot be changed.");
 

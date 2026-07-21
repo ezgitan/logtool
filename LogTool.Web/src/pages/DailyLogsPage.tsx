@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ApiRequestError } from '../api/client'
 import { getDailyLogs } from '../api/logsApi'
+import { LogEditModal } from '../components/LogEditModal'
 import { StatusMessage } from '../components/StatusMessage'
 import type { DailyLogEntry } from '../types/log'
 
@@ -27,16 +28,19 @@ function parseIsoDate(isoDate: string) {
   return new Date(y, m - 1, d)
 }
 
-/** Last 6 days before today, oldest first, so they sit to the left of the "Today" box. */
+/** Last 6 work days before today (weekends skipped), oldest first, so they sit to the left of the "Today" box. */
 function getPastWeekDates() {
   const base = parseIsoDate(today)
   const dates: string[] = []
-  for (let i = 6; i >= 1; i--) {
-    const day = new Date(base)
-    day.setDate(day.getDate() - i)
-    dates.push(day.toISOString().slice(0, 10))
+  const cursor = new Date(base)
+
+  while (dates.length < 6) {
+    cursor.setDate(cursor.getDate() - 1)
+    if (cursor.getDay() === 0 || cursor.getDay() === 6) continue
+    dates.push(cursor.toISOString().slice(0, 10))
   }
-  return dates
+
+  return dates.reverse()
 }
 
 const pastWeekDates = getPastWeekDates()
@@ -51,25 +55,40 @@ function getErrorMessage(error: unknown) {
   return 'Something went wrong. Please try again.'
 }
 
-export function DailyLogsPage() {
+interface DailyLogsPageProps {
+  currentMemberName: string | null
+}
+
+export function DailyLogsPage({ currentMemberName }: DailyLogsPageProps) {
   const [date, setDate] = useState(getInitialDate)
   const [entries, setEntries] = useState<DailyLogEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [editingOwnEntry, setEditingOwnEntry] = useState(false)
 
-  useEffect(() => {
-    if (!date) return
-    localStorage.setItem(SELECTED_DATE_STORAGE_KEY, date)
-    setLoading(true)
-    setError(null)
+  const refreshEntries = () =>
     getDailyLogs(date)
       .then(setEntries)
       .catch((caught: unknown) => {
         setEntries([])
         setError(getErrorMessage(caught))
       })
-      .finally(() => setLoading(false))
+
+  useEffect(() => {
+    if (!date) return
+    localStorage.setItem(SELECTED_DATE_STORAGE_KEY, date)
+    setLoading(true)
+    setError(null)
+    refreshEntries().finally(() => setLoading(false))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date])
+
+  const ownEntry = currentMemberName ? entries.find((entry) => entry.memberName === currentMemberName) : undefined
+
+  function handleEditSaved() {
+    setEditingOwnEntry(false)
+    void refreshEntries()
+  }
 
   return (
     <>
@@ -129,6 +148,7 @@ export function DailyLogsPage() {
                   <th scope="col">Member</th>
                   <th scope="col">Attendance</th>
                   <th scope="col">Log</th>
+                  {currentMemberName && <th scope="col"></th>}
                 </tr>
               </thead>
               <tbody>
@@ -147,6 +167,19 @@ export function DailyLogsPage() {
                     <td className={entry.log ? 'daily-log' : 'daily-log daily-log-empty'}>
                       {entry.log || 'No log entered'}
                     </td>
+                    {currentMemberName && (
+                      <td>
+                        {entry.memberName === currentMemberName && (
+                          <button
+                            type="button"
+                            className="admin-notify-button"
+                            onClick={() => setEditingOwnEntry(true)}
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -154,6 +187,18 @@ export function DailyLogsPage() {
           </div>
         )}
       </section>
+
+      {editingOwnEntry && currentMemberName && (
+        <LogEditModal
+          memberName={currentMemberName}
+          date={date}
+          dateLabel={dateFormatter.format(new Date(`${date}T12:00:00`))}
+          initialAttendance={ownEntry?.attendance ?? null}
+          initialLog={ownEntry?.log ?? null}
+          onSaved={handleEditSaved}
+          onCancel={() => setEditingOwnEntry(false)}
+        />
+      )}
     </>
   )
 }

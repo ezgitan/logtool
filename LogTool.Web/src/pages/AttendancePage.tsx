@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ApiRequestError } from '../api/client'
-import { adminUpdateLog, getAttendanceGrid, getLogRange } from '../api/logsApi'
+import { getAttendanceGrid, getLogRange } from '../api/logsApi'
+import { LogEditModal } from '../components/LogEditModal'
 import { StatusMessage } from '../components/StatusMessage'
 import type { AttendanceGrid } from '../types/log'
 
@@ -8,17 +9,6 @@ const now = new Date()
 
 const monthFormatter = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' })
 const weekdayFormatter = new Intl.DateTimeFormat('en-GB', { weekday: 'long' })
-
-const attendanceOptions = [
-  'Office',
-  'Home Office',
-  'Leave',
-  'School',
-  'Mission',
-  'Company Activity',
-  'Bank Holiday',
-  'Report',
-]
 
 function getErrorMessage(error: unknown) {
   if (error instanceof ApiRequestError) {
@@ -54,10 +44,9 @@ export function AttendancePage() {
   const [copied, setCopied] = useState(false)
 
   const [editingCell, setEditingCell] = useState<EditingCell | null>(null)
-  const [editAttendance, setEditAttendance] = useState('Office')
-  const [editLogText, setEditLogText] = useState('')
+  const [editInitialAttendance, setEditInitialAttendance] = useState<string | null>(null)
+  const [editInitialLog, setEditInitialLog] = useState<string | null>(null)
   const [editLoading, setEditLoading] = useState(false)
-  const [editSaving, setEditSaving] = useState(false)
   const [editError, setEditError] = useState<string | null>(null)
 
   const isCurrentOrFutureMonth = year > now.getFullYear() || (year === now.getFullYear() && month >= now.getMonth() + 1)
@@ -117,15 +106,15 @@ export function AttendancePage() {
 
   function openEditCell(memberName: string, date: string) {
     setEditingCell({ memberName, date })
-    setEditAttendance('Office')
-    setEditLogText('')
+    setEditInitialAttendance(null)
+    setEditInitialLog(null)
     setEditError(null)
     setEditLoading(true)
     getLogRange(memberName, date, date)
       .then((entries) => {
         const entry = entries[0]
-        setEditAttendance(entry?.attendance ?? 'Office')
-        setEditLogText(entry?.log ?? '')
+        setEditInitialAttendance(entry?.attendance ?? null)
+        setEditInitialLog(entry?.log ?? null)
       })
       .catch((caught: unknown) => setEditError(getErrorMessage(caught)))
       .finally(() => setEditLoading(false))
@@ -136,24 +125,9 @@ export function AttendancePage() {
     setEditError(null)
   }
 
-  async function handleSaveEdit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    if (!editingCell) return
-
-    setEditSaving(true)
-    setEditError(null)
-    try {
-      await adminUpdateLog(editingCell.memberName, editingCell.date, {
-        attendance: editAttendance,
-        log: editLogText,
-      })
-      await refreshGrid()
-      closeEditCell()
-    } catch (caught) {
-      setEditError(getErrorMessage(caught))
-    } finally {
-      setEditSaving(false)
-    }
+  function handleEditSaved() {
+    closeEditCell()
+    void refreshGrid()
   }
 
   return (
@@ -241,47 +215,28 @@ export function AttendancePage() {
         )}
       </section>
 
-      {editingCell && (
+      {editingCell && editLoading && (
         <div className="modal-overlay" onClick={closeEditCell}>
           <div className="panel notify-member-card" onClick={(event) => event.stopPropagation()}>
             <p className="eyebrow">EDIT LOG</p>
             <h2>{editingCell.memberName}</h2>
             <p className="login-hint">{formatHeaderDate(editingCell.date)}</p>
-
-            {editLoading && <p className="empty-state">Loading…</p>}
-            {editError && <StatusMessage tone="error">{editError}</StatusMessage>}
-
-            {!editLoading && (
-              <form onSubmit={handleSaveEdit} className="admin-add-form">
-                <label>
-                  Attendance
-                  <select value={editAttendance} onChange={(event) => setEditAttendance(event.target.value)}>
-                    {attendanceOptions.map((option) => (
-                      <option key={option}>{option}</option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Log
-                  <textarea
-                    value={editLogText}
-                    onChange={(event) => setEditLogText(event.target.value)}
-                    rows={4}
-                    maxLength={10000}
-                  />
-                </label>
-                <div className="reminder-actions">
-                  <button type="button" className="button-secondary" onClick={closeEditCell}>
-                    Cancel
-                  </button>
-                  <button type="submit" disabled={editSaving}>
-                    {editSaving ? 'Saving…' : 'Save'}
-                  </button>
-                </div>
-              </form>
-            )}
+            {editError ? <StatusMessage tone="error">{editError}</StatusMessage> : <p className="empty-state">Loading…</p>}
           </div>
         </div>
+      )}
+
+      {editingCell && !editLoading && (
+        <LogEditModal
+          memberName={editingCell.memberName}
+          date={editingCell.date}
+          dateLabel={formatHeaderDate(editingCell.date)}
+          initialAttendance={editInitialAttendance}
+          initialLog={editInitialLog}
+          asAdmin
+          onSaved={handleEditSaved}
+          onCancel={closeEditCell}
+        />
       )}
     </>
   )

@@ -57,11 +57,6 @@ public sealed class LogService(
                 var attendanceRow = schemaService.EnsureDateRow(attendanceWorksheet, date);
                 var canonicalMemberName = logWorksheet.Cell(1, logColumn).GetString().Trim();
 
-                if (!string.IsNullOrWhiteSpace(logWorksheet.Cell(logRow, logColumn).GetString()))
-                {
-                    throw new LogAlreadySubmittedException(date);
-                }
-
                 var existingAttendance = attendanceWorksheet.Cell(attendanceRow, attendanceColumn).GetString().Trim();
                 if (string.Equals(existingAttendance, AttendanceTypes.BankHoliday, StringComparison.OrdinalIgnoreCase))
                 {
@@ -83,9 +78,9 @@ public sealed class LogService(
 
     /// <summary>
     /// Admin-only correction path: writes log + attendance for any date,
-    /// bypassing the write-once ("already submitted") and Bank Holiday locks
-    /// that apply to a member's own submissions - used to fix mistakes after
-    /// the fact from the Attendance page.
+    /// bypassing the Bank Holiday lock that still applies to a member's own
+    /// edits via <see cref="UpdateAsync"/> - used to fix mistakes from the
+    /// Attendance page, including on auto-filled holiday rows.
     /// </summary>
     public Task<LogEntryDto> AdminUpdateAsync(
         string memberName,

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ApiRequestError } from '../api/client'
 import { getLogRange, getMonthlyReport } from '../api/logsApi'
+import { LogEditModal } from '../components/LogEditModal'
 import { StatusMessage } from '../components/StatusMessage'
 import type { LogEntry, MonthlyReport } from '../types/log'
 
@@ -62,7 +63,11 @@ interface RemoteDaysSelection {
   dates: string[]
 }
 
-export function MonthlyReportPage() {
+interface MonthlyReportPageProps {
+  currentMemberName: string | null
+}
+
+export function MonthlyReportPage({ currentMemberName }: MonthlyReportPageProps) {
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth() + 1)
   const [report, setReport] = useState<MonthlyReport | null>(null)
@@ -76,6 +81,7 @@ export function MonthlyReportPage() {
   const [rangeEntries, setRangeEntries] = useState<LogEntry[] | null>(null)
   const [rangeLoading, setRangeLoading] = useState(false)
   const [rangeError, setRangeError] = useState<string | null>(null)
+  const [editingEntryDate, setEditingEntryDate] = useState<string | null>(null)
 
   const isCurrentOrFutureMonth = year > now.getFullYear() || (year === now.getFullYear() && month >= now.getMonth() + 1)
 
@@ -92,6 +98,19 @@ export function MonthlyReportPage() {
       })
       .finally(() => setLoading(false))
   }, [year, month])
+
+  const refreshRange = () => {
+    if (!selectedMember || !rangeStart || !rangeEnd) return
+    setRangeLoading(true)
+    setRangeError(null)
+    return getLogRange(selectedMember, rangeStart, rangeEnd)
+      .then(setRangeEntries)
+      .catch((caught: unknown) => {
+        setRangeEntries(null)
+        setRangeError(getErrorMessage(caught))
+      })
+      .finally(() => setRangeLoading(false))
+  }
 
   useEffect(() => {
     if (!selectedMember || !rangeStart || !rangeEnd) return
@@ -146,6 +165,12 @@ export function MonthlyReportPage() {
     setSelectedMember(null)
     setRangeEntries(null)
     setRangeError(null)
+    setEditingEntryDate(null)
+  }
+
+  function handleEntryEditSaved() {
+    setEditingEntryDate(null)
+    void refreshRange()
   }
 
   const breakdown: Record<string, number> = {}
@@ -335,7 +360,10 @@ export function MonthlyReportPage() {
                 <ul className="range-log-list">
                   {rangeEntries.length === 0 && <li className="empty-state">No records in this range.</li>}
                   {rangeEntries.map((entry) => (
-                    <li key={entry.date} className="range-log-item">
+                    <li
+                      key={entry.date}
+                      className={selectedMember === currentMemberName ? 'range-log-item range-log-item-editable' : 'range-log-item'}
+                    >
                       <div className="range-log-date">{formatShortDate(entry.date)}</div>
                       {entry.attendance ? (
                         <span className={`attendance-badge attendance-${slugify(entry.attendance)}`}>
@@ -347,6 +375,15 @@ export function MonthlyReportPage() {
                       <div className={entry.log ? 'daily-log' : 'daily-log daily-log-empty'}>
                         {entry.log || 'No log entered'}
                       </div>
+                      {selectedMember === currentMemberName && (
+                        <button
+                          type="button"
+                          className="admin-notify-button"
+                          onClick={() => setEditingEntryDate(entry.date)}
+                        >
+                          Edit
+                        </button>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -360,6 +397,18 @@ export function MonthlyReportPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {editingEntryDate && selectedMember && (
+        <LogEditModal
+          memberName={selectedMember}
+          date={editingEntryDate}
+          dateLabel={formatShortDate(editingEntryDate)}
+          initialAttendance={rangeEntries?.find((entry) => entry.date === editingEntryDate)?.attendance ?? null}
+          initialLog={rangeEntries?.find((entry) => entry.date === editingEntryDate)?.log ?? null}
+          onSaved={handleEntryEditSaved}
+          onCancel={() => setEditingEntryDate(null)}
+        />
       )}
     </>
   )

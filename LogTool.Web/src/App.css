@@ -328,6 +328,7 @@ button.button-success:disabled { cursor: not-allowed; opacity: .5; }
   display: grid; grid-template-columns: 90px auto 1fr; align-items: start; gap: 12px;
   padding: 10px 14px; border-radius: 10px; background: #f8fafc; border: 1px solid var(--border); font-size: 13px;
 }
+.range-log-item-editable { grid-template-columns: 90px auto 1fr auto; }
 .range-log-date { color: var(--muted); font-weight: 650; }
 .range-log-item .daily-log { font-size: 13px; }
 

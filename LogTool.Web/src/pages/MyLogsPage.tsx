@@ -38,7 +38,7 @@ export function MyLogsPage({ memberName }: MyLogsPageProps) {
   const [date, setDate] = useState(today)
   const [attendance, setAttendance] = useState('Office')
   const [log, setLog] = useState('')
-  const [locked, setLocked] = useState(false)
+  const [hasExistingEntry, setHasExistingEntry] = useState(false)
   const [missingDays, setMissingDays] = useState<MissingLogDay[]>([])
   const [loadingMissing, setLoadingMissing] = useState(false)
   const [loadingLog, setLoadingLog] = useState(false)
@@ -70,9 +70,9 @@ export function MyLogsPage({ memberName }: MyLogsPageProps) {
         const loadedAttendance = entry.attendance ?? 'Office'
         setAttendance(loadedAttendance)
         setLog(entry.log ?? (autoLogAttendance.has(loadedAttendance) ? loadedAttendance : ''))
-        setLocked(Boolean(entry.log))
+        setHasExistingEntry(Boolean(entry.log))
         if (entry.log) {
-          setMessage({ tone: 'info', text: 'A log has already been submitted for this date and cannot be edited.' })
+          setMessage({ tone: 'info', text: 'You already have an entry for this date - feel free to update it.' })
         } else if (entry.attendance) {
           setMessage({ tone: 'info', text: 'Attendance is set for this date; the log is still missing.' })
         }
@@ -80,7 +80,7 @@ export function MyLogsPage({ memberName }: MyLogsPageProps) {
       .catch((error: unknown) => {
         setAttendance('Office')
         setLog('')
-        setLocked(false)
+        setHasExistingEntry(false)
         setMessage({ tone: 'error', text: getErrorMessage(error) })
       })
       .finally(() => setLoadingLog(false))
@@ -97,13 +97,13 @@ export function MyLogsPage({ memberName }: MyLogsPageProps) {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!memberName || !date || !log.trim() || locked) return
+    if (!memberName || !date || !log.trim()) return
     setSaving(true)
     setMessage(null)
     try {
       await updateLog(memberName, date, { attendance, log })
       setMessage({ tone: 'success', text: 'Log and attendance saved to the Excel file.' })
-      setLocked(true)
+      setHasExistingEntry(true)
       await refreshMissingDays()
     } catch (error) {
       setMessage({ tone: 'error', text: getErrorMessage(error) })
@@ -159,11 +159,7 @@ export function MyLogsPage({ memberName }: MyLogsPageProps) {
               </label>
               <label>
                 Attendance
-                <select
-                  value={attendance}
-                  onChange={(event) => handleAttendanceChange(event.target.value)}
-                  disabled={locked}
-                >
+                <select value={attendance} onChange={(event) => handleAttendanceChange(event.target.value)}>
                   {attendanceOptions.map((option) => <option key={option}>{option}</option>)}
                 </select>
               </label>
@@ -176,16 +172,16 @@ export function MyLogsPage({ memberName }: MyLogsPageProps) {
                 onChange={(event) => setLog(event.target.value)}
                 maxLength={10000}
                 placeholder="Describe the tasks, research, and key outcomes for today…"
-                disabled={locked || autoLogAttendance.has(attendance)}
+                disabled={autoLogAttendance.has(attendance)}
                 required
               />
               <span className="character-count">{log.length.toLocaleString('en-GB')} / 10,000</span>
             </label>
 
             <div className="form-footer">
-              <p>{locked ? 'This entry cannot be changed once submitted.' : 'This date cannot be edited after saving.'}</p>
-              <button type="submit" disabled={saving || loadingLog || locked || !log.trim()}>
-                {locked ? 'Saved' : saving ? 'Saving…' : 'Save entry'}
+              <p>{hasExistingEntry ? 'You can update this entry any time.' : 'You can update this entry any time after saving.'}</p>
+              <button type="submit" disabled={saving || loadingLog || !log.trim()}>
+                {saving ? 'Saving…' : hasExistingEntry ? 'Update entry' : 'Save entry'}
               </button>
             </div>
           </form>
