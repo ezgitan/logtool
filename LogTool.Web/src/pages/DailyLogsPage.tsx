@@ -89,6 +89,7 @@ export function DailyLogsPage({ currentMemberName, isAdmin }: DailyLogsPageProps
     localStorage.setItem(SELECTED_DATE_STORAGE_KEY, date)
     setLoading(true)
     setError(null)
+    setSelectedRow(null)
     refreshEntries().finally(() => setLoading(false))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date])
@@ -103,7 +104,7 @@ export function DailyLogsPage({ currentMemberName, isAdmin }: DailyLogsPageProps
   }
 
   return (
-    <>
+    <div onClick={() => setSelectedRow(null)}>
       <section className="intro">
         <div>
           <h1>Daily Logs</h1>
@@ -168,9 +169,10 @@ export function DailyLogsPage({ currentMemberName, isAdmin }: DailyLogsPageProps
                   <tr
                     key={entry.memberName}
                     className={entry.memberName === selectedRow ? 'row-selected' : undefined}
-                    onClick={() =>
+                    onClick={(event) => {
+                      event.stopPropagation()
                       setSelectedRow((current) => (current === entry.memberName ? null : entry.memberName))
-                    }
+                    }}
                   >
                     <td className="daily-member">{entry.memberName}</td>
                     <td>
@@ -221,7 +223,7 @@ export function DailyLogsPage({ currentMemberName, isAdmin }: DailyLogsPageProps
           onCancel={() => setEditingMemberName(null)}
         />
       )}
-    </>
+    </div>
   )
 }
 
