@@ -72,6 +72,7 @@ export function DailyLogsPage({ currentMemberName }: DailyLogsPageProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [editingOwnEntry, setEditingOwnEntry] = useState(false)
+  const [selectedRow, setSelectedRow] = useState<string | null>(null)
 
   const refreshEntries = () =>
     getDailyLogs(date)
@@ -149,7 +150,7 @@ export function DailyLogsPage({ currentMemberName }: DailyLogsPageProps) {
 
         {!loading && !error && entries.length > 0 && (
           <div className="daily-table-wrap">
-            <table className="daily-table" aria-label="Daily team records">
+            <table className="daily-table daily-logs-table" aria-label="Daily team records">
               <thead>
                 <tr>
                   <th scope="col">Member</th>
@@ -160,7 +161,13 @@ export function DailyLogsPage({ currentMemberName }: DailyLogsPageProps) {
               </thead>
               <tbody>
                 {entries.map((entry) => (
-                  <tr key={entry.memberName}>
+                  <tr
+                    key={entry.memberName}
+                    className={entry.memberName === selectedRow ? 'row-selected' : undefined}
+                    onClick={() =>
+                      setSelectedRow((current) => (current === entry.memberName ? null : entry.memberName))
+                    }
+                  >
                     <td className="daily-member">{entry.memberName}</td>
                     <td>
                       {entry.attendance ? (
@@ -180,7 +187,10 @@ export function DailyLogsPage({ currentMemberName }: DailyLogsPageProps) {
                           <button
                             type="button"
                             className="admin-notify-button"
-                            onClick={() => setEditingOwnEntry(true)}
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              setEditingOwnEntry(true)
+                            }}
                           >
                             Edit
                           </button>
