@@ -259,8 +259,9 @@ button.button-success:disabled { cursor: not-allowed; opacity: .5; }
 .daily-table tbody tr:nth-child(even) { background: #fbfdfe; }
 .daily-table tbody tr:hover { background: var(--brand-soft); }
 .daily-logs-table tbody tr { cursor: pointer; }
-.daily-logs-table tbody tr.row-selected { background: var(--brand-soft); box-shadow: inset 3px 0 0 var(--brand); }
-.daily-logs-table tbody tr.row-selected:hover { background: var(--brand-soft); }
+.daily-logs-table tbody tr.row-selected { background: #a5f3fc; box-shadow: inset 4px 0 0 var(--brand-dark); }
+.daily-logs-table tbody tr.row-selected .daily-member { color: var(--brand-dark); }
+.daily-logs-table tbody tr.row-selected:hover { background: #a5f3fc; }
 .daily-member { width: 220px; font-weight: 750; color: var(--ink); white-space: nowrap; }
 .daily-table td:nth-child(2) { width: 170px; }
 .daily-log { color: var(--ink); line-height: 1.6; white-space: pre-wrap; font-weight: 500; }
@@ -331,11 +332,12 @@ button.button-success:disabled { cursor: not-allowed; opacity: .5; }
   .member-range-layout { grid-template-columns: 1fr; }
 }
 .range-log-item {
-  display: grid; grid-template-columns: 90px 148px 1fr; align-items: start; gap: 12px;
+  display: grid; grid-template-columns: 90px 122px 1fr; align-items: start; gap: 12px;
   padding: 10px 14px; border-radius: 10px; background: #f8fafc; border: 1px solid var(--border); font-size: 13px;
 }
-.range-log-item-editable { grid-template-columns: 90px 148px 1fr auto; }
+.range-log-item-editable { grid-template-columns: 90px 122px 1fr auto; }
 .range-log-date { color: var(--muted); font-weight: 650; }
+.range-log-item .attendance-badge { justify-self: start; }
 .range-log-item .daily-log { font-size: 13px; }
 
 .attendance-badge {
