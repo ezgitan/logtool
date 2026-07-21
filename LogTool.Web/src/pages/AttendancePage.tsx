@@ -89,10 +89,8 @@ export function AttendancePage() {
   async function copyTable() {
     if (!grid) return
 
-    const dayNameRow = ['', ...grid.dates.map((date) => weekdayFormatter.format(parseIsoDate(date)))]
-    const dateRow = ['', ...grid.dates.map((date) => formatHeaderDate(date))]
     const memberRows = grid.members.map((member) => [member.memberName, ...member.codes.map((code) => code ?? '')])
-    const tsv = [dayNameRow, dateRow, ...memberRows].map((row) => row.join('\t')).join('\r\n')
+    const tsv = memberRows.map((row) => row.join('\t')).join('\r\n')
 
     try {
       await navigator.clipboard.writeText(tsv)
