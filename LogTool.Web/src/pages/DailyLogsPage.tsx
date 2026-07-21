@@ -5,7 +5,14 @@ import { LogEditModal } from '../components/LogEditModal'
 import { StatusMessage } from '../components/StatusMessage'
 import type { DailyLogEntry } from '../types/log'
 
-const today = new Date().toISOString().slice(0, 10)
+function toLocalIsoDate(date: Date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const today = toLocalIsoDate(new Date())
 const SELECTED_DATE_STORAGE_KEY = 'logtool.dailyLogsDate'
 
 function getInitialDate() {
@@ -37,7 +44,7 @@ function getPastWeekDates() {
   while (dates.length < 6) {
     cursor.setDate(cursor.getDate() - 1)
     if (cursor.getDay() === 0 || cursor.getDay() === 6) continue
-    dates.push(cursor.toISOString().slice(0, 10))
+    dates.push(toLocalIsoDate(cursor))
   }
 
   return dates.reverse()

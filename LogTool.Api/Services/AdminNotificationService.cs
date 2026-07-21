@@ -4,30 +4,45 @@ using WebPush;
 
 namespace LogTool.Api.Services;
 
+public sealed record AdminNotificationSendResult(int RecipientCount, IReadOnlyList<string> RecipientNames);
+
 public sealed class AdminNotificationService(
     PushSubscriptionStore store,
     NotificationStore notificationStore,
+    AdminMessageHistoryStore messageHistoryStore,
     MemberService memberService,
     VapidKeyProvider vapidKeyProvider,
     TimeProvider timeProvider,
     ILogger<AdminNotificationService> logger)
 {
-    public async Task<int> SendToAllAsync(string message, CancellationToken cancellationToken)
+    public async Task<AdminNotificationSendResult> SendToAllAsync(string message, CancellationToken cancellationToken)
     {
         var activeMembers = await memberService.GetActiveMembersAsync(cancellationToken);
         var memberNames = activeMembers.Select(member => member.Name).ToList();
-        await notificationStore.AddAsync(memberNames, message, timeProvider.GetUtcNow(), cancellationToken);
-        return await SendPushAsync(null, message, cancellationToken);
+        var sentAt = timeProvider.GetUtcNow();
+        await notificationStore.AddAsync(memberNames, message, sentAt, cancellationToken);
+        await messageHistoryStore.AddAsync(message, "All users", sentAt, cancellationToken);
+
+        // Only push to people who are still active members today - the push
+        // subscription file can accumulate entries for former/renamed members
+        // that were never cleaned up, and those shouldn't count as recipients.
+        return await SendPushAsync(memberNames, message, cancellationToken);
     }
 
-    public async Task<int> SendToMemberAsync(string memberName, string message, CancellationToken cancellationToken)
+    public async Task<AdminNotificationSendResult> SendToMemberAsync(string memberName, string message, CancellationToken cancellationToken)
     {
-        await notificationStore.AddAsync([memberName], message, timeProvider.GetUtcNow(), cancellationToken);
-        return await SendPushAsync(memberName, message, cancellationToken);
+        var sentAt = timeProvider.GetUtcNow();
+        await notificationStore.AddAsync([memberName], message, sentAt, cancellationToken);
+        await messageHistoryStore.AddAsync(message, memberName, sentAt, cancellationToken);
+        return await SendPushAsync([memberName], message, cancellationToken);
     }
 
-    private async Task<int> SendPushAsync(string? onlyMemberName, string message, CancellationToken cancellationToken)
+    private async Task<AdminNotificationSendResult> SendPushAsync(
+        IReadOnlyList<string> targetMemberNames,
+        string message,
+        CancellationToken cancellationToken)
     {
+        var targetSet = new HashSet<string>(targetMemberNames, StringComparer.OrdinalIgnoreCase);
         var members = await store.GetAllAsync(cancellationToken);
         using var webPushClient = new WebPushClient();
         var vapidDetails = new VapidDetails(vapidKeyProvider.Subject, vapidKeyProvider.PublicKey, vapidKeyProvider.PrivateKey);
@@ -36,7 +51,7 @@ public sealed class AdminNotificationService(
         var reachedMembers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var (memberName, settings) in members)
         {
-            if (onlyMemberName is not null && !string.Equals(memberName, onlyMemberName, StringComparison.OrdinalIgnoreCase))
+            if (!targetSet.Contains(memberName))
             {
                 continue;
             }
@@ -72,6 +87,6 @@ public sealed class AdminNotificationService(
             }
         }
 
-        return reachedMembers.Count;
+        return new AdminNotificationSendResult(reachedMembers.Count, reachedMembers.ToList());
     }
 }

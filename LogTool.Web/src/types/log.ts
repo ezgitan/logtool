@@ -82,6 +82,7 @@ export interface PushSettings {
 
 export interface SendNotificationResult {
   recipientCount: number
+  recipientNames: string[]
 }
 
 export interface ExcelLink {
@@ -93,6 +94,13 @@ export interface AppNotification {
   message: string
   sentAt: string
   read: boolean
+}
+
+export interface AdminMessage {
+  id: string
+  message: string
+  target: string
+  sentAt: string
 }
 
 export interface ApiError {

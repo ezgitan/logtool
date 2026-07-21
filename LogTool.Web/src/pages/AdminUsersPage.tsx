@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { ApiRequestError } from '../api/client'
 import { addMember, deactivateMember, getExcelLink, getMembers } from '../api/logsApi'
 import { notifyAllMembers, notifyMember } from '../api/pushApi'
+import { MessageHistoryModal } from '../components/MessageHistoryModal'
 import { StatusMessage } from '../components/StatusMessage'
 import type { Member } from '../types/log'
 
@@ -29,6 +30,8 @@ export function AdminUsersPage() {
   const [notifyTarget, setNotifyTarget] = useState<string | null>(null)
   const [notifyMessageText, setNotifyMessageText] = useState('')
   const [notifySending, setNotifySending] = useState(false)
+
+  const [showMessageHistory, setShowMessageHistory] = useState(false)
 
   const [excelPath, setExcelPath] = useState<string | null>(null)
 
@@ -100,6 +103,7 @@ export function AdminUsersPage() {
     try {
       const result = await notifyAllMembers(trimmed)
       setBroadcastMessage('')
+      console.log(`Notification recipients (${result.recipientCount}):`, result.recipientNames)
       setMessage(
         result.recipientCount > 0
           ? { tone: 'success', text: `Notification sent to ${result.recipientCount} user(s).` }
@@ -131,6 +135,7 @@ export function AdminUsersPage() {
     setNotifySending(true)
     try {
       const result = await notifyMember(notifyTarget, trimmed)
+      console.log(`Notification recipients (${result.recipientCount}):`, result.recipientNames)
       setMessage(
         result.recipientCount > 0
           ? { tone: 'success', text: `Notification sent to ${notifyTarget}.` }
@@ -189,6 +194,9 @@ export function AdminUsersPage() {
             <div>
               <h2>Send notification</h2>
             </div>
+            <button type="button" className="admin-notify-button" onClick={() => setShowMessageHistory(true)}>
+              Message History
+            </button>
           </div>
 
           <form onSubmit={handleBroadcast} className="admin-add-form">
@@ -275,6 +283,8 @@ export function AdminUsersPage() {
           </div>
         </div>
       )}
+
+      {showMessageHistory && <MessageHistoryModal onClose={() => setShowMessageHistory(false)} />}
     </>
   )
 }

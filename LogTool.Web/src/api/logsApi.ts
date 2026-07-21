@@ -1,5 +1,6 @@
 import { apiRequest } from './client'
 import type {
+  AdminMessage,
   AttendanceGrid,
   DailyLogEntry,
   ExcelLink,
@@ -42,6 +43,18 @@ export const getAttendanceGrid = (year: number, month: number) =>
   apiRequest<AttendanceGrid>(`/api/attendance-grid?year=${year}&month=${month}`)
 
 export const getExcelLink = () => apiRequest<ExcelLink>('/api/admin/excel-link')
+
+export const getMessageHistory = () => apiRequest<AdminMessage[]>('/api/admin/message-history')
+
+export const deleteMessageHistoryEntry = (id: string) =>
+  apiRequest<void>(`/api/admin/message-history/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  })
+
+export const clearMessageHistory = () =>
+  apiRequest<void>('/api/admin/message-history', {
+    method: 'DELETE',
+  })
 
 export const updateLog = (memberName: string, date: string, payload: UpdateLogEntry) =>
   apiRequest<LogEntry>(`/api/logs/${encodeURIComponent(memberName)}/${date}`, {
