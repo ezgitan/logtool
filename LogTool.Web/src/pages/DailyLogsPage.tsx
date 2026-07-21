@@ -94,6 +94,14 @@ export function DailyLogsPage({ currentMemberName, isAdmin }: DailyLogsPageProps
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date])
 
+  useEffect(() => {
+    function clearSelection() {
+      setSelectedRow(null)
+    }
+    document.addEventListener('click', clearSelection)
+    return () => document.removeEventListener('click', clearSelection)
+  }, [])
+
   const editingEntry = editingMemberName
     ? entries.find((entry) => entry.memberName === editingMemberName)
     : undefined
@@ -104,7 +112,7 @@ export function DailyLogsPage({ currentMemberName, isAdmin }: DailyLogsPageProps
   }
 
   return (
-    <div onClick={() => setSelectedRow(null)}>
+    <>
       <section className="intro">
         <div>
           <h1>Daily Logs</h1>
@@ -229,7 +237,7 @@ export function DailyLogsPage({ currentMemberName, isAdmin }: DailyLogsPageProps
           onCancel={() => setEditingMemberName(null)}
         />
       )}
-    </div>
+    </>
   )
 }
 
