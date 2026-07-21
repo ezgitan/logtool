@@ -156,6 +156,12 @@ export function DailyLogsPage({ currentMemberName, isAdmin }: DailyLogsPageProps
         {!loading && !error && entries.length > 0 && (
           <div className="daily-table-wrap">
             <table className="daily-table daily-logs-table" aria-label="Daily team records">
+              <colgroup>
+                <col style={{ width: 220 }} />
+                <col style={{ width: 170 }} />
+                <col />
+                {canEditColumn && <col style={{ width: 100 }} />}
+              </colgroup>
               <thead>
                 <tr>
                   <th scope="col">Member</th>

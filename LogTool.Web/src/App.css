@@ -258,13 +258,14 @@ button.button-success:disabled { cursor: not-allowed; opacity: .5; }
 .daily-table tbody tr:last-child td { border-bottom: 0; }
 .daily-table tbody tr:nth-child(even) { background: #fbfdfe; }
 .daily-table tbody tr:hover { background: var(--brand-soft); }
+.daily-logs-table { table-layout: fixed; }
 .daily-logs-table tbody tr { cursor: pointer; }
 .daily-logs-table tbody tr.row-selected { background: #fde68a; box-shadow: inset 4px 0 0 #b45309; }
 .daily-logs-table tbody tr.row-selected .daily-member { color: #92400e; }
 .daily-logs-table tbody tr.row-selected:hover { background: #fde68a; }
-.daily-member { width: 220px; font-weight: 750; color: var(--ink); white-space: nowrap; }
+.daily-member { width: 220px; font-weight: 750; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .daily-table td:nth-child(2) { width: 170px; }
-.daily-log { color: var(--ink); line-height: 1.6; white-space: pre-wrap; font-weight: 500; }
+.daily-log { color: var(--ink); line-height: 1.6; white-space: pre-wrap; font-weight: 500; overflow-wrap: break-word; }
 .daily-log-empty { color: #94a3b8; font-style: italic; font-weight: 400; }
 
 .report-panel { padding: 26px; }
