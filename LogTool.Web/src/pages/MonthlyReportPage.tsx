@@ -70,9 +70,10 @@ interface LeaveDaysSelection {
 
 interface MonthlyReportPageProps {
   currentMemberName: string | null
+  isAdmin: boolean
 }
 
-export function MonthlyReportPage({ currentMemberName }: MonthlyReportPageProps) {
+export function MonthlyReportPage({ currentMemberName, isAdmin }: MonthlyReportPageProps) {
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth() + 1)
   const [report, setReport] = useState<MonthlyReport | null>(null)
@@ -402,33 +403,33 @@ export function MonthlyReportPage({ currentMemberName }: MonthlyReportPageProps)
               {!rangeLoading && !rangeError && rangeEntries && (
                 <ul className="range-log-list">
                   {rangeEntries.length === 0 && <li className="empty-state">No records in this range.</li>}
-                  {rangeEntries.map((entry) => (
-                    <li
-                      key={entry.date}
-                      className={selectedMember === currentMemberName ? 'range-log-item range-log-item-editable' : 'range-log-item'}
-                    >
-                      <div className="range-log-date">{formatShortDate(entry.date)}</div>
-                      {entry.attendance ? (
-                        <span className={`attendance-badge attendance-${slugify(entry.attendance)}`}>
-                          {entry.attendance}
-                        </span>
-                      ) : (
-                        <span className="attendance-badge attendance-missing">Not set</span>
-                      )}
-                      <div className={entry.log ? 'daily-log' : 'daily-log daily-log-empty'}>
-                        {entry.log || 'No log entered'}
-                      </div>
-                      {selectedMember === currentMemberName && (
-                        <button
-                          type="button"
-                          className="admin-notify-button"
-                          onClick={() => setEditingEntryDate(entry.date)}
-                        >
-                          Edit
-                        </button>
-                      )}
-                    </li>
-                  ))}
+                  {rangeEntries.map((entry) => {
+                    const canEdit = selectedMember === currentMemberName || isAdmin
+                    return (
+                      <li key={entry.date} className={canEdit ? 'range-log-item range-log-item-editable' : 'range-log-item'}>
+                        <div className="range-log-date">{formatShortDate(entry.date)}</div>
+                        {entry.attendance ? (
+                          <span className={`attendance-badge attendance-${slugify(entry.attendance)}`}>
+                            {entry.attendance}
+                          </span>
+                        ) : (
+                          <span className="attendance-badge attendance-missing">Not set</span>
+                        )}
+                        <div className={entry.log ? 'daily-log' : 'daily-log daily-log-empty'}>
+                          {entry.log || 'No log entered'}
+                        </div>
+                        {canEdit && (
+                          <button
+                            type="button"
+                            className="admin-notify-button"
+                            onClick={() => setEditingEntryDate(entry.date)}
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </li>
+                    )
+                  })}
                 </ul>
               )}
             </div>
@@ -449,6 +450,7 @@ export function MonthlyReportPage({ currentMemberName }: MonthlyReportPageProps)
           dateLabel={formatShortDate(editingEntryDate)}
           initialAttendance={rangeEntries?.find((entry) => entry.date === editingEntryDate)?.attendance ?? null}
           initialLog={rangeEntries?.find((entry) => entry.date === editingEntryDate)?.log ?? null}
+          asAdmin={isAdmin}
           onSaved={handleEntryEditSaved}
           onCancel={() => setEditingEntryDate(null)}
         />

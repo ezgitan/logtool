@@ -64,15 +64,17 @@ function getErrorMessage(error: unknown) {
 
 interface DailyLogsPageProps {
   currentMemberName: string | null
+  isAdmin: boolean
 }
 
-export function DailyLogsPage({ currentMemberName }: DailyLogsPageProps) {
+export function DailyLogsPage({ currentMemberName, isAdmin }: DailyLogsPageProps) {
   const [date, setDate] = useState(getInitialDate)
   const [entries, setEntries] = useState<DailyLogEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [editingOwnEntry, setEditingOwnEntry] = useState(false)
+  const [editingMemberName, setEditingMemberName] = useState<string | null>(null)
   const [selectedRow, setSelectedRow] = useState<string | null>(null)
+  const canEditColumn = Boolean(currentMemberName) || isAdmin
 
   const refreshEntries = () =>
     getDailyLogs(date)
@@ -91,10 +93,12 @@ export function DailyLogsPage({ currentMemberName }: DailyLogsPageProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date])
 
-  const ownEntry = currentMemberName ? entries.find((entry) => entry.memberName === currentMemberName) : undefined
+  const editingEntry = editingMemberName
+    ? entries.find((entry) => entry.memberName === editingMemberName)
+    : undefined
 
   function handleEditSaved() {
-    setEditingOwnEntry(false)
+    setEditingMemberName(null)
     void refreshEntries()
   }
 
@@ -156,7 +160,7 @@ export function DailyLogsPage({ currentMemberName }: DailyLogsPageProps) {
                   <th scope="col">Member</th>
                   <th scope="col">Attendance</th>
                   <th scope="col">Log</th>
-                  {currentMemberName && <th scope="col"></th>}
+                  {canEditColumn && <th scope="col"></th>}
                 </tr>
               </thead>
               <tbody>
@@ -181,15 +185,15 @@ export function DailyLogsPage({ currentMemberName }: DailyLogsPageProps) {
                     <td className={entry.log ? 'daily-log' : 'daily-log daily-log-empty'}>
                       {entry.log || 'No log entered'}
                     </td>
-                    {currentMemberName && (
+                    {canEditColumn && (
                       <td>
-                        {entry.memberName === currentMemberName && (
+                        {(entry.memberName === currentMemberName || isAdmin) && (
                           <button
                             type="button"
                             className="admin-notify-button"
                             onClick={(event) => {
                               event.stopPropagation()
-                              setEditingOwnEntry(true)
+                              setEditingMemberName(entry.memberName)
                             }}
                           >
                             Edit
@@ -205,15 +209,16 @@ export function DailyLogsPage({ currentMemberName }: DailyLogsPageProps) {
         )}
       </section>
 
-      {editingOwnEntry && currentMemberName && (
+      {editingMemberName && (
         <LogEditModal
-          memberName={currentMemberName}
+          memberName={editingMemberName}
           date={date}
           dateLabel={dateFormatter.format(new Date(`${date}T12:00:00`))}
-          initialAttendance={ownEntry?.attendance ?? null}
-          initialLog={ownEntry?.log ?? null}
+          initialAttendance={editingEntry?.attendance ?? null}
+          initialLog={editingEntry?.log ?? null}
+          asAdmin={isAdmin}
           onSaved={handleEditSaved}
-          onCancel={() => setEditingOwnEntry(false)}
+          onCancel={() => setEditingMemberName(null)}
         />
       )}
     </>
