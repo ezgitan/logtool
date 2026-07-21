@@ -35,15 +35,22 @@ public sealed class MonthlyReportService(
                 var attendanceWorksheet = schemaService.GetAttendanceWorksheet(workbook);
                 var members = schemaService.GetActiveMembers(logWorksheet);
                 var attendanceRows = schemaService.GetDateRows(attendanceWorksheet);
+                var logRows = schemaService.GetDateRowsInMonth(logWorksheet, year, month);
 
                 var memberColumns = members.ToDictionary(
                     member => member.Name,
                     member => schemaService.FindActiveMemberColumn(attendanceWorksheet, member.Name));
+                var memberLogColumns = members.ToDictionary(
+                    member => member.Name,
+                    member => schemaService.FindActiveMemberColumn(logWorksheet, member.Name));
 
                 var weekdays = EachWeekdayInMonth(year, month).ToList();
                 var attendanceByDate = weekdays.ToDictionary(
                     date => date,
                     date => ReadDayAttendance(attendanceWorksheet, attendanceRows, memberColumns, date));
+                var logByDate = weekdays.ToDictionary(
+                    date => date,
+                    date => ReadDayAttendance(logWorksheet, logRows, memberLogColumns, date));
 
                 // A day counts as a holiday if it's in the cached public
                 // holiday calendar, OR if someone logged "Bank Holiday" that
@@ -56,7 +63,7 @@ public sealed class MonthlyReportService(
                 var workingDays = weekdays.Count - holidayCount;
 
                 var entries = members
-                    .Select(member => BuildEntry(member.Name, weekdays, attendanceByDate, workingDays))
+                    .Select(member => BuildEntry(member.Name, weekdays, attendanceByDate, logByDate, workingDays))
                     .ToList();
 
                 return new MonthlyReportDto(workingDays, entries);
@@ -68,11 +75,12 @@ public sealed class MonthlyReportService(
         string memberName,
         IReadOnlyList<DateOnly> weekdays,
         IReadOnlyDictionary<DateOnly, Dictionary<string, string?>> attendanceByDate,
+        IReadOnlyDictionary<DateOnly, Dictionary<string, string?>> logByDate,
         int workingDays)
     {
         var officeDays = 0;
-        var leaveDays = 0;
         var remoteDates = new List<DateOnly>();
+        var leaveDates = new List<LeaveDayDto>();
 
         foreach (var date in weekdays)
         {
@@ -92,11 +100,12 @@ public sealed class MonthlyReportService(
             }
             else if (LeaveAttendance.Contains(value))
             {
-                leaveDays++;
+                leaveDates.Add(new LeaveDayDto(date, LeaveReason(value, logByDate[date][memberName])));
             }
         }
 
         var remoteDays = remoteDates.Count;
+        var leaveDays = leaveDates.Count;
         var totalWorkedDays = officeDays + remoteDays;
 
         return new MonthlyReportEntryDto(
@@ -109,8 +118,17 @@ public sealed class MonthlyReportService(
             totalWorkedDays * HoursPerDay,
             leaveDays,
             workingDays - totalWorkedDays,
-            remoteDates);
+            remoteDates,
+            leaveDates);
     }
+
+    // Bank Holiday days are never labeled with anything but "Bank Holiday" -
+    // for a regular "Leave" day, the actual reason (annual leave, unpaid,
+    // etc.) is whatever the member typed into their log for that day.
+    private static string LeaveReason(string attendance, string? logText) =>
+        string.Equals(attendance, AttendanceTypes.BankHoliday, StringComparison.OrdinalIgnoreCase)
+            ? AttendanceTypes.BankHoliday
+            : !string.IsNullOrWhiteSpace(logText) ? logText.Trim() : attendance;
 
     private static Dictionary<string, string?> ReadDayAttendance(
         ClosedXML.Excel.IXLWorksheet attendanceWorksheet,

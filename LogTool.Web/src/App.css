@@ -292,6 +292,8 @@ button.button-success:disabled { cursor: not-allowed; opacity: .5; }
   padding: 10px 14px; border-radius: 10px; background: #f8fafc; border: 1px solid var(--border);
   font-size: 14px; color: var(--ink); font-weight: 600;
 }
+.leave-date-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.leave-date-reason { color: var(--muted); font-weight: 650; font-size: 13px; text-align: right; }
 
 .member-name-toggle {
   all: unset; cursor: pointer; color: var(--brand); font-weight: 700;
@@ -326,14 +328,14 @@ button.button-success:disabled { cursor: not-allowed; opacity: .5; }
   .member-range-layout { grid-template-columns: 1fr; }
 }
 .range-log-item {
-  display: grid; grid-template-columns: 90px auto 1fr; align-items: start; gap: 12px;
+  display: grid; grid-template-columns: 90px 148px 1fr; align-items: start; gap: 12px;
   padding: 10px 14px; border-radius: 10px; background: #f8fafc; border: 1px solid var(--border); font-size: 13px;
 }
-.range-log-item-editable { grid-template-columns: 90px auto 1fr auto; }
+.range-log-item-editable { grid-template-columns: 90px 148px 1fr auto; }
 .range-log-date { color: var(--muted); font-weight: 650; }
 .range-log-item .daily-log { font-size: 13px; }
 
-.attendance-badge { display: inline-flex; align-items: center; padding: 5px 11px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #f1f5f9; color: #475569; }
+.attendance-badge { display: inline-flex; align-items: center; padding: 5px 11px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #f1f5f9; color: #475569; white-space: nowrap; }
 .attendance-office { background: var(--brand-soft); color: var(--brand-dark); }
 .attendance-home-office { background: #eef2ff; color: #4338ca; }
 .attendance-leave { background: #fffbeb; color: #b45309; }

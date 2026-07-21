@@ -23,6 +23,11 @@ export interface DailyLogEntry {
   log: string | null
 }
 
+export interface LeaveDayEntry {
+  date: string
+  reason: string
+}
+
 export interface MonthlyReportEntry {
   memberName: string
   officeDays: number
@@ -34,6 +39,7 @@ export interface MonthlyReportEntry {
   totalLeaveDays: number
   notWorkingDays: number
   remoteDates: string[]
+  leaveDates: LeaveDayEntry[]
 }
 
 export interface MonthlyReport {

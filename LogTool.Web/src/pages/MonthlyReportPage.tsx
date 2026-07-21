@@ -3,7 +3,7 @@ import { ApiRequestError } from '../api/client'
 import { getLogRange, getMonthlyReport } from '../api/logsApi'
 import { LogEditModal } from '../components/LogEditModal'
 import { StatusMessage } from '../components/StatusMessage'
-import type { LogEntry, MonthlyReport } from '../types/log'
+import type { LeaveDayEntry, LogEntry, MonthlyReport } from '../types/log'
 
 const now = new Date()
 
@@ -63,6 +63,11 @@ interface RemoteDaysSelection {
   dates: string[]
 }
 
+interface LeaveDaysSelection {
+  memberName: string
+  entries: LeaveDayEntry[]
+}
+
 interface MonthlyReportPageProps {
   currentMemberName: string | null
 }
@@ -74,6 +79,7 @@ export function MonthlyReportPage({ currentMemberName }: MonthlyReportPageProps)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [remoteDaysSelection, setRemoteDaysSelection] = useState<RemoteDaysSelection | null>(null)
+  const [leaveDaysSelection, setLeaveDaysSelection] = useState<LeaveDaysSelection | null>(null)
 
   const [selectedMember, setSelectedMember] = useState<string | null>(null)
   const [rangeStart, setRangeStart] = useState('')
@@ -260,7 +266,21 @@ export function MonthlyReportPage({ currentMemberName }: MonthlyReportPageProps)
                       )}
                     </td>
                     <td className="report-cell">{entry.totalWorkedDays}</td>
-                    <td className="report-cell">{entry.totalLeaveDays}</td>
+                    <td className="report-cell">
+                      {entry.totalLeaveDays > 0 ? (
+                        <button
+                          type="button"
+                          className="remote-day-toggle"
+                          onClick={() =>
+                            setLeaveDaysSelection({ memberName: entry.memberName, entries: entry.leaveDates })
+                          }
+                        >
+                          {entry.totalLeaveDays}
+                        </button>
+                      ) : (
+                        entry.totalLeaveDays
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -282,6 +302,29 @@ export function MonthlyReportPage({ currentMemberName }: MonthlyReportPageProps)
             </ul>
             <div className="reminder-actions">
               <button type="button" onClick={() => setRemoteDaysSelection(null)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {leaveDaysSelection && (
+        <div className="modal-overlay" onClick={() => setLeaveDaysSelection(null)}>
+          <div className="panel remote-dates-card" onClick={(event) => event.stopPropagation()}>
+            <p className="eyebrow">LEAVE DAYS</p>
+            <h2>{leaveDaysSelection.memberName}</h2>
+            <p className="login-hint">{monthFormatter.format(new Date(year, month - 1, 1))}</p>
+            <ul className="remote-dates-list">
+              {leaveDaysSelection.entries.map((entry) => (
+                <li key={entry.date} className="leave-date-item">
+                  <span>{formatRemoteDate(entry.date)}</span>
+                  <span className="leave-date-reason">{entry.reason}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="reminder-actions">
+              <button type="button" onClick={() => setLeaveDaysSelection(null)}>
                 Close
               </button>
             </div>
